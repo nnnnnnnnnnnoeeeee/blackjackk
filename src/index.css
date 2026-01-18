@@ -1,0 +1,261 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Casino Blackjack Design System */
+
+@layer base {
+  :root {
+    /* Casino Table Green */
+    --background: 160 84% 8%;
+    --foreground: 45 29% 97%;
+
+    /* Card surfaces */
+    --card: 160 60% 12%;
+    --card-foreground: 45 29% 97%;
+
+    /* Popover */
+    --popover: 160 60% 10%;
+    --popover-foreground: 45 29% 97%;
+
+    /* Casino Gold - Primary */
+    --primary: 43 74% 49%;
+    --primary-foreground: 160 84% 8%;
+
+    /* Emerald Secondary */
+    --secondary: 160 40% 18%;
+    --secondary-foreground: 45 29% 97%;
+
+    /* Muted */
+    --muted: 160 30% 20%;
+    --muted-foreground: 160 10% 60%;
+
+    /* Gold Accent */
+    --accent: 43 74% 49%;
+    --accent-foreground: 160 84% 8%;
+
+    /* Destructive - Red for bust/lose */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 45 29% 97%;
+
+    /* Success - Win */
+    --success: 142 71% 45%;
+    --success-foreground: 160 84% 8%;
+
+    /* Warning - Push */
+    --warning: 38 92% 50%;
+    --warning-foreground: 160 84% 8%;
+
+    /* Border */
+    --border: 160 30% 25%;
+    --input: 160 30% 25%;
+    --ring: 43 74% 49%;
+
+    --radius: 0.75rem;
+
+    /* Card colors */
+    --card-red: 0 84% 60%;
+    --card-black: 0 0% 10%;
+    --card-white: 0 0% 98%;
+
+    /* Chip colors */
+    --chip-red: 0 72% 51%;
+    --chip-blue: 217 91% 60%;
+    --chip-green: 142 71% 45%;
+    --chip-black: 0 0% 15%;
+    --chip-gold: 43 74% 49%;
+
+    /* Sidebar */
+    --sidebar-background: 160 60% 10%;
+    --sidebar-foreground: 45 29% 97%;
+    --sidebar-primary: 43 74% 49%;
+    --sidebar-primary-foreground: 160 84% 8%;
+    --sidebar-accent: 160 40% 18%;
+    --sidebar-accent-foreground: 45 29% 97%;
+    --sidebar-border: 160 30% 25%;
+    --sidebar-ring: 43 74% 49%;
+  }
+
+  .dark {
+    /* Dark mode inherits the same casino theme */
+    --background: 160 84% 6%;
+    --foreground: 45 29% 97%;
+    --card: 160 60% 10%;
+    --card-foreground: 45 29% 97%;
+    --popover: 160 60% 8%;
+    --popover-foreground: 45 29% 97%;
+    --primary: 43 74% 49%;
+    --primary-foreground: 160 84% 8%;
+    --secondary: 160 40% 15%;
+    --secondary-foreground: 45 29% 97%;
+    --muted: 160 30% 18%;
+    --muted-foreground: 160 10% 55%;
+    --accent: 43 74% 49%;
+    --accent-foreground: 160 84% 8%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 45 29% 97%;
+    --border: 160 30% 22%;
+    --input: 160 30% 22%;
+    --ring: 43 74% 49%;
+    --sidebar-background: 160 60% 8%;
+    --sidebar-foreground: 45 29% 97%;
+    --sidebar-primary: 43 74% 49%;
+    --sidebar-primary-foreground: 160 84% 8%;
+    --sidebar-accent: 160 40% 15%;
+    --sidebar-accent-foreground: 45 29% 97%;
+    --sidebar-border: 160 30% 22%;
+    --sidebar-ring: 43 74% 49%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Georgia', 'Times New Roman', serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Playing Card Styles */
+  .playing-card {
+    @apply relative flex flex-col items-center justify-center rounded-lg shadow-xl;
+    @apply bg-[hsl(var(--card-white))] text-[hsl(var(--card-black))];
+    @apply border-2 border-[hsl(var(--card-white))];
+    aspect-ratio: 2.5 / 3.5;
+    min-width: 60px;
+    max-width: 80px;
+  }
+
+  .playing-card.red {
+    @apply text-[hsl(var(--card-red))];
+  }
+
+  .playing-card.black {
+    @apply text-[hsl(var(--card-black))];
+  }
+
+  .playing-card.face-down {
+    @apply bg-gradient-to-br from-primary to-[hsl(43_74%_35%)] border-primary;
+    background-image: 
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        hsl(43 74% 40% / 0.3) 10px,
+        hsl(43 74% 40% / 0.3) 20px
+      );
+  }
+
+  /* Poker Chip Styles */
+  .poker-chip {
+    @apply relative flex items-center justify-center rounded-full font-bold shadow-lg;
+    @apply border-4 border-dashed transition-transform hover:scale-110;
+    width: 48px;
+    height: 48px;
+  }
+
+  .poker-chip.red {
+    @apply bg-[hsl(var(--chip-red))] border-[hsl(0_60%_70%)] text-white;
+  }
+
+  .poker-chip.blue {
+    @apply bg-[hsl(var(--chip-blue))] border-[hsl(217_70%_75%)] text-white;
+  }
+
+  .poker-chip.green {
+    @apply bg-[hsl(var(--chip-green))] border-[hsl(142_50%_60%)] text-white;
+  }
+
+  .poker-chip.black {
+    @apply bg-[hsl(var(--chip-black))] border-[hsl(0_0%_35%)] text-white;
+  }
+
+  .poker-chip.gold {
+    @apply bg-[hsl(var(--chip-gold))] border-[hsl(43_60%_65%)] text-[hsl(var(--chip-black))];
+  }
+
+  /* Table felt pattern */
+  .table-felt {
+    @apply relative overflow-hidden;
+    background: 
+      radial-gradient(ellipse at center, hsl(160 84% 12%) 0%, hsl(160 84% 6%) 100%);
+  }
+
+  .table-felt::before {
+    content: '';
+    @apply absolute inset-0 opacity-10;
+    background-image: 
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Casino button */
+  .btn-casino {
+    @apply px-6 py-3 rounded-lg font-semibold uppercase tracking-wider;
+    @apply bg-gradient-to-b from-primary to-[hsl(43_74%_40%)] text-primary-foreground;
+    @apply shadow-lg border border-[hsl(43_74%_60%)];
+    @apply hover:from-[hsl(43_74%_55%)] hover:to-primary;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-primary disabled:hover:to-[hsl(43_74%_40%)];
+    @apply transition-all duration-200;
+  }
+
+  .btn-casino-secondary {
+    @apply px-6 py-3 rounded-lg font-semibold uppercase tracking-wider;
+    @apply bg-secondary text-secondary-foreground;
+    @apply shadow-md border border-border;
+    @apply hover:bg-[hsl(160_40%_22%)] hover:border-primary/50;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply transition-all duration-200;
+  }
+
+  /* Score badge */
+  .score-badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold;
+    @apply bg-secondary/80 text-foreground border border-border;
+    @apply backdrop-blur-sm;
+  }
+
+  .score-badge.blackjack {
+    @apply bg-primary/90 text-primary-foreground border-primary;
+    @apply animate-pulse;
+  }
+
+  .score-badge.bust {
+    @apply bg-destructive/90 text-destructive-foreground border-destructive;
+  }
+
+  /* Glow effects */
+  .glow-gold {
+    box-shadow: 0 0 20px hsl(43 74% 49% / 0.4), 0 0 40px hsl(43 74% 49% / 0.2);
+  }
+
+  .glow-success {
+    box-shadow: 0 0 20px hsl(142 71% 45% / 0.4), 0 0 40px hsl(142 71% 45% / 0.2);
+  }
+
+  .glow-destructive {
+    box-shadow: 0 0 20px hsl(0 72% 51% / 0.4), 0 0 40px hsl(0 72% 51% / 0.2);
+  }
+}
+
+@layer utilities {
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .text-shadow-md {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+}
