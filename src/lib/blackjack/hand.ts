@@ -127,11 +127,24 @@ export function formatHandValue(cards: Card[]): string {
 /**
  * Checks if a hand can be split
  */
-export function canSplit(hand: Hand, maxSplits: number, currentSplitCount: number): boolean {
+export function canSplit(
+  hand: Hand, 
+  maxSplits: number, 
+  currentSplitCount: number,
+  resplitAces: boolean = false
+): boolean {
   if (hand.cards.length !== 2) return false;
   if (currentSplitCount >= maxSplits) return false;
   
   const [card1, card2] = hand.cards;
+  
+  // Check if both cards are aces
+  const isAcePair = card1.rank === 'A' && card2.rank === 'A';
+  
+  // If resplit aces is disabled and this is already a split hand with aces, can't resplit
+  if (!resplitAces && hand.isSplit && isAcePair) {
+    return false;
+  }
   
   // Can split if same rank OR same value (e.g., 10-J)
   return card1.rank === card2.rank || 

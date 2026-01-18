@@ -28,6 +28,7 @@ import {
   getNextActiveHandIndex,
   isValidBet,
 } from './rules';
+import { evaluatePerfectPairs, evaluate21Plus3 } from './sidebets';
 
 // ============================================================================
 // Game Initialization
@@ -51,8 +52,11 @@ export function createInitialState(
     bankroll,
     currentBet: 0,
     insuranceBet: 0,
+    sideBets: {},
+    sideBetResults: undefined,
     results: [],
     config: fullConfig,
+    handHistory: [],
   };
 }
 
@@ -75,6 +79,8 @@ export function resetForNewRound(state: GameState): GameState {
     activeHandIndex: 0,
     currentBet: 0,
     insuranceBet: 0,
+    sideBets: {},
+    sideBetResults: undefined,
     results: [],
   };
 }
@@ -115,6 +121,16 @@ export function dealInitialCards(state: GameState): GameState {
     throw new Error('Cannot deal without a bet');
   }
   
+  // Ensure playerHands exists and has at least one hand
+  if (!state.playerHands || state.playerHands.length === 0) {
+    throw new Error('Cannot deal without a player hand');
+  }
+  
+  // Ensure shoe has enough cards (at least 4 for initial deal)
+  if (!state.shoe || !Array.isArray(state.shoe) || state.shoe.length < 4) {
+    throw new Error('Shoe does not have enough cards. Please reshuffle.');
+  }
+  
   let shoe = [...state.shoe];
   let playerCards: Card[] = [];
   let dealerCards: Card[] = [];
@@ -134,8 +150,9 @@ export function dealInitialCards(state: GameState): GameState {
   [card, shoe] = drawCard(shoe, false); // Dealer hole card face down
   dealerCards.push(card);
   
+  const existingHand = state.playerHands[0];
   const playerHand: Hand = {
-    ...state.playerHands[0],
+    ...existingHand,
     cards: playerCards,
     isBlackjack: isBlackjack(playerCards),
   };
@@ -145,6 +162,40 @@ export function dealInitialCards(state: GameState): GameState {
     cards: dealerCards,
     isBlackjack: isBlackjack(dealerCards),
   };
+  
+  // Evaluate side bets after initial deal
+  let sideBetResults = state.sideBetResults;
+  if (state.sideBets.perfectPairs || state.sideBets.twentyOnePlus3) {
+    sideBetResults = {};
+    
+    // Evaluate Perfect Pairs
+    if (state.sideBets.perfectPairs && playerCards.length === 2) {
+      const ppResult = evaluatePerfectPairs(
+        [playerCards[0], playerCards[1]],
+        state.config.perfectPairs.payouts
+      );
+      sideBetResults.perfectPairs = {
+        bet: state.sideBets.perfectPairs,
+        tier: ppResult.tier,
+        payout: ppResult.win ? state.sideBets.perfectPairs * (ppResult.payoutMultiplier + 1) : 0,
+      };
+    }
+    
+    // Evaluate 21+3
+    if (state.sideBets.twentyOnePlus3 && playerCards.length === 2 && dealerCards.length >= 1) {
+      const dealerUpCard = dealerCards.find(c => c.faceUp) || dealerCards[0];
+      const t21Result = evaluate21Plus3(
+        [playerCards[0], playerCards[1]],
+        dealerUpCard,
+        state.config.twentyOnePlus3.payouts
+      );
+      sideBetResults.twentyOnePlus3 = {
+        bet: state.sideBets.twentyOnePlus3,
+        handType: t21Result.handType,
+        payout: t21Result.win ? state.sideBets.twentyOnePlus3 * (t21Result.payoutMultiplier + 1) : 0,
+      };
+    }
+  }
   
   // Determine next phase
   let nextPhase: GamePhase = 'PLAYER_TURN';
@@ -161,6 +212,7 @@ export function dealInitialCards(state: GameState): GameState {
     dealerHand,
     playerHands: [playerHand],
     activeHandIndex: 0,
+    sideBetResults,
   };
 }
 
@@ -199,6 +251,10 @@ function executeHit(state: GameState): GameState {
   const handIndex = state.activeHandIndex;
   const hand = state.playerHands[handIndex];
   
+  if (!hand) {
+    throw new Error(`No hand at index ${handIndex}`);
+  }
+  
   const newHand = addCardToHand(hand, card);
   const newHands = [...state.playerHands];
   newHands[handIndex] = newHand;
@@ -219,8 +275,14 @@ function executeHit(state: GameState): GameState {
 
 function executeStand(state: GameState): GameState {
   const handIndex = state.activeHandIndex;
+  const hand = state.playerHands[handIndex];
+  
+  if (!hand) {
+    throw new Error(`No hand at index ${handIndex}`);
+  }
+  
   const newHands = [...state.playerHands];
-  newHands[handIndex] = { ...newHands[handIndex], isStood: true };
+  newHands[handIndex] = { ...hand, isStood: true };
   
   const newState: GameState = {
     ...state,
@@ -233,7 +295,17 @@ function executeStand(state: GameState): GameState {
 function executeDouble(state: GameState): GameState {
   const handIndex = state.activeHandIndex;
   const hand = state.playerHands[handIndex];
+  
+  if (!hand) {
+    throw new Error(`No hand at index ${handIndex}`);
+  }
+  
   const additionalBet = hand.bet;
+  
+  // Validate bankroll is sufficient
+  if (state.bankroll < additionalBet) {
+    throw new Error('Insufficient bankroll for double');
+  }
   
   // Draw one card
   const [card, newShoe] = drawCard(state.shoe, true);
@@ -260,6 +332,26 @@ function executeDouble(state: GameState): GameState {
 function executeSplit(state: GameState): GameState {
   const handIndex = state.activeHandIndex;
   const hand = state.playerHands[handIndex];
+  
+  if (!hand) {
+    throw new Error(`No hand at index ${handIndex}`);
+  }
+  
+  if (hand.cards.length < 2) {
+    throw new Error('Cannot split hand with less than 2 cards');
+  }
+  
+  // Validate bankroll is sufficient for the additional bet
+  if (state.bankroll < hand.bet) {
+    throw new Error('Insufficient bankroll for split');
+  }
+  
+  // Ensure shoe has enough cards (need at least 2 for split)
+  let shoe = [...state.shoe];
+  if (!shoe || !Array.isArray(shoe) || shoe.length < 2) {
+    throw new Error('Not enough cards in shoe for split');
+  }
+  
   const [card1, card2] = hand.cards;
   
   // Create two new hands from the split
@@ -276,32 +368,81 @@ function executeSplit(state: GameState): GameState {
   };
   
   // Draw one card for each hand
-  let shoe = [...state.shoe];
   let newCard1: Card;
   let newCard2: Card;
   
-  [newCard1, shoe] = drawCard(shoe, true);
-  [newCard2, shoe] = drawCard(shoe, true);
+  try {
+    [newCard1, shoe] = drawCard(shoe, true);
+    [newCard2, shoe] = drawCard(shoe, true);
+  } catch (error) {
+    throw new Error(`Error drawing cards for split: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
   
   const newHand1 = addCardToHand(hand1, newCard1);
   const newHand2 = addCardToHand(hand2, newCard2);
   
+  // If a hand gets blackjack after split, it's automatically finished
+  // (Note: Split blackjacks are usually not treated as natural blackjacks, but we still mark them as finished)
+  const finalHand1: Hand = newHand1.isBlackjack 
+    ? { ...newHand1, isStood: true }
+    : newHand1;
+  const finalHand2: Hand = newHand2.isBlackjack 
+    ? { ...newHand2, isStood: true }
+    : newHand2;
+  
   // Replace current hand with two new hands
   const newHands = [...state.playerHands];
-  newHands.splice(handIndex, 1, newHand1, newHand2);
+  newHands.splice(handIndex, 1, finalHand1, finalHand2);
   
-  return {
+  // Determine next active hand
+  // Start with the first split hand (at handIndex)
+  let nextActiveIndex = handIndex;
+  
+  // If first hand is finished (blackjack or busted), try second hand
+  if (finalHand1.isStood || finalHand1.isBusted || finalHand1.isBlackjack) {
+    nextActiveIndex = handIndex + 1;
+    // If second hand is also finished, find next available hand
+    if (finalHand2.isStood || finalHand2.isBusted || finalHand2.isBlackjack) {
+      const nextIndex = getNextActiveHandIndex(newHands, handIndex);
+      nextActiveIndex = nextIndex === -1 ? handIndex : nextIndex;
+    }
+  }
+  
+  // Ensure nextActiveIndex is valid
+  if (nextActiveIndex < 0 || nextActiveIndex >= newHands.length) {
+    nextActiveIndex = handIndex; // Fallback to first split hand
+  }
+  
+  const newState: GameState = {
     ...state,
     shoe,
     bankroll: state.bankroll - hand.bet, // Second hand costs another bet
     playerHands: newHands,
-    activeHandIndex: handIndex,
+    activeHandIndex: nextActiveIndex,
+  };
+  
+  // If all hands are finished, move to dealer turn
+  if (areAllHandsFinished(newHands)) {
+    return {
+      ...newState,
+      phase: 'DEALER_TURN',
+    };
+  }
+  
+  // Ensure phase is still PLAYER_TURN if we have active hands
+  return {
+    ...newState,
+    phase: 'PLAYER_TURN',
   };
 }
 
 function executeSurrender(state: GameState): GameState {
   const handIndex = state.activeHandIndex;
   const hand = state.playerHands[handIndex];
+  
+  if (!hand) {
+    throw new Error(`No hand at index ${handIndex}`);
+  }
   
   // Return half the bet
   const refund = hand.bet / 2;
@@ -323,8 +464,18 @@ function executeSurrender(state: GameState): GameState {
   return moveToNextHand(newState);
 }
 
-function executeInsurance(state: GameState): GameState {
+export function executeInsurance(state: GameState): GameState {
   const insuranceAmount = state.currentBet / 2;
+  
+  // Validate bankroll is sufficient
+  if (state.bankroll < insuranceAmount) {
+    throw new Error('Insufficient bankroll for insurance');
+  }
+  
+  // Validate insurance hasn't already been taken
+  if (state.insuranceBet > 0) {
+    throw new Error('Insurance already taken');
+  }
   
   return {
     ...state,
@@ -446,13 +597,23 @@ export function settleHands(state: GameState): GameState {
   const results: HandResult[] = [];
   let totalPayout = 0;
   
-  // Handle insurance first
+  // Handle insurance first (insurance pays 2:1 if dealer has blackjack)
   if (state.insuranceBet > 0) {
     if (state.dealerHand.isBlackjack) {
-      // Insurance pays 2:1
+      // Insurance pays 2:1 (bet + 2x bet = 3x total)
       totalPayout += state.insuranceBet * 3;
     }
-    // If dealer doesn't have blackjack, insurance is lost (already deducted)
+    // If dealer doesn't have blackjack, insurance is lost (already deducted from bankroll)
+  }
+  
+  // Handle side bets (already evaluated in dealInitialCards, just add payouts)
+  if (state.sideBetResults) {
+    if (state.sideBetResults.perfectPairs) {
+      totalPayout += state.sideBetResults.perfectPairs.payout;
+    }
+    if (state.sideBetResults.twentyOnePlus3) {
+      totalPayout += state.sideBetResults.twentyOnePlus3.payout;
+    }
   }
   
   // Calculate results for each hand
@@ -461,7 +622,10 @@ export function settleHands(state: GameState): GameState {
     
     // Skip already settled hands (surrendered)
     if (hand.bet === 0 && state.results.some(r => r.handIndex === i)) {
-      results.push(state.results.find(r => r.handIndex === i)!);
+      const existingResult = state.results.find(r => r.handIndex === i);
+      if (existingResult) {
+        results.push(existingResult);
+      }
       continue;
     }
     
@@ -470,9 +634,12 @@ export function settleHands(state: GameState): GameState {
     totalPayout += payout;
   }
   
+  // Ensure bankroll never goes negative (safety check)
+  const newBankroll = Math.max(0, state.bankroll + totalPayout);
+  
   return {
     ...state,
-    bankroll: state.bankroll + totalPayout,
+    bankroll: newBankroll,
     results,
   };
 }

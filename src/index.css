@@ -125,14 +125,40 @@
 }
 
 @layer components {
-  /* Playing Card Styles */
+  /* Playing Card Styles - Premium design */
   .playing-card {
-    @apply relative flex flex-col items-center justify-center rounded-lg shadow-xl;
+    @apply relative flex flex-col items-center justify-center rounded-lg;
     @apply bg-[hsl(var(--card-white))] text-[hsl(var(--card-black))];
     @apply border-2 border-[hsl(var(--card-white))];
     aspect-ratio: 2.5 / 3.5;
     min-width: 60px;
     max-width: 80px;
+    
+    /* Ombres portées réalistes */
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06),
+      0 0 0 1px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    
+    /* Texture de papier/carton subtile */
+    background-image: 
+      radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.02) 0%, transparent 50%);
+    
+    /* Reflets subtils */
+    position: relative;
+  }
+  
+  .playing-card::before {
+    content: '';
+    @apply absolute inset-0 rounded-lg pointer-events-none;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%,
+      rgba(0, 0, 0, 0.05) 100%
+    );
+    border-radius: inherit;
   }
 
   .playing-card.red {
@@ -159,6 +185,7 @@
   .poker-chip {
     @apply relative flex items-center justify-center rounded-full font-bold shadow-lg;
     @apply border-4 border-dashed transition-transform hover:scale-110;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
     width: 48px;
     height: 48px;
   }
@@ -183,18 +210,69 @@
     @apply bg-[hsl(var(--chip-gold))] border-[hsl(43_60%_65%)] text-[hsl(var(--chip-black))];
   }
 
-  /* Table felt pattern */
+  /* Table felt pattern - Premium texture */
   .table-felt {
     @apply relative overflow-hidden;
+    /* Couleur de base avec gradient */
     background: 
-      radial-gradient(ellipse at center, hsl(160 84% 12%) 0%, hsl(160 84% 6%) 100%);
+      linear-gradient(135deg, #0d5d2e 0%, #0a4a24 100%),
+      /* Texture de feutre */
+      repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.03) 0px,
+        transparent 1px,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 3px
+      ),
+      /* Motif subtil */
+      radial-gradient(
+        circle at 30% 30%,
+        rgba(26, 122, 62, 0.2) 0%,
+        transparent 50%
+      ),
+      /* Overlay de profondeur */
+      linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.1) 0%,
+        transparent 50%,
+        rgba(0, 0, 0, 0.1) 100%
+      );
+    position: relative;
+    
+    /* Effet de texture avec SVG noise */
+    background-image: 
+      url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+    
+    /* Ombre portée pour profondeur */
+    box-shadow: 
+      inset 0 0 100px rgba(0, 0, 0, 0.3),
+      0 10px 40px rgba(0, 0, 0, 0.2);
   }
 
   .table-felt::before {
     content: '';
-    @apply absolute inset-0 opacity-10;
+    @apply absolute inset-0 opacity-10 pointer-events-none;
     background-image: 
       url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .table-felt::after {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    background: 
+      radial-gradient(ellipse 80% 50% at 50% 0%, hsl(43 74% 49% / 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse 80% 50% at 50% 100%, hsl(43 74% 49% / 0.05) 0%, transparent 50%);
+  }
+  
+  /* Bordure dorée pour la table */
+  .table-border {
+    @apply relative;
+    border: 3px solid hsl(43 74% 49%);
+    border-radius: 1rem;
+    box-shadow: 
+      0 0 0 2px rgba(0, 0, 0, 0.3),
+      inset 0 0 20px hsl(43 74% 49% / 0.2),
+      0 0 30px hsl(43 74% 49% / 0.3);
   }
 
   /* Casino button */
@@ -205,6 +283,7 @@
     @apply hover:from-[hsl(43_74%_55%)] hover:to-primary;
     @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-primary disabled:hover:to-[hsl(43_74%_40%)];
     @apply transition-all duration-200;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 
   .btn-casino-secondary {
@@ -214,6 +293,7 @@
     @apply hover:bg-[hsl(160_40%_22%)] hover:border-primary/50;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
     @apply transition-all duration-200;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 
   /* Score badge */
@@ -257,5 +337,46 @@
 
   .text-shadow-lg {
     text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+  
+  .glow-warning {
+    box-shadow: 0 0 20px hsl(38 92% 50% / 0.4), 0 0 40px hsl(38 92% 50% / 0.2);
+  }
+}
+
+/* Responsive improvements - Mobile First */
+@media (max-width: 640px) {
+  .playing-card {
+    min-width: 50px;
+    max-width: 65px;
+  }
+  
+  .poker-chip {
+    width: 44px;
+    height: 44px;
+    font-size: 0.7rem;
+  }
+  
+  .btn-casino,
+  .btn-casino-secondary {
+    @apply px-4 py-2.5 text-sm;
+    min-height: 44px; /* Touch target minimum for accessibility */
+  }
+  
+  .table-felt {
+    padding: 1rem;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .playing-card {
+    min-width: 65px;
+    max-width: 75px;
+  }
+  
+  .poker-chip {
+    width: 52px;
+    height: 52px;
   }
 }

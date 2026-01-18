@@ -99,7 +99,7 @@ export function canSplitHand(
   if (hand.isStood || hand.isBusted) return false;
   if (bankroll < hand.bet) return false; // Need to match the bet
   
-  return canSplit(hand, config.maxSplits, currentSplitCount);
+  return canSplit(hand, config.maxSplits, currentSplitCount, config.resplitAces);
 }
 
 /**
@@ -161,8 +161,12 @@ export function calculatePayout(
   const dealerValue = getBestHandValue(dealerCards);
   const playerBusted = playerValue > 21;
   const dealerBusted = dealerValue > 21;
-  const playerBJ = playerHand.isBlackjack && playerHand.cards.length === 2 && !playerHand.isSplit;
-  const dealerBJ = isBlackjack(dealerCards);
+  
+  // Natural blackjack: EXACTLY 2 cards, A + 10/J/Q/K, NOT from split
+  const isNaturalBlackjack = playerHand.isBlackjack && 
+                             playerHand.cards.length === 2 && 
+                             !playerHand.isSplit;
+  const dealerBJ = isBlackjack(dealerCards) && dealerCards.length === 2;
   
   const bet = playerHand.bet;
   
@@ -178,12 +182,15 @@ export function calculatePayout(
   }
   
   // Blackjack scenarios
-  if (playerBJ && dealerBJ) {
-    return { result: 'push', payout: bet }; // Push - return bet
+  if (isNaturalBlackjack && dealerBJ) {
+    // Both have natural blackjack = push
+    return { result: 'push', payout: bet };
   }
   
-  if (playerBJ) {
-    return { result: 'blackjack', payout: bet + (bet * config.blackjackPayout) };
+  if (isNaturalBlackjack) {
+    // Natural blackjack pays 3:2 (bet + bet * 1.5 = 2.5x bet total)
+    const payout = bet + (bet * config.blackjackPayout);
+    return { result: 'blackjack', payout };
   }
   
   if (dealerBJ) {

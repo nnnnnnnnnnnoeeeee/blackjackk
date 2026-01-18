@@ -1,73 +1,218 @@
-# Welcome to your Lovable project
+# ♠ Blackjack Brilliance
 
-## Project info
+Un jeu de Blackjack moderne et élégant, développé avec React, TypeScript et Tailwind CSS. Interface "casino premium" avec animations fluides, feedback clair et règles conformes aux standards du casino.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🎮 Fonctionnalités
 
-## How can I edit this code?
+### Règles du Jeu
+- **6 decks** (sabot de 312 cartes)
+- **S17** (Stand on Soft 17) par défaut
+- **Blackjack 3:2** (paiement 1.5x)
+- **Actions disponibles** : Hit, Stand, Double, Split
+- **Split** : Jusqu'à 1 split par défaut
+- **Double après split** : Autorisé par défaut
+- **Assurance** : Disponible (optionnelle)
+- **Reshuffle** : À 25% du sabot restant
 
-There are several ways of editing your application.
+### Interface Utilisateur
+- **Design casino premium** : Feutrine verte avec accents dorés
+- **Animations fluides** : Distributions de cartes, transitions d'état
+- **Feedback visuel** : Indicateurs de phase, résultats clairs
+- **Multi-mains** : Support des splits avec indicateurs de main active
+- **Statistiques** : Suivi des parties, taux de victoire, blackjacks
+- **Responsive** : Optimisé pour mobile et desktop
+- **Accessibilité** : Navigation clavier, aria-labels, focus visible
 
-**Use Lovable**
+### Raccourcis Clavier
+- **H** : Hit (Tirer)
+- **S** : Stand (Rester)
+- **D** : Double (Doubler)
+- **P** : Split (Séparer)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 🚀 Installation et Développement
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prérequis
+- Node.js 18+ et npm
+- (Recommandé) [nvm](https://github.com/nvm-sh/nvm) pour gérer Node.js
 
-**Use your preferred IDE**
+### Installation
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+```bash
+# Cloner le repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Installer les dépendances
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Lancer le serveur de développement
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+L'application sera accessible sur `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Scripts Disponibles
 
-**Use GitHub Codespaces**
+```bash
+# Développement avec hot-reload
+npm run dev
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Tests unitaires
+npm run test
 
-## What technologies are used for this project?
+# Tests en mode watch
+npm run test:watch
 
-This project is built with:
+# Build de production
+npm run build
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# Preview du build de production
+npm run preview
 
-## How can I deploy this project?
+# Linting
+npm run lint
+```
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## 🏗️ Architecture
 
-## Can I connect a custom domain to my Lovable project?
+### Structure du Projet
 
-Yes, you can!
+```
+src/
+├── components/          # Composants React UI
+│   ├── BetPanel.tsx    # Panneau de mise
+│   ├── Controls.tsx    # Boutons d'action (Hit/Stand/Double/Split)
+│   ├── HandView.tsx    # Affichage d'une main
+│   ├── PlayingCard.tsx # Carte individuelle
+│   ├── StatsPanel.tsx  # Statistiques de jeu
+│   ├── Table.tsx       # Table principale
+│   └── ui/             # Composants shadcn/ui
+├── lib/
+│   └── blackjack/      # Moteur de jeu pur (sans dépendances React)
+│       ├── deck.ts     # Gestion du sabot
+│       ├── game.ts     # Logique de jeu et transitions d'état
+│       ├── hand.ts     # Calculs de main (valeur, blackjack, etc.)
+│       ├── rules.ts    # Règles (validation actions, dealer, payout)
+│       └── types.ts    # Types TypeScript
+├── store/
+│   └── useGameStore.ts # Store Zustand avec persistance
+├── test/               # Tests Vitest
+│   ├── blackjack.test.ts    # Tests unitaires moteur
+│   └── game-flow.test.ts    # Tests scénarios complets
+└── pages/              # Pages React Router
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Moteur de Jeu
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Le moteur de jeu (`src/lib/blackjack/`) est **pur** et **sans dépendances React** :
+- Fonctions pures et immutables
+- Facilement testable
+- Réutilisable dans d'autres contextes
+
+### Store (Zustand)
+
+- **Persistance** : Sauvegarde automatique dans localStorage
+- **Validation** : Vérification de l'état restauré pour éviter la corruption
+- **Selectors optimisés** : Réduction des re-renders inutiles
+
+## 🧪 Tests
+
+Les tests couvrent :
+- Calculs de main (as, blackjack, bust)
+- Règles du dealer (S17/H17)
+- Actions joueur (hit, stand, double, split)
+- Settlement (payout, push, insurance)
+- Scénarios complets de partie
+
+```bash
+# Lancer tous les tests
+npm run test
+
+# Mode watch pour développement
+npm run test:watch
+```
+
+## 🎨 Personnalisation
+
+### Configuration du Jeu
+
+Modifiez `DEFAULT_CONFIG` dans `src/lib/blackjack/types.ts` :
+
+```typescript
+export const DEFAULT_CONFIG: GameConfig = {
+  deckCount: 6,              // Nombre de decks
+  blackjackPayout: 1.5,      // 3:2 = 1.5, 6:5 = 1.2
+  dealerHitsSoft17: false,   // true pour H17
+  allowSplit: true,
+  maxSplits: 1,
+  allowDouble: true,
+  allowDoubleAfterSplit: true,
+  allowSurrender: false,
+  allowInsurance: false,
+  minBet: 10,
+  maxBet: 1000,
+  reshuffleThreshold: 0.25,  // 25% restant
+};
+```
+
+### Thème et Styles
+
+Les couleurs et styles sont définis dans `src/index.css` avec des variables CSS :
+- `--background` : Feutrine verte
+- `--primary` : Or casino
+- `--success` : Vert (victoire)
+- `--destructive` : Rouge (défaite)
+
+## 📦 Build de Production
+
+```bash
+npm run build
+```
+
+Les fichiers optimisés seront générés dans `dist/`.
+
+## 🐛 Dépannage
+
+### Erreurs de Build
+- Vérifier que toutes les dépendances sont installées : `npm install`
+- Vérifier la version de Node.js : `node --version` (18+)
+
+### Tests qui échouent
+- Vérifier que les dépendances de test sont installées
+- Lancer `npm run test` pour voir les erreurs détaillées
+
+### Problèmes de Persistance
+- Le localStorage peut être vidé : les données seront réinitialisées
+- Vérifier la console du navigateur pour les erreurs de sérialisation
+
+## 📝 Notes Techniques
+
+### Performance
+- **Memoization** : Composants React memoizés
+- **Selectors Zustand** : Sélection granulaire pour éviter re-renders
+- **Animations** : Framer Motion avec optimisations
+
+### Accessibilité
+- **Navigation clavier** : Raccourcis H/S/D/P
+- **ARIA labels** : Tous les boutons et éléments interactifs
+- **Focus visible** : Rings de focus sur tous les éléments focusables
+- **Contraste** : Respect des standards WCAG
+
+### Compatibilité
+- **Navigateurs** : Chrome, Firefox, Safari, Edge (dernières versions)
+- **Mobile** : iOS Safari, Chrome Mobile
+- **Responsive** : Breakpoints Tailwind (sm, md, lg)
+
+## 📄 Licence
+
+Ce projet est un exemple éducatif. Les règles du Blackjack sont conformes aux standards des casinos.
+
+## 🙏 Remerciements
+
+- [shadcn/ui](https://ui.shadcn.com/) pour les composants UI
+- [Zustand](https://github.com/pmndrs/zustand) pour la gestion d'état
+- [Framer Motion](https://www.framer.com/motion/) pour les animations
+- [Tailwind CSS](https://tailwindcss.com/) pour le styling
+
+---
+
+**Jouez responsablement** 🎲

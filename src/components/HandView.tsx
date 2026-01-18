@@ -49,7 +49,7 @@ export const HandView = memo(function HandView({
     if (!result) return null;
     switch (result) {
       case 'blackjack':
-        return 'BLACKJACK!';
+        return 'BLACKJACK 3:2!';
       case 'win':
         return 'WIN';
       case 'lose':
@@ -72,7 +72,7 @@ export const HandView = memo(function HandView({
         {isDealer ? 'Dealer' : 'Player'}
       </div>
       
-      {/* Cards container */}
+      {/* Cards container with spotlight effect for active hand */}
       <motion.div 
         className={cn(
           'relative flex items-center justify-center min-h-[100px] sm:min-h-[120px]',
@@ -80,6 +80,29 @@ export const HandView = memo(function HandView({
           isActive && !isDealer && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
           getResultStyles(),
         )}
+        animate={isActive && !isDealer ? {
+          boxShadow: [
+            '0 0 0px rgba(212, 175, 55, 0)',
+            '0 0 40px rgba(212, 175, 55, 0.3)',
+            '0 0 0px rgba(212, 175, 55, 0)',
+          ],
+        } : {}}
+        transition={isActive && !isDealer ? {
+          boxShadow: {
+            duration: 2,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          },
+        } : {}}
+        style={isActive && !isDealer ? {
+          background: `
+            radial-gradient(
+              ellipse 800px 400px at center,
+              rgba(255, 255, 255, 0.05) 0%,
+              transparent 70%
+            )
+          `,
+        } : {}}
       >
         <div className="flex -space-x-8 sm:-space-x-10">
           <AnimatePresence>
@@ -94,24 +117,58 @@ export const HandView = memo(function HandView({
           </AnimatePresence>
         </div>
         
-        {/* Result overlay */}
+        {/* Result overlay with premium animations */}
         {resultText && (
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            animate={{ 
+              scale: 1, 
+              opacity: 1,
+              ...(result === 'win' || result === 'blackjack' ? {
+                boxShadow: [
+                  '0 0 0px rgba(34, 197, 94, 0)',
+                  '0 0 30px rgba(34, 197, 94, 0.8)',
+                  '0 0 0px rgba(34, 197, 94, 0)',
+                ],
+              } : {}),
+            }}
+            transition={{
+              scale: {
+                type: 'spring',
+                stiffness: 200,
+                damping: 15,
+              },
+              opacity: { duration: 0.3 },
+              boxShadow: result === 'win' || result === 'blackjack' ? {
+                duration: 1.5,
+                repeat: 2,
+              } : {},
+            }}
             className={cn(
               'absolute inset-0 flex items-center justify-center',
               'bg-background/80 backdrop-blur-sm rounded-xl',
+              'pointer-events-none', // Don't block clicks
+              result === 'win' || result === 'blackjack' ? 'glow-success' : '',
+              result === 'lose' ? 'glow-destructive' : '',
             )}
           >
-            <span className={cn(
-              'text-lg sm:text-xl font-bold uppercase tracking-wider text-shadow-md',
-              result === 'win' || result === 'blackjack' ? 'text-success' : '',
-              result === 'lose' ? 'text-destructive' : '',
-              result === 'push' ? 'text-warning' : '',
-            )}>
+            <motion.span
+              initial={{ scale: 0, rotate: -10 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{
+                type: 'spring',
+                stiffness: 200,
+                delay: 0.1,
+              }}
+              className={cn(
+                'text-lg sm:text-xl font-bold uppercase tracking-wider text-shadow-md',
+                result === 'win' || result === 'blackjack' ? 'text-success' : '',
+                result === 'lose' ? 'text-destructive' : '',
+                result === 'push' ? 'text-warning' : '',
+              )}
+            >
               {resultText}
-            </span>
+            </motion.span>
           </motion.div>
         )}
       </motion.div>

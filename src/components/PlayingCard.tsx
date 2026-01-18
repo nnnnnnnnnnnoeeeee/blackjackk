@@ -25,14 +25,31 @@ export const PlayingCard = memo(function PlayingCard({
   if (!faceUp) {
     return (
       <motion.div
-        initial={{ y: -100, opacity: 0, rotateY: 180 }}
-        animate={{ y: 0, opacity: 1, rotateY: 0 }}
-        transition={{ 
-          duration: 0.4, 
-          delay: index * 0.15,
-          type: 'spring',
-          stiffness: 200,
+        initial={{ 
+          y: -200, 
+          x: -50,
+          opacity: 0, 
+          rotateY: -90,
+          rotateX: 10,
+          scale: 0.5 
         }}
+        animate={{ 
+          y: 0, 
+          x: 0,
+          opacity: 1, 
+          rotateY: 0,
+          rotateX: 0,
+          scale: 1 
+        }}
+        transition={{ 
+          duration: 0.35,
+          delay: index * 0.08,
+          type: 'spring',
+          stiffness: 250,
+          damping: 30,
+          mass: 0.7,
+        }}
+        style={{ transformStyle: 'preserve-3d' }}
         className={cn('playing-card face-down', className)}
         aria-label="Face down card"
       />
@@ -41,14 +58,33 @@ export const PlayingCard = memo(function PlayingCard({
   
   return (
     <motion.div
-      initial={{ y: -100, opacity: 0, scale: 0.8 }}
-      animate={{ y: 0, opacity: 1, scale: 1 }}
-      transition={{ 
-        duration: 0.4, 
-        delay: index * 0.15,
-        type: 'spring',
-        stiffness: 200,
+      initial={{ 
+        y: -200, 
+        x: -50,
+        opacity: 0, 
+        scale: 0.5, 
+        rotate: -5,
+        rotateY: -90,
+        rotateX: 10,
       }}
+      animate={{ 
+        y: 0, 
+        x: 0,
+        opacity: 1, 
+        scale: 1, 
+        rotate: 0,
+        rotateY: 0,
+        rotateX: 0,
+      }}
+      transition={{ 
+        duration: 0.35,
+        delay: index * 0.08,
+        type: 'spring',
+        stiffness: 250,
+        damping: 30,
+        mass: 0.7,
+      }}
+      style={{ transformStyle: 'preserve-3d' }}
       className={cn('playing-card', color, className)}
       aria-label={`${rank} of ${suit}`}
     >

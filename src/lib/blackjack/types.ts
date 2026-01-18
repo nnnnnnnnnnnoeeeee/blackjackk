@@ -38,6 +38,30 @@ export interface HandResult {
   payout: number;
 }
 
+export interface PerfectPairsConfig {
+  enabled: boolean;
+  minBet: number;
+  maxBet: number;
+  payouts: {
+    mixed: number;
+    colored: number;
+    perfect: number;
+  };
+}
+
+export interface TwentyOnePlus3Config {
+  enabled: boolean;
+  minBet: number;
+  maxBet: number;
+  payouts: {
+    flush: number;
+    straight: number;
+    threeOfAKind: number;
+    straightFlush: number;
+    suitedTrips: number;
+  };
+}
+
 export interface GameConfig {
   deckCount: number;
   blackjackPayout: number; // 1.5 for 3:2, 1.2 for 6:5
@@ -48,9 +72,39 @@ export interface GameConfig {
   allowDoubleAfterSplit: boolean;
   allowSurrender: boolean;
   allowInsurance: boolean;
+  resplitAces: boolean;
   minBet: number;
   maxBet: number;
   reshuffleThreshold: number; // Percentage (0-1) at which to reshuffle
+  perfectPairs: PerfectPairsConfig;
+  twentyOnePlus3: TwentyOnePlus3Config;
+  soundEnabled: boolean;
+  soundVolume: number; // 0.0 to 1.0
+}
+
+export interface SideBetResults {
+  perfectPairs?: {
+    bet: number;
+    tier: 'none' | 'mixed' | 'colored' | 'perfect';
+    payout: number;
+  };
+  twentyOnePlus3?: {
+    bet: number;
+    handType: 'none' | 'flush' | 'straight' | 'threeOfAKind' | 'straightFlush' | 'suitedTrips';
+    payout: number;
+  };
+}
+
+export interface HandHistory {
+  id: string;
+  timestamp: number;
+  playerCards: Card[][];
+  dealerCards: Card[];
+  bets: number[];
+  actions: Array<{ handIndex: number; action: PlayerAction; timestamp: number }>;
+  results: HandResult[];
+  totalPayout: number;
+  netResult: number;
 }
 
 export interface GameState {
@@ -62,8 +116,20 @@ export interface GameState {
   bankroll: number;
   currentBet: number;
   insuranceBet: number;
+  sideBets: {
+    perfectPairs?: number;
+    twentyOnePlus3?: number;
+  };
+  sideBetResults?: SideBetResults;
   results: HandResult[];
   config: GameConfig;
+  handHistory?: HandHistory[]; // Last 50 hands
+}
+
+export interface CardCountingStats {
+  runningCount: number;
+  trueCount: number;
+  cardsSeen: number;
 }
 
 export interface GameStats {
@@ -77,6 +143,7 @@ export interface GameStats {
   totalWon: number;
   biggestWin: number;
   biggestLoss: number;
+  cardCounting?: CardCountingStats;
 }
 
 export const DEFAULT_CONFIG: GameConfig = {
@@ -88,10 +155,35 @@ export const DEFAULT_CONFIG: GameConfig = {
   allowDouble: true,
   allowDoubleAfterSplit: true,
   allowSurrender: false,
-  allowInsurance: false,
+  allowInsurance: true,
+  resplitAces: false, // No resplit aces by default
   minBet: 10,
   maxBet: 1000,
   reshuffleThreshold: 0.25,
+  perfectPairs: {
+    enabled: false,
+    minBet: 5,
+    maxBet: 500,
+    payouts: {
+      mixed: 5,
+      colored: 10,
+      perfect: 25,
+    },
+  },
+  twentyOnePlus3: {
+    enabled: false,
+    minBet: 5,
+    maxBet: 500,
+    payouts: {
+      flush: 5,
+      straight: 10,
+      threeOfAKind: 30,
+      straightFlush: 40,
+      suitedTrips: 100,
+    },
+  },
+  soundEnabled: false, // OFF by default
+  soundVolume: 0.5, // 50% volume
 };
 
 export const INITIAL_STATS: GameStats = {
