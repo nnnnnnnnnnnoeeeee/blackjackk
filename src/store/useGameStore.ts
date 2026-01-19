@@ -240,12 +240,15 @@ export const useGameStore = create<GameStore>()(
       // Place a bet and deal cards
       placeBet: (amount: number) => {
         const { gameState } = get();
-        console.log('[placeBet] Called with:', { amount, phase: gameState.phase, bankroll: gameState.bankroll, shoeLength: gameState.shoe?.length });
+        console.log('[placeBet] Called with:', { amount, phase: gameState.phase, bankroll: gameState.bankroll, shoeLength: gameState.shoe?.length, isAnimating: get().isAnimating });
         
         if (gameState.phase !== 'BETTING') {
           console.warn('[placeBet] Wrong phase:', gameState.phase);
           return;
         }
+        
+        // Always reset isAnimating before starting a new round
+        set({ isAnimating: false });
         
         try {
           // Ensure shoe has enough cards before dealing (at least 4 for initial deal)
@@ -262,7 +265,7 @@ export const useGameStore = create<GameStore>()(
           console.log('[placeBet] Starting round with shoe length:', currentState.shoe.length);
           const newState = startRound(currentState, amount);
           console.log('[placeBet] Round started, new phase:', newState.phase);
-          set({ gameState: newState });
+          set({ gameState: newState, isAnimating: false });
           
           // If player has blackjack, automatically finish round after delay
           if (newState.phase === 'DEALER_TURN') {
@@ -272,6 +275,8 @@ export const useGameStore = create<GameStore>()(
           }
         } catch (error) {
           console.error('[placeBet] Error:', error);
+          // Always reset isAnimating on error
+          set({ isAnimating: false });
           // Re-throw to let UI components handle the error display
           throw error;
         }
@@ -310,7 +315,29 @@ export const useGameStore = create<GameStore>()(
           
           // If moved to dealer turn, finish round
           if (newState.phase === 'DEALER_TURN') {
-            get().finishRound();
+            console.log('[action] Phase is DEALER_TURN, calling finishRound');
+            // Call finishRound immediately after state update
+            // Use setTimeout to ensure state is updated before calling finishRound
+            setTimeout(() => {
+              const currentState = get();
+              console.log('[action] Checking state before finishRound:', { phase: currentState.gameState.phase, isAnimating: currentState.isAnimating });
+              if (currentState.gameState.phase === 'DEALER_TURN') {
+                console.log('[action] Calling finishRound');
+                currentState.finishRound().catch(err => {
+                  console.error('[action] Error in finishRound:', err);
+                  // Force phase to SETTLEMENT on error
+                  set({
+                    gameState: {
+                      ...currentState.gameState,
+                      phase: 'SETTLEMENT',
+                    },
+                    isAnimating: false,
+                  });
+                });
+              } else {
+                console.warn('[action] Phase changed before finishRound could be called:', currentState.gameState.phase);
+              }
+            }, 50);
           }
         } catch (error) {
           console.error('[action] Error executing action:', error);
@@ -321,7 +348,9 @@ export const useGameStore = create<GameStore>()(
       // Finish round (dealer plays, settle)
       finishRound: async () => {
         const { gameState, stats } = get();
+        console.log('[finishRound] Called, current phase:', gameState.phase);
         if (gameState.phase !== 'DEALER_TURN') {
+          console.warn('[finishRound] Not in DEALER_TURN phase, current phase:', gameState.phase);
           // Ensure isAnimating is false if we're not in dealer turn
           set({ isAnimating: false });
           return;
@@ -334,26 +363,27 @@ export const useGameStore = create<GameStore>()(
           let currentState = revealDealerCard(gameState);
           set({ gameState: currentState });
           
-          // Very short delay for visual feedback
-          await new Promise(r => setTimeout(r, 200));
+          // Delay for card flip animation (0.35s + buffer)
+          await new Promise(r => setTimeout(r, 500));
           
           // Check if all player hands busted - no need to draw
           const allBusted = currentState.playerHands.every(h => h.isBusted);
           
           if (!allBusted) {
-            // Dealer draws cards one by one with minimal delays
+            // Dealer draws cards one by one with delays for animation
             while (shouldDealerHit(currentState.dealerHand.cards, currentState.config.dealerHitsSoft17)) {
               currentState = dealerDrawCard({
                 ...currentState,
                 phase: 'DEALER_TURN', // Ensure phase is correct
               });
               set({ gameState: currentState });
-              // Short delay only if dealer needs to draw more cards
-              if (shouldDealerHit(currentState.dealerHand.cards, currentState.config.dealerHitsSoft17)) {
-                await new Promise(r => setTimeout(r, 300));
-              }
+              // Delay for card dealing animation (0.35s + buffer)
+              await new Promise(r => setTimeout(r, 500));
             }
           }
+          
+          // Final delay to ensure all animations complete
+          await new Promise(r => setTimeout(r, 300));
           
           // Finalize dealer turn state
           const afterDealer: GameState = {
@@ -420,16 +450,65 @@ export const useGameStore = create<GameStore>()(
             }, 0),
           };
           
-          get().addHandToHistory(handHistory);
+          // Add to hand history (only if function exists)
+          const store = get();
+          if (store.addHandToHistory) {
+            store.addHandToHistory(handHistory);
+          } else {
+            // Fallback: add directly to gameState
+            const currentState = get();
+            const updatedHistory = [...(currentState.gameState.handHistory || []), handHistory];
+            // Keep only last 50 hands
+            const trimmedHistory = updatedHistory.slice(-50);
+            set({
+              gameState: {
+                ...currentState.gameState,
+                handHistory: trimmedHistory,
+              },
+            });
+          }
+          
+          // Ensure phase is SETTLEMENT before setting state
+          const settlementState = {
+            ...finalState,
+            phase: 'SETTLEMENT' as const,
+          };
+          
+          console.log('[finishRound] Setting final state:', { phase: settlementState.phase, isAnimating: false, resultsCount: settlementState.results.length });
           
           set({ 
-            gameState: finalState, 
+            gameState: settlementState, 
             stats: newStats,
             isAnimating: false,
           });
           
+          // Double-check that state was set correctly
+          const verifyState = get();
+          console.log('[finishRound] State after set:', { phase: verifyState.gameState.phase, isAnimating: verifyState.isAnimating });
+          
           // Ensure phase is SETTLEMENT and isAnimating is false
-          console.log('[finishRound] Round finished, phase:', finalState.phase, 'isAnimating: false');
+          if (verifyState.gameState.phase !== 'SETTLEMENT') {
+            console.error('[finishRound] ERROR: Phase is not SETTLEMENT after finishRound! Current phase:', verifyState.gameState.phase);
+            // Force set to SETTLEMENT
+            set({
+              gameState: {
+                ...verifyState.gameState,
+                phase: 'SETTLEMENT',
+              },
+              isAnimating: false,
+            });
+          }
+          
+          // After a short delay showing results, automatically start a new round if bankroll > 0
+          setTimeout(() => {
+            const currentState = get();
+            // Only auto-start if still in SETTLEMENT and not bankrupt
+            if (currentState.gameState.phase === 'SETTLEMENT' && currentState.gameState.bankroll > 0) {
+              console.log('[finishRound] Auto-starting new round after settlement');
+              // Don't auto-start, let user click "New Hand" button
+              // This gives them time to see the results
+            }
+          }, 3000);
         } catch (error) {
           console.error('Error finishing round:', error);
           // Always reset isAnimating on error
@@ -504,6 +583,19 @@ export const useGameStore = create<GameStore>()(
       completeTutorial: () => {
         console.log('[useGameStore] completeTutorial called');
         set({ tutorialCompleted: true, tutorialStep: 0 });
+      },
+      
+      addHandToHistory: (history: HandHistory) => {
+        const { gameState } = get();
+        const updatedHistory = [...(gameState.handHistory || []), history];
+        // Keep only last 50 hands
+        const trimmedHistory = updatedHistory.slice(-50);
+        set({
+          gameState: {
+            ...gameState,
+            handHistory: trimmedHistory,
+          },
+        });
       },
       
       // Get current card count

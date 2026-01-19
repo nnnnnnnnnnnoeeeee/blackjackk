@@ -5,7 +5,7 @@
 import { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/store/useGameStore';
-import { getCountInterpretation } from '@/lib/blackjack/cardcounting';
+import { getCountInterpretation, calculateRunningCount, calculateTrueCount } from '@/lib/blackjack/cardcounting';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { cn } from '@/lib/utils';
@@ -14,7 +14,36 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 export const CardCountingPanel = memo(function CardCountingPanel() {
   const cardCountingEnabled = useGameStore(s => s.cardCountingEnabled);
   const toggleCardCounting = useGameStore(s => s.toggleCardCounting);
-  const cardCount = useGameStore(s => s.getCardCount());
+  
+  // Extract primitive values to avoid infinite loops
+  // Create a stable string key from face-up cards
+  const cardKey = useGameStore(s => {
+    if (!s.cardCountingEnabled) return '';
+    const dealerCards = s.gameState.dealerHand.cards.filter(c => c.faceUp).map(c => `${c.rank}${c.suit}`).sort().join(',');
+    const playerCards = s.gameState.playerHands.flatMap(h => h.cards.filter(c => c.faceUp).map(c => `${c.rank}${c.suit}`)).sort().join(',');
+    return `${dealerCards}|${playerCards}`;
+  });
+  const shoeLength = useGameStore(s => s.gameState.shoe.length);
+  const deckCount = useGameStore(s => s.gameState.config.deckCount);
+  
+  // Calculate card count using useMemo with primitive dependencies
+  const cardCount = useMemo(() => {
+    if (!cardCountingEnabled) return null;
+    
+    // Get fresh state for calculation (inside useMemo to avoid dependency on gameState object)
+    const state = useGameStore.getState();
+    
+    // Calculate running count from all face-up cards seen
+    const allCards = [
+      ...state.gameState.dealerHand.cards.filter(c => c.faceUp),
+      ...state.gameState.playerHands.flatMap(h => h.cards.filter(c => c.faceUp)),
+    ];
+    
+    const runningCount = calculateRunningCount(allCards);
+    const trueCount = calculateTrueCount(runningCount, shoeLength, deckCount);
+    
+    return { runningCount, trueCount };
+  }, [cardCountingEnabled, cardKey, shoeLength, deckCount]);
   
   const interpretation = useMemo(() => {
     if (!cardCount) return null;

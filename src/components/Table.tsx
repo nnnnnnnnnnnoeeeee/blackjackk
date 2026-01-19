@@ -2,7 +2,7 @@
 // Main Blackjack Table - The game board
 // ============================================================================
 
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   useGameStore, 
@@ -82,7 +82,51 @@ export const Table = memo(function Table() {
   // Safety: Reset isAnimating if stuck (shouldn't be animating in BETTING or SETTLEMENT)
   useEffect(() => {
     if (isAnimating && (phase === 'BETTING' || phase === 'SETTLEMENT')) {
+      console.log('[Table] Force resetting isAnimating for phase:', phase);
       useGameStore.setState({ isAnimating: false });
+    }
+  }, [phase, isAnimating]);
+  
+  // Safety: If we're stuck in DEALER_TURN without animation, force finishRound
+  // Use a ref to prevent multiple calls
+  const finishRoundAttemptedRef = useRef(false);
+  
+  useEffect(() => {
+    // Reset ref when phase changes to BETTING or DEALING (new round starting)
+    if (phase === 'BETTING' || phase === 'DEALING') {
+      finishRoundAttemptedRef.current = false;
+      // Also ensure isAnimating is false when starting a new round
+      if (isAnimating) {
+        useGameStore.setState({ isAnimating: false });
+      }
+      return;
+    }
+    
+    if (phase === 'DEALER_TURN' && !isAnimating && !finishRoundAttemptedRef.current) {
+      finishRoundAttemptedRef.current = true;
+      const timeout = setTimeout(() => {
+        const currentState = useGameStore.getState();
+        if (currentState.gameState.phase === 'DEALER_TURN' && !currentState.isAnimating) {
+          console.log('[Table] Stuck in DEALER_TURN, forcing finishRound');
+          currentState.finishRound().catch(err => {
+            console.error('[Table] Error forcing finishRound:', err);
+            // Force to SETTLEMENT on error
+            useGameStore.setState({
+              gameState: {
+                ...currentState.gameState,
+                phase: 'SETTLEMENT',
+              },
+              isAnimating: false,
+            });
+          });
+        }
+      }, 500);
+      return () => {
+        clearTimeout(timeout);
+      };
+    } else if (phase !== 'DEALER_TURN') {
+      // Reset ref when phase changes away from DEALER_TURN
+      finishRoundAttemptedRef.current = false;
     }
   }, [phase, isAnimating]);
   
@@ -481,7 +525,7 @@ export const Table = memo(function Table() {
               </motion.div>
             )}
             
-            {(phase === 'DEALER_TURN' || phase === 'DEALING') && (
+            {(phase === 'DEALER_TURN' || phase === 'DEALING') && isAnimating && (
               <motion.div
                 key="waiting"
                 initial={{ opacity: 0 }}

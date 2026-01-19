@@ -34,13 +34,14 @@ export const StatsDashboard = memo(function StatsDashboard() {
   
   const bankrollHistory = useMemo(() => {
     // Calculate bankroll progression from hand history
+    if (!handHistory || handHistory.length === 0) return [];
     let currentBankroll = 1000; // Starting bankroll
     const history = handHistory.map((hand, index) => {
-      currentBankroll += hand.netResult;
+      currentBankroll += hand.netResult || 0;
       return {
         hand: index + 1,
         bankroll: currentBankroll,
-        netResult: hand.netResult,
+        netResult: hand.netResult || 0,
       };
     });
     return history;
@@ -53,11 +54,12 @@ export const StatsDashboard = memo(function StatsDashboard() {
   ], [stats]);
   
   const recentResults = useMemo(() => {
+    if (!handHistory || handHistory.length === 0) return [];
     return handHistory.slice(0, 20).map((hand, index) => ({
       hand: index + 1,
-      result: hand.results[0]?.result || 'lose',
-      payout: hand.totalPayout,
-      net: hand.netResult,
+      result: (hand.results && hand.results.length > 0) ? hand.results[0]?.result || 'lose' : 'lose',
+      payout: hand.totalPayout || 0,
+      net: hand.netResult || 0,
     }));
   }, [handHistory]);
   
@@ -276,7 +278,7 @@ export const StatsDashboard = memo(function StatsDashboard() {
               <CardDescription>Dernières mains jouées (max 50)</CardDescription>
             </CardHeader>
             <CardContent>
-              {handHistory.length === 0 ? (
+              {!handHistory || handHistory.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   Aucune main jouée pour le moment
                 </div>
@@ -310,9 +312,9 @@ export const StatsDashboard = memo(function StatsDashboard() {
                             </span>
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {hand.results.length} main{hand.results.length > 1 ? 's' : ''} • 
-                            Mise totale: ${hand.bets.reduce((a, b) => a + b, 0).toFixed(0)} • 
-                            Payout: ${hand.totalPayout.toFixed(0)}
+                            {(hand.results?.length || 0)} main{(hand.results?.length || 0) > 1 ? 's' : ''} • 
+                            Mise totale: ${(hand.bets?.reduce((a, b) => a + b, 0) || 0).toFixed(0)} • 
+                            Payout: ${(hand.totalPayout || 0).toFixed(0)}
                           </div>
                         </div>
                       </div>
