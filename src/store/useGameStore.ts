@@ -303,12 +303,36 @@ export const useGameStore = create<GameStore>()(
           
           // Validate state after action
           if (!Array.isArray(newState.playerHands) || newState.playerHands.length === 0) {
-            throw new Error('Invalid state: playerHands is empty after action');
+            console.error('[action] Invalid state: playerHands is empty after action');
+            // Don't update state, just return
+            return;
           }
           
+          // Validate and fix activeHandIndex
           if (newState.activeHandIndex < 0 || newState.activeHandIndex >= newState.playerHands.length) {
-            console.warn('[action] Invalid activeHandIndex, resetting to 0');
-            newState.activeHandIndex = 0;
+            console.warn('[action] Invalid activeHandIndex, fixing:', { 
+              activeHandIndex: newState.activeHandIndex, 
+              handsLength: newState.playerHands.length 
+            });
+            
+            // Find a valid active hand
+            const validIndex = newState.playerHands.findIndex(h => 
+              !h.isStood && !h.isBusted && !h.isBlackjack
+            );
+            
+            if (validIndex !== -1) {
+              newState.activeHandIndex = validIndex;
+            } else {
+              // All hands finished, move to dealer turn
+              newState.activeHandIndex = 0;
+              newState.phase = 'DEALER_TURN';
+            }
+          }
+          
+          // Ensure phase is valid
+          if (!['BETTING', 'DEALING', 'INSURANCE', 'PLAYER_TURN', 'DEALER_TURN', 'SETTLEMENT'].includes(newState.phase)) {
+            console.warn('[action] Invalid phase, resetting to PLAYER_TURN:', newState.phase);
+            newState.phase = 'PLAYER_TURN';
           }
           
           set({ gameState: newState });
@@ -341,7 +365,10 @@ export const useGameStore = create<GameStore>()(
           }
         } catch (error) {
           console.error('[action] Error executing action:', error);
-          throw error; // Re-throw to show error in UI
+          // Reset isAnimating to prevent UI freeze
+          set({ isAnimating: false });
+          // Re-throw to show error in UI (will be caught by Controls.tsx)
+          throw error;
         }
       },
       
@@ -511,8 +538,15 @@ export const useGameStore = create<GameStore>()(
           }, 3000);
         } catch (error) {
           console.error('Error finishing round:', error);
-          // Always reset isAnimating on error
-          set({ isAnimating: false });
+          // Always reset isAnimating on error and force SETTLEMENT phase
+          const currentState = get();
+          set({
+            gameState: {
+              ...currentState.gameState,
+              phase: 'SETTLEMENT',
+            },
+            isAnimating: false, // CRITICAL: Always reset animation flag even on error
+          });
         }
       },
       

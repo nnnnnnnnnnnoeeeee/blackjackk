@@ -92,16 +92,34 @@ export default function Lobby() {
 
     setCreating(true);
     try {
+      // Get current session to ensure we have auth token
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        toast.error('Session expirée. Veuillez vous reconnecter.');
+        navigate('/login');
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('create_table', {
         body: { name: tableName.trim(), max_players: 5 },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Create table error:', error);
+        throw error;
+      }
+
+      if (!data || !data.table) {
+        throw new Error('Réponse invalide du serveur');
+      }
 
       toast.success('Table créée !');
       navigate(`/table/${data.table.id}`);
     } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de la création de la table');
+      console.error('Error creating table:', error);
+      const errorMessage = error?.message || error?.error || 'Erreur lors de la création de la table';
+      const errorDetails = error?.details ? ` (${error.details})` : '';
+      toast.error(`${errorMessage}${errorDetails}`);
     } finally {
       setCreating(false);
       setTableName('');

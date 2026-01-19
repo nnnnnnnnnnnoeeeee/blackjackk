@@ -221,18 +221,21 @@ export const BetPanel = memo(function BetPanel() {
         </div>
       </div>
       
-      {/* Side Bets Section */}
-      <div className="w-full border-t border-border pt-4 mt-2 space-y-4">
-        <div className="text-xs uppercase tracking-wider text-muted-foreground text-center mb-2">
-          Side Bets
+      {/* Side Bets Section - Improved UI */}
+      <div className="w-full border-t border-border pt-4 mt-4 space-y-4">
+        <div className="text-xs uppercase tracking-wider text-muted-foreground text-center mb-3">
+          🎰 Side Bets (Optionnels)
         </div>
         
         {/* Perfect Pairs */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="perfect-pairs-toggle" className="text-sm font-medium cursor-pointer">
-              Perfect Pairs
-            </Label>
+        <div className="bg-card/30 rounded-lg p-3 border border-border/50">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">Perfect Pairs</span>
+              <span className="text-xs text-muted-foreground" title="Gagnez si vos 2 premières cartes forment une paire">
+                ℹ️
+              </span>
+            </div>
             <Switch
               id="perfect-pairs-toggle"
               checked={config.perfectPairs?.enabled ?? false}
@@ -247,39 +250,83 @@ export const BetPanel = memo(function BetPanel() {
               }}
             />
           </div>
+          
           {config.perfectPairs?.enabled && (
-            <div className="space-y-2 pl-2">
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={0}
-                  max={Math.min(bankroll - betAmount - twentyOnePlus3Bet, config.perfectPairs?.maxBet ?? 500)}
-                  step={5}
-                  value={perfectPairsBet || ''}
-                  onChange={(e) => {
-                    const val = Math.max(0, Number(e.target.value));
-                    setPerfectPairsBet(Math.min(val, bankroll - betAmount - twentyOnePlus3Bet, config.perfectPairs?.maxBet ?? 500));
-                  }}
-                  className="w-20 px-2 py-1 text-sm rounded border border-border bg-background"
-                  placeholder="0"
-                />
-                <span className="text-xs text-muted-foreground">
-                  ${config.perfectPairs?.minBet ?? 5}-${config.perfectPairs?.maxBet ?? 500}
-                </span>
+            <div className="space-y-3">
+              {/* Explanation */}
+              <div className="text-xs text-muted-foreground bg-background/50 rounded p-2">
+                <div className="font-medium mb-1">💡 Comment ça marche ?</div>
+                <div>Si vos 2 premières cartes forment une paire, vous gagnez !</div>
+                <div className="mt-1 flex gap-2 text-[10px]">
+                  <span>🔴 Mixed: {config.perfectPairs?.payouts?.mixed ?? 5}:1</span>
+                  <span>🟢 Colored: {config.perfectPairs?.payouts?.colored ?? 10}:1</span>
+                  <span>⭐ Perfect: {config.perfectPairs?.payouts?.perfect ?? 25}:1</span>
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">
-                Mixed: {config.perfectPairs?.payouts?.mixed ?? 5}:1 | Colored: {config.perfectPairs?.payouts?.colored ?? 10}:1 | Perfect: {config.perfectPairs?.payouts?.perfect ?? 25}:1
+              
+              {/* Bet amount display */}
+              <div className="text-center">
+                <div className="text-xs text-muted-foreground mb-1">Mise Perfect Pairs</div>
+                <div className="text-xl font-bold text-primary">${perfectPairsBet}</div>
               </div>
+              
+              {/* Chip buttons for side bet */}
+              <div className="flex flex-wrap justify-center gap-2">
+                {[5, 10, 25, 50].map((value) => {
+                  const maxBet = Math.min(bankroll - betAmount - twentyOnePlus3Bet, config.perfectPairs?.maxBet ?? 500);
+                  const disabled = perfectPairsBet + value > maxBet || value < (config.perfectPairs?.minBet ?? 5);
+                  return (
+                    <motion.button
+                      key={value}
+                      whileHover={disabled ? {} : { scale: 1.1, y: -2 }}
+                      whileTap={disabled ? {} : { scale: 0.9 }}
+                      onClick={() => {
+                        const newBet = Math.min(perfectPairsBet + value, maxBet);
+                        if (newBet >= (config.perfectPairs?.minBet ?? 5)) {
+                          setPerfectPairsBet(newBet);
+                        }
+                      }}
+                      disabled={disabled}
+                      className={cn(
+                        'poker-chip text-xs font-bold cursor-pointer',
+                        value === 5 && 'red',
+                        value === 10 && 'red',
+                        value === 25 && 'green',
+                        value === 50 && 'blue',
+                        disabled && 'opacity-30 cursor-not-allowed filter grayscale-[50%]',
+                      )}
+                      style={{
+                        boxShadow: disabled ? 'none' : '0 2px 4px rgba(0, 0, 0, 0.2)',
+                      }}
+                    >
+                      +{value}
+                    </motion.button>
+                  );
+                })}
+              </div>
+              
+              {/* Clear button */}
+              {perfectPairsBet > 0 && (
+                <button
+                  onClick={() => setPerfectPairsBet(0)}
+                  className="w-full text-xs btn-casino-secondary py-1"
+                >
+                  Réinitialiser
+                </button>
+              )}
             </div>
           )}
         </div>
         
         {/* 21+3 */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="21plus3-toggle" className="text-sm font-medium cursor-pointer">
-              21+3
-            </Label>
+        <div className="bg-card/30 rounded-lg p-3 border border-border/50">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">21+3</span>
+              <span className="text-xs text-muted-foreground" title="Gagnez si vos 2 cartes + la carte du dealer forment une main de poker">
+                ℹ️
+              </span>
+            </div>
             <Switch
               id="21plus3-toggle"
               checked={config.twentyOnePlus3?.enabled ?? false}
@@ -294,36 +341,90 @@ export const BetPanel = memo(function BetPanel() {
               }}
             />
           </div>
+          
           {config.twentyOnePlus3?.enabled && (
-            <div className="space-y-2 pl-2">
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={0}
-                  max={Math.min(bankroll - betAmount - perfectPairsBet, config.twentyOnePlus3?.maxBet ?? 500)}
-                  step={5}
-                  value={twentyOnePlus3Bet || ''}
-                  onChange={(e) => {
-                    const val = Math.max(0, Number(e.target.value));
-                    setTwentyOnePlus3Bet(Math.min(val, bankroll - betAmount - perfectPairsBet, config.twentyOnePlus3?.maxBet ?? 500));
-                  }}
-                  className="w-20 px-2 py-1 text-sm rounded border border-border bg-background"
-                  placeholder="0"
-                />
-                <span className="text-xs text-muted-foreground">
-                  ${config.twentyOnePlus3?.minBet ?? 5}-${config.twentyOnePlus3?.maxBet ?? 500}
-                </span>
+            <div className="space-y-3">
+              {/* Explanation */}
+              <div className="text-xs text-muted-foreground bg-background/50 rounded p-2">
+                <div className="font-medium mb-1">💡 Comment ça marche ?</div>
+                <div>Vos 2 cartes + la carte du dealer = main de poker</div>
+                <div className="mt-1 flex flex-wrap gap-1 text-[10px]">
+                  <span>🟣 Flush: {config.twentyOnePlus3?.payouts?.flush ?? 5}:1</span>
+                  <span>📈 Straight: {config.twentyOnePlus3?.payouts?.straight ?? 10}:1</span>
+                  <span>🎯 3 of a Kind: {config.twentyOnePlus3?.payouts?.threeOfAKind ?? 30}:1</span>
+                  <span>⭐ Straight Flush: {config.twentyOnePlus3?.payouts?.straightFlush ?? 40}:1</span>
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">
-                Flush: {config.twentyOnePlus3?.payouts?.flush ?? 5}:1 | Straight: {config.twentyOnePlus3?.payouts?.straight ?? 10}:1 | 3 of a Kind: {config.twentyOnePlus3?.payouts?.threeOfAKind ?? 30}:1
+              
+              {/* Bet amount display */}
+              <div className="text-center">
+                <div className="text-xs text-muted-foreground mb-1">Mise 21+3</div>
+                <div className="text-xl font-bold text-primary">${twentyOnePlus3Bet}</div>
               </div>
+              
+              {/* Chip buttons for side bet */}
+              <div className="flex flex-wrap justify-center gap-2">
+                {[5, 10, 25, 50].map((value) => {
+                  const maxBet = Math.min(bankroll - betAmount - perfectPairsBet, config.twentyOnePlus3?.maxBet ?? 500);
+                  const disabled = twentyOnePlus3Bet + value > maxBet || value < (config.twentyOnePlus3?.minBet ?? 5);
+                  return (
+                    <motion.button
+                      key={value}
+                      whileHover={disabled ? {} : { scale: 1.1, y: -2 }}
+                      whileTap={disabled ? {} : { scale: 0.9 }}
+                      onClick={() => {
+                        const newBet = Math.min(twentyOnePlus3Bet + value, maxBet);
+                        if (newBet >= (config.twentyOnePlus3?.minBet ?? 5)) {
+                          setTwentyOnePlus3Bet(newBet);
+                        }
+                      }}
+                      disabled={disabled}
+                      className={cn(
+                        'poker-chip text-xs font-bold cursor-pointer',
+                        value === 5 && 'red',
+                        value === 10 && 'red',
+                        value === 25 && 'green',
+                        value === 50 && 'blue',
+                        disabled && 'opacity-30 cursor-not-allowed filter grayscale-[50%]',
+                      )}
+                      style={{
+                        boxShadow: disabled ? 'none' : '0 2px 4px rgba(0, 0, 0, 0.2)',
+                      }}
+                    >
+                      +{value}
+                    </motion.button>
+                  );
+                })}
+              </div>
+              
+              {/* Clear button */}
+              {twentyOnePlus3Bet > 0 && (
+                <button
+                  onClick={() => setTwentyOnePlus3Bet(0)}
+                  className="w-full text-xs btn-casino-secondary py-1"
+                >
+                  Réinitialiser
+                </button>
+              )}
             </div>
           )}
         </div>
         
-        {!canAffordSideBets && (perfectPairsBet > 0 || twentyOnePlus3Bet > 0) && (
-          <div className="text-xs text-destructive text-center">
-            Total bets exceed bankroll
+        {/* Total side bets display */}
+        {(perfectPairsBet > 0 || twentyOnePlus3Bet > 0) && (
+          <div className="text-center pt-2 border-t border-border">
+            <div className="text-xs text-muted-foreground">Total Side Bets</div>
+            <div className={cn(
+              "text-lg font-bold",
+              canAffordSideBets ? "text-primary" : "text-destructive"
+            )}>
+              ${perfectPairsBet + twentyOnePlus3Bet}
+            </div>
+            {!canAffordSideBets && (
+              <div className="text-xs text-destructive mt-1">
+                ⚠️ Total dépasse votre bankroll
+              </div>
+            )}
           </div>
         )}
       </div>

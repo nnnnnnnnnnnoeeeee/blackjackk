@@ -331,14 +331,24 @@ function executeDouble(state: GameState): GameState {
 
 function executeSplit(state: GameState): GameState {
   const handIndex = state.activeHandIndex;
+  
+  // Validate inputs
+  if (!Array.isArray(state.playerHands) || state.playerHands.length === 0) {
+    throw new Error('Invalid state: playerHands is empty');
+  }
+  
+  if (handIndex < 0 || handIndex >= state.playerHands.length) {
+    throw new Error(`Invalid hand index: ${handIndex} (total hands: ${state.playerHands.length})`);
+  }
+  
   const hand = state.playerHands[handIndex];
   
   if (!hand) {
     throw new Error(`No hand at index ${handIndex}`);
   }
   
-  if (hand.cards.length < 2) {
-    throw new Error('Cannot split hand with less than 2 cards');
+  if (!Array.isArray(hand.cards) || hand.cards.length !== 2) {
+    throw new Error('Can only split hands with exactly 2 cards');
   }
   
   // Validate bankroll is sufficient for the additional bet
@@ -347,9 +357,11 @@ function executeSplit(state: GameState): GameState {
   }
   
   // Ensure shoe has enough cards (need at least 2 for split)
+  // Reshuffle if needed instead of throwing error
   let shoe = [...state.shoe];
   if (!shoe || !Array.isArray(shoe) || shoe.length < 2) {
-    throw new Error('Not enough cards in shoe for split');
+    console.warn('[executeSplit] Reshuffling shoe - not enough cards');
+    shoe = createShuffledShoe(state.config.deckCount);
   }
   
   const [card1, card2] = hand.cards;
@@ -375,7 +387,11 @@ function executeSplit(state: GameState): GameState {
     [newCard1, shoe] = drawCard(shoe, true);
     [newCard2, shoe] = drawCard(shoe, true);
   } catch (error) {
-    throw new Error(`Error drawing cards for split: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    // If drawCard fails, reshuffle and try again
+    console.warn('[executeSplit] Error drawing cards, reshuffling:', error);
+    shoe = createShuffledShoe(state.config.deckCount);
+    [newCard1, shoe] = drawCard(shoe, true);
+    [newCard2, shoe] = drawCard(shoe, true);
   }
   
   const newHand1 = addCardToHand(hand1, newCard1);
@@ -394,24 +410,52 @@ function executeSplit(state: GameState): GameState {
   const newHands = [...state.playerHands];
   newHands.splice(handIndex, 1, finalHand1, finalHand2);
   
-  // Determine next active hand
-  // Start with the first split hand (at handIndex)
+  // Validate newHands array
+  if (!Array.isArray(newHands) || newHands.length === 0) {
+    throw new Error('Failed to create new hands array after split');
+  }
+  
+  // Determine next active hand using simplified logic
+  // First, try the first split hand (at handIndex)
   let nextActiveIndex = handIndex;
   
-  // If first hand is finished (blackjack or busted), try second hand
+  // Check if first hand is finished
   if (finalHand1.isStood || finalHand1.isBusted || finalHand1.isBlackjack) {
-    nextActiveIndex = handIndex + 1;
-    // If second hand is also finished, find next available hand
-    if (finalHand2.isStood || finalHand2.isBusted || finalHand2.isBlackjack) {
-      const nextIndex = getNextActiveHandIndex(newHands, handIndex);
-      nextActiveIndex = nextIndex === -1 ? handIndex : nextIndex;
+    // First hand is finished, try second hand (at handIndex + 1)
+    if (handIndex + 1 < newHands.length) {
+      nextActiveIndex = handIndex + 1;
+      
+      // Check if second hand is also finished
+      if (finalHand2.isStood || finalHand2.isBusted || finalHand2.isBlackjack) {
+        // Both split hands are finished, find next available hand
+        // Search from the beginning to find any active hand
+        const activeIndex = newHands.findIndex(h => !h.isStood && !h.isBusted && !h.isBlackjack);
+        if (activeIndex !== -1) {
+          nextActiveIndex = activeIndex;
+        } else {
+          // No active hands found - all hands are finished
+          nextActiveIndex = 0; // Fallback index
+        }
+      }
+    } else {
+      // handIndex + 1 is out of bounds, search for any active hand
+      const activeIndex = newHands.findIndex(h => !h.isStood && !h.isBusted && !h.isBlackjack);
+      if (activeIndex !== -1) {
+        nextActiveIndex = activeIndex;
+      } else {
+        nextActiveIndex = 0; // Fallback
+      }
     }
   }
   
-  // Ensure nextActiveIndex is valid
+  // Final validation of nextActiveIndex
   if (nextActiveIndex < 0 || nextActiveIndex >= newHands.length) {
-    nextActiveIndex = handIndex; // Fallback to first split hand
+    console.warn('[executeSplit] Invalid nextActiveIndex, resetting to 0');
+    nextActiveIndex = 0;
   }
+  
+  // Check if all hands are finished
+  const allFinished = areAllHandsFinished(newHands);
   
   const newState: GameState = {
     ...state,
@@ -419,21 +463,10 @@ function executeSplit(state: GameState): GameState {
     bankroll: state.bankroll - hand.bet, // Second hand costs another bet
     playerHands: newHands,
     activeHandIndex: nextActiveIndex,
+    phase: allFinished ? 'DEALER_TURN' : 'PLAYER_TURN',
   };
   
-  // If all hands are finished, move to dealer turn
-  if (areAllHandsFinished(newHands)) {
-    return {
-      ...newState,
-      phase: 'DEALER_TURN',
-    };
-  }
-  
-  // Ensure phase is still PLAYER_TURN if we have active hands
-  return {
-    ...newState,
-    phase: 'PLAYER_TURN',
-  };
+  return newState;
 }
 
 function executeSurrender(state: GameState): GameState {

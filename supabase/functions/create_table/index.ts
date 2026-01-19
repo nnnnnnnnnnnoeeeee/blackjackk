@@ -18,23 +18,48 @@ serve(async (req) => {
   }
 
   try {
+    // Use service_role key to bypass RLS, but verify user via auth header
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    
+    if (!supabaseServiceKey) {
+      return new Response(
+        JSON.stringify({ error: 'Service role key not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create admin client for database operations (bypasses RLS)
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    
+    // Create user client to verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
+      supabaseUrl,
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
+          headers: { Authorization: authHeader },
         },
       }
     );
 
     const {
       data: { user },
+      error: authError,
     } = await supabaseClient.auth.getUser();
 
-    if (!user) {
+    if (authError || !user) {
+      console.error('Auth error:', authError);
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: 'Unauthorized', details: authError?.message }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -48,8 +73,8 @@ serve(async (req) => {
       );
     }
 
-    // Create table
-    const { data: table, error: tableError } = await supabaseClient
+    // Create table using admin client to bypass RLS
+    const { data: table, error: tableError } = await supabaseAdmin
       .from('tables')
       .insert({
         name: name.trim(),
@@ -62,11 +87,15 @@ serve(async (req) => {
       .single();
 
     if (tableError) {
-      throw tableError;
+      console.error('Table creation error:', tableError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to create table', details: tableError.message }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Add creator as first player (seat 1)
-    const { error: playerError } = await supabaseClient
+    // Add creator as first player (seat 1) using admin client
+    const { error: playerError } = await supabaseAdmin
       .from('table_players')
       .insert({
         table_id: table.id,
@@ -76,12 +105,16 @@ serve(async (req) => {
       });
 
     if (playerError) {
+      console.error('Player insertion error:', playerError);
       // Rollback table creation
-      await supabaseClient.from('tables').delete().eq('id', table.id);
-      throw playerError;
+      await supabaseAdmin.from('tables').delete().eq('id', table.id);
+      return new Response(
+        JSON.stringify({ error: 'Failed to add player to table', details: playerError.message }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Initialize table state
+    // Initialize table state using admin client
     const initialState = {
       phase: 'waiting',
       shoe: [],
@@ -101,7 +134,7 @@ serve(async (req) => {
       sideBetResults: null,
     };
 
-    const { error: stateError } = await supabaseClient
+    const { error: stateError } = await supabaseAdmin
       .from('table_state')
       .insert({
         table_id: table.id,
@@ -109,18 +142,27 @@ serve(async (req) => {
       });
 
     if (stateError) {
+      console.error('State initialization error:', stateError);
       // Rollback
-      await supabaseClient.from('tables').delete().eq('id', table.id);
-      throw stateError;
+      await supabaseAdmin.from('tables').delete().eq('id', table.id);
+      await supabaseAdmin.from('table_players').delete().eq('table_id', table.id);
+      return new Response(
+        JSON.stringify({ error: 'Failed to initialize table state', details: stateError.message }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     return new Response(
       JSON.stringify({ table }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Unexpected error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error?.message || 'Internal server error',
+        details: error?.stack 
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
