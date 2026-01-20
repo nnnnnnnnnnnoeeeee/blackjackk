@@ -26,6 +26,7 @@ import { Tutorial } from './Tutorial';
 import { BasicStrategyChart } from './BasicStrategyChart';
 import { ParticleSystem } from './ParticleSystem';
 import { useSound } from '@/hooks/useSound';
+import { cn } from '@/lib/utils';
 
 export const Table = memo(function Table() {
   const phase = useGameStore(selectPhase);
@@ -173,64 +174,69 @@ export const Table = memo(function Table() {
   };
   
   return (
-    <div className="table-felt table-border min-h-screen flex flex-col">
-      {/* Header / Stats */}
-      <header className="p-3 sm:p-4">
+    <div className="table-felt table-border h-screen flex flex-col overflow-hidden">
+      {/* Header / Stats - Compact */}
+      <header className="flex-shrink-0 p-2">
         <div className="max-w-2xl mx-auto">
-          <div className="flex justify-between items-center mb-3">
-            <h1 className="text-xl sm:text-2xl font-bold text-primary text-shadow-md">
+          <div className="flex justify-between items-center mb-1.5">
+            <h1 className="text-lg font-bold text-primary text-shadow-md">
               ♠ Blackjack
             </h1>
             <div className="text-right">
               <span className="text-xs text-muted-foreground uppercase tracking-wider">
                 Bankroll
               </span>
-              <div className="text-lg sm:text-xl font-bold text-foreground">
+              <div className="text-base font-bold text-foreground">
                 ${bankroll.toLocaleString()}
               </div>
             </div>
           </div>
           
-          {/* Phase indicator */}
+          {/* Phase indicator - Compact */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             key={phase}
-            className="text-center mb-3"
+            className="text-center mb-1.5"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/50 backdrop-blur-sm border border-border">
-              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-sm font-semibold text-foreground uppercase tracking-wider">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-card/50 backdrop-blur-sm border border-border">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              <span className="text-xs font-semibold text-foreground uppercase tracking-wider">
                 {getPhaseText()}
               </span>
             </div>
           </motion.div>
           
-          <div className="flex flex-col gap-3">
-            <StatsPanel />
-            <CardCountingPanel />
-            <div className="flex flex-wrap gap-2 justify-center">
+          {/* Stats Panels - Compact and Collapsible */}
+          <div className="flex flex-col gap-1.5">
+            {!showSettings && !showStatsDashboard && !showStrategyChart && (
+              <>
+                <StatsPanel />
+                <CardCountingPanel />
+              </>
+            )}
+            <div className="flex flex-wrap gap-1.5 justify-center">
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className="btn-casino-secondary text-xs px-3 py-2"
+                className="btn-casino-secondary text-xs px-2 py-1"
                 aria-label="Settings"
               >
-                {showSettings ? 'Hide' : 'Show'} Settings
+                {showSettings ? '✕' : '⚙️'}
               </button>
               <button
                 onClick={() => setShowStatsDashboard(!showStatsDashboard)}
-                className="btn-casino-secondary text-xs px-3 py-2"
+                className="btn-casino-secondary text-xs px-2 py-1"
                 aria-label="Stats Dashboard"
               >
-                {showStatsDashboard ? 'Hide' : 'Show'} Stats
+                {showStatsDashboard ? '✕' : '📊'}
               </button>
               {phase === 'PLAYER_TURN' && (
                 <button
                   onClick={() => setShowStrategyChart(!showStrategyChart)}
-                  className="btn-casino-secondary text-xs px-3 py-2"
+                  className="btn-casino-secondary text-xs px-2 py-1"
                   aria-label="Strategy Chart"
                 >
-                  {showStrategyChart ? 'Hide' : 'Show'} Strategy
+                  {showStrategyChart ? '✕' : '📈'}
                 </button>
               )}
             </div>
@@ -248,48 +254,48 @@ export const Table = memo(function Table() {
         position={{ x: 50, y: 50 }}
       />
       
-      {/* Settings Panel */}
+      {/* Settings Panel - Scrollable if needed */}
       {showSettings && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="w-full p-4"
+          className="flex-shrink-0 w-full p-2 max-h-48 overflow-y-auto"
         >
           <SettingsPanel />
         </motion.div>
       )}
       
-      {/* Stats Dashboard */}
+      {/* Stats Dashboard - Scrollable if needed */}
       {showStatsDashboard && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="w-full p-4"
+          className="flex-shrink-0 w-full p-2 max-h-48 overflow-y-auto"
         >
           <StatsDashboard />
         </motion.div>
       )}
       
-      {/* Strategy Chart */}
+      {/* Strategy Chart - Scrollable if needed */}
       {showStrategyChart && phase === 'PLAYER_TURN' && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="w-full p-4"
+          className="flex-shrink-0 w-full p-2 max-h-48 overflow-y-auto"
         >
           <BasicStrategyChart />
         </motion.div>
       )}
       
-      {/* Game Area */}
-      <main className="flex-1 flex flex-col justify-between p-4 sm:p-6">
-        <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col justify-between gap-4 table-felt table-border rounded-2xl p-6 sm:p-8">
+      {/* Game Area - Optimized for no scroll */}
+      <main className="flex-1 flex flex-col justify-between p-2 min-h-0 overflow-hidden">
+        <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col justify-between gap-2 table-felt table-border rounded-xl p-3 min-h-0">
           
-          {/* Dealer Area */}
-          <div className="flex justify-center">
+          {/* Dealer Area - Compact */}
+          <div className="flex-shrink-0 flex justify-center">
             <AnimatePresence mode="wait">
               {dealerHand.cards.length > 0 && (
                 <HandView
@@ -302,8 +308,8 @@ export const Table = memo(function Table() {
             </AnimatePresence>
           </div>
           
-          {/* Center Area - Bet Display or Message */}
-          <div className="flex justify-center items-center py-4">
+          {/* Center Area - Bet Display or Message - Compact */}
+          <div className="flex-shrink-0 flex justify-center items-center py-2">
             <AnimatePresence mode="wait">
               {isPlaying && currentBet > 0 && (
                 <motion.div
@@ -464,8 +470,8 @@ export const Table = memo(function Table() {
             </AnimatePresence>
           </div>
           
-          {/* Player Area */}
-          <div className="flex justify-center gap-4 flex-wrap">
+          {/* Player Area - Compact */}
+          <div className="flex-shrink-0 flex justify-center gap-2 flex-wrap">
             <AnimatePresence mode="wait">
               {playerHands.length > 0 ? (
                 playerHands.map((hand, index) => (
@@ -481,9 +487,9 @@ export const Table = memo(function Table() {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         className={cn(
-                          'absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold',
+                          'absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold',
                           index === activeHandIndex && phase === 'PLAYER_TURN'
-                            ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2 ring-offset-background'
+                            ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-1 ring-offset-background'
                             : 'bg-secondary text-secondary-foreground'
                         )}
                       >
@@ -498,8 +504,8 @@ export const Table = memo(function Table() {
         </div>
       </main>
       
-      {/* Controls Area */}
-      <footer className="p-4 sm:p-6">
+      {/* Controls Area - Fixed Bottom */}
+      <footer className="flex-shrink-0 p-2 border-t border-border/50 bg-black/20">
         <div className="max-w-2xl mx-auto">
           <AnimatePresence mode="wait">
             {phase === 'BETTING' && bankroll > 0 && (
@@ -531,7 +537,7 @@ export const Table = memo(function Table() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="text-center text-muted-foreground"
+                className="text-center text-muted-foreground text-sm"
               >
                 <span className="animate-pulse">Dealer playing...</span>
               </motion.div>

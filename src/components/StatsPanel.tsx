@@ -16,10 +16,10 @@ interface StatItemProps {
 const StatItem = memo(function StatItem({ label, value, className }: StatItemProps) {
   return (
     <div className={cn('text-center', className)}>
-      <div className="text-xs uppercase tracking-wider text-muted-foreground mb-0.5">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
         {label}
       </div>
-      <div className="text-sm sm:text-base font-semibold text-foreground">
+      <div className="text-xs font-semibold text-foreground">
         {value}
       </div>
     </div>
@@ -41,9 +41,9 @@ export const StatsPanel = memo(function StatsPanel() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="w-full p-3 sm:p-4 rounded-xl bg-card/30 backdrop-blur-sm border border-border"
+      className="w-full p-1.5 rounded-lg bg-card/30 backdrop-blur-sm border border-border"
     >
-      <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
+      <div className="flex flex-wrap justify-center gap-2">
         <StatItem 
           label="Bankroll" 
           value={`$${bankroll.toLocaleString()}`}

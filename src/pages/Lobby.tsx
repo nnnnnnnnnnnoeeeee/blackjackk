@@ -54,7 +54,11 @@ export default function Lobby() {
 
   const loadTables = async () => {
     try {
+      // Get current user first
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      
       // First, try to load tables without the relation to avoid RLS issues
+      // RLS should filter, but we also filter explicitly for safety
       const { data: tablesData, error: tablesError } = await supabase
         .from('tables')
         .select('id, name, status, max_players, created_by, created_at, room_code, is_public')
@@ -67,9 +71,14 @@ export default function Lobby() {
         throw tablesError;
       }
 
+      // Filter tables: show public tables OR tables created by current user
+      const filteredTables = (tablesData || []).filter(table => 
+        table.is_public === true || table.created_by === currentUser?.id
+      );
+
       // Then load players separately for each table
-      if (tablesData && tablesData.length > 0) {
-        const tableIds = tablesData.map(t => t.id);
+      if (filteredTables.length > 0) {
+        const tableIds = filteredTables.map(t => t.id);
         const { data: playersData, error: playersError } = await supabase
           .from('table_players')
           .select('table_id, user_id, seat')
@@ -81,7 +90,7 @@ export default function Lobby() {
         }
 
         // Combine tables with their players
-        const tablesWithPlayers = tablesData.map(table => ({
+        const tablesWithPlayers = filteredTables.map(table => ({
           ...table,
           table_players: playersData?.filter(p => p.table_id === table.id) || [],
         }));
@@ -223,7 +232,7 @@ export default function Lobby() {
         .from('tables')
         .insert({
           name: tableName.trim(),
-          max_players: 5,
+          max_players: 7,
           created_by: activeSession.user.id,
           status: 'waiting',
           room_code: roomCode,
@@ -324,12 +333,21 @@ export default function Lobby() {
       // Find table by room code
       const { data: table, error: tableError } = await supabase
         .from('tables')
-        .select('id, name, status, max_players, table_players(*)')
+        .select('id, name, status, max_players, is_public, created_by, table_players(*)')
         .eq('room_code', code)
-        .single();
+        .maybeSingle();
 
       if (tableError || !table) {
         toast.error('Code de salle invalide');
+        return;
+      }
+
+      // For private tables, joining by code is allowed (that's the purpose of room codes)
+      // The RLS policy will handle access control
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Vous devez être connecté pour rejoindre une table');
+        navigate('/login');
         return;
       }
 
@@ -384,7 +402,7 @@ export default function Lobby() {
         .from('tables')
         .select('*, table_players(*)')
         .eq('id', tableId)
-        .single();
+        .maybeSingle();
 
       if (tableError || !table) {
         toast.error('Table introuvable');

@@ -159,20 +159,20 @@ export const BetPanel = memo(function BetPanel() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center gap-4 p-4 sm:p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border max-w-2xl w-full"
+      className="flex flex-col items-center gap-2 p-2 rounded-xl bg-card/50 backdrop-blur-sm border border-border max-w-2xl w-full"
     >
-      {/* Bet amount display */}
+      {/* Bet amount display - Compact */}
       <div className="text-center">
-        <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+        <div className="text-xs uppercase tracking-wider text-muted-foreground mb-0.5">
           Your Bet
         </div>
-        <div className="text-3xl sm:text-4xl font-bold text-primary">
+        <div className="text-2xl font-bold text-primary">
           ${betAmount}
         </div>
       </div>
       
-      {/* Chip buttons */}
-      <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+      {/* Chip buttons - Compact */}
+      <div className="flex flex-wrap justify-center gap-1.5">
         {CHIP_VALUES.map(({ value, color }) => (
           <ChipButton
             key={value}
@@ -184,11 +184,11 @@ export const BetPanel = memo(function BetPanel() {
         ))}
       </div>
       
-      {/* Quick actions */}
-      <div className="flex gap-2">
+      {/* Quick actions - Compact */}
+      <div className="flex gap-1.5">
         <button
           onClick={handleClear}
-          className="btn-casino-secondary text-xs px-3 py-2"
+          className="btn-casino-secondary text-xs px-2 py-1"
           aria-label="Réinitialiser la mise"
         >
           Clear
@@ -196,14 +196,14 @@ export const BetPanel = memo(function BetPanel() {
         <button
           onClick={handleAllIn}
           disabled={bankroll === 0}
-          className="btn-casino-secondary text-xs px-3 py-2"
+          className="btn-casino-secondary text-xs px-2 py-1"
           aria-label="Miser tout"
         >
           All In
         </button>
       </div>
       
-      {/* Bet slider */}
+      {/* Bet slider - Compact */}
       <div className="w-full max-w-xs">
         <input
           type="range"
@@ -212,19 +212,19 @@ export const BetPanel = memo(function BetPanel() {
           step={5}
           value={betAmount}
           onChange={(e) => setBetAmount(Number(e.target.value))}
-          className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+          className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
           aria-label="Bet amount slider"
         />
-        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+        <div className="flex justify-between text-xs text-muted-foreground mt-0.5">
           <span>$0</span>
           <span>${Math.min(bankroll, config.maxBet)}</span>
         </div>
       </div>
       
-      {/* Side Bets Section - Improved UI */}
-      <div className="w-full border-t border-border pt-4 mt-4 space-y-4">
-        <div className="text-xs uppercase tracking-wider text-muted-foreground text-center mb-3">
-          🎰 Side Bets (Optionnels)
+      {/* Side Bets Section - Compact and Collapsible */}
+      <div className="w-full border-t border-border pt-2 mt-2 space-y-2 max-h-64 overflow-y-auto">
+        <div className="text-xs uppercase tracking-wider text-muted-foreground text-center mb-1.5">
+          🎰 Side Bets
         </div>
         
         {/* Perfect Pairs */}

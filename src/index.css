@@ -131,8 +131,8 @@
     @apply bg-[hsl(var(--card-white))] text-[hsl(var(--card-black))];
     @apply border-2 border-[hsl(var(--card-white))];
     aspect-ratio: 2.5 / 3.5;
-    min-width: 60px;
-    max-width: 80px;
+    min-width: 70px;
+    max-width: 100px;
     
     /* Ombres portées réalistes */
     box-shadow: 

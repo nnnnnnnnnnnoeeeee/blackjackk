@@ -97,13 +97,60 @@ serve(async (req) => {
 
     const currentState: GameState = stateData.state_json;
 
-    // Check if all players have placed bets
-    const playersWithBets = Object.keys(currentState.playerHands).length;
-    const totalPlayers = table.table_players.length;
+    // If in waiting phase, transition to betting phase first
+    // Players will place bets, then we can deal cards
+    if (currentState.phase === 'waiting') {
+      const bettingState: GameState = {
+        ...currentState,
+        phase: 'betting',
+      };
 
-    if (playersWithBets < totalPlayers) {
+      // Update state to betting phase
+      const { error: updateError } = await supabaseClient
+        .from('table_state')
+        .update({
+          state_json: bettingState,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('table_id', table_id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
       return new Response(
-        JSON.stringify({ error: 'Not all players have placed bets' }),
+        JSON.stringify({ success: true, state: bettingState, message: 'Game moved to betting phase' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // If in betting phase, check minimum requirements before dealing
+    if (currentState.phase === 'betting') {
+      const playersWithBets = Object.keys(currentState.playerHands).length;
+      const totalPlayers = table.table_players.length;
+
+      // Minimum 2 players required to start
+      if (totalPlayers < 2) {
+        return new Response(
+          JSON.stringify({ error: 'At least 2 players are required to start' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // At least one player must have placed a bet
+      if (playersWithBets === 0) {
+        return new Response(
+          JSON.stringify({ error: 'At least one player must place a bet' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Continue to deal cards - only players who bet will get cards
+      // This allows starting with 2+ players even if not all have bet
+    } else if (currentState.phase !== 'betting') {
+      // Should not happen, but safety check
+      return new Response(
+        JSON.stringify({ error: `Cannot start round in phase: ${currentState.phase}` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

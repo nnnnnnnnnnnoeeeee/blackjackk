@@ -415,47 +415,49 @@ function executeSplit(state: GameState): GameState {
     throw new Error('Failed to create new hands array after split');
   }
   
-  // Determine next active hand using simplified logic
-  // First, try the first split hand (at handIndex)
-  let nextActiveIndex = handIndex;
+  // Use getNextActiveHandIndex to find the next active hand properly
+  // Start from handIndex (first split hand)
+  let nextActiveIndex = getNextActiveHandIndex(newHands, handIndex - 1);
   
-  // Check if first hand is finished
-  if (finalHand1.isStood || finalHand1.isBusted || finalHand1.isBlackjack) {
-    // First hand is finished, try second hand (at handIndex + 1)
-    if (handIndex + 1 < newHands.length) {
-      nextActiveIndex = handIndex + 1;
-      
-      // Check if second hand is also finished
-      if (finalHand2.isStood || finalHand2.isBusted || finalHand2.isBlackjack) {
-        // Both split hands are finished, find next available hand
-        // Search from the beginning to find any active hand
-        const activeIndex = newHands.findIndex(h => !h.isStood && !h.isBusted && !h.isBlackjack);
-        if (activeIndex !== -1) {
-          nextActiveIndex = activeIndex;
-        } else {
-          // No active hands found - all hands are finished
-          nextActiveIndex = 0; // Fallback index
-        }
-      }
-    } else {
-      // handIndex + 1 is out of bounds, search for any active hand
-      const activeIndex = newHands.findIndex(h => !h.isStood && !h.isBusted && !h.isBlackjack);
-      if (activeIndex !== -1) {
-        nextActiveIndex = activeIndex;
-      } else {
-        nextActiveIndex = 0; // Fallback
-      }
-    }
-  }
-  
-  // Final validation of nextActiveIndex
-  if (nextActiveIndex < 0 || nextActiveIndex >= newHands.length) {
-    console.warn('[executeSplit] Invalid nextActiveIndex, resetting to 0');
-    nextActiveIndex = 0;
+  // If no active hand found from handIndex, search from beginning
+  if (nextActiveIndex === -1) {
+    nextActiveIndex = getNextActiveHandIndex(newHands, -1);
   }
   
   // Check if all hands are finished
   const allFinished = areAllHandsFinished(newHands);
+  
+  // If all hands finished or no active hand found, move to dealer turn
+  if (allFinished || nextActiveIndex === -1) {
+    return {
+      ...state,
+      shoe,
+      bankroll: state.bankroll - hand.bet, // Second hand costs another bet
+      playerHands: newHands,
+      activeHandIndex: 0, // Safe fallback
+      phase: 'DEALER_TURN',
+    };
+  }
+  
+  // Validate nextActiveIndex is within bounds
+  if (nextActiveIndex < 0 || nextActiveIndex >= newHands.length) {
+    console.warn('[executeSplit] Invalid nextActiveIndex, using fallback');
+    // Find any active hand as fallback
+    const fallbackIndex = newHands.findIndex(h => !h.isStood && !h.isBusted && !h.isBlackjack);
+    if (fallbackIndex !== -1) {
+      nextActiveIndex = fallbackIndex;
+    } else {
+      // No active hands - move to dealer turn
+      return {
+        ...state,
+        shoe,
+        bankroll: state.bankroll - hand.bet,
+        playerHands: newHands,
+        activeHandIndex: 0,
+        phase: 'DEALER_TURN',
+      };
+    }
+  }
   
   const newState: GameState = {
     ...state,
@@ -463,7 +465,7 @@ function executeSplit(state: GameState): GameState {
     bankroll: state.bankroll - hand.bet, // Second hand costs another bet
     playerHands: newHands,
     activeHandIndex: nextActiveIndex,
-    phase: allFinished ? 'DEALER_TURN' : 'PLAYER_TURN',
+    phase: 'PLAYER_TURN',
   };
   
   return newState;
@@ -650,6 +652,9 @@ export function settleHands(state: GameState): GameState {
   }
   
   // Calculate results for each hand
+  // Use dealerHand.isBlackjack directly for accurate blackjack detection
+  const dealerHasBlackjack = state.dealerHand.isBlackjack && state.dealerHand.cards.length === 2;
+  
   for (let i = 0; i < state.playerHands.length; i++) {
     const hand = state.playerHands[i];
     
@@ -662,7 +667,13 @@ export function settleHands(state: GameState): GameState {
       continue;
     }
     
-    const { result, payout } = calculatePayout(hand, state.dealerHand.cards, state.config);
+    // Calculate payout with dealer blackjack info
+    const { result, payout } = calculatePayout(
+      hand, 
+      state.dealerHand.cards, 
+      state.config,
+      dealerHasBlackjack // Pass dealer blackjack status explicitly
+    );
     results.push({ handIndex: i, result, payout });
     totalPayout += payout;
   }

@@ -155,7 +155,8 @@ export function shouldDealerHit(dealerCards: import('./types').Card[], hitsSoft1
 export function calculatePayout(
   playerHand: Hand,
   dealerCards: import('./types').Card[],
-  config: GameConfig
+  config: GameConfig,
+  dealerHasBlackjack?: boolean // Optional explicit dealer blackjack status
 ): { result: import('./types').SettlementResult; payout: number } {
   const playerValue = getBestHandValue(playerHand.cards);
   const dealerValue = getBestHandValue(dealerCards);
@@ -166,7 +167,11 @@ export function calculatePayout(
   const isNaturalBlackjack = playerHand.isBlackjack && 
                              playerHand.cards.length === 2 && 
                              !playerHand.isSplit;
-  const dealerBJ = isBlackjack(dealerCards) && dealerCards.length === 2;
+  
+  // Use explicit dealer blackjack status if provided, otherwise calculate from cards
+  const dealerBJ = dealerHasBlackjack !== undefined 
+    ? dealerHasBlackjack 
+    : (isBlackjack(dealerCards) && dealerCards.length === 2);
   
   const bet = playerHand.bet;
   
@@ -181,9 +186,10 @@ export function calculatePayout(
     return { result: 'lose', payout: 0 };
   }
   
-  // Blackjack scenarios
+  // Blackjack scenarios - CHECK THIS FIRST
+  // If both have natural blackjack, it's a push (equal)
   if (isNaturalBlackjack && dealerBJ) {
-    // Both have natural blackjack = push
+    // Both have natural blackjack = push (égalité)
     return { result: 'push', payout: bet };
   }
   

@@ -56,9 +56,9 @@ const ActionButton = memo(function ActionButton({
         disabled={disabled}
         type="button"
         className={cn(
-          'px-4 sm:px-6 py-3 rounded-lg font-semibold uppercase tracking-wider',
-          'transition-all duration-200 text-sm sm:text-base',
-          'relative z-10',
+          'px-3 py-2 rounded-lg font-semibold uppercase tracking-wider',
+          'transition-all duration-200 text-xs',
+          'relative z-10 w-full',
           variant === 'primary' && 'btn-casino',
           variant === 'secondary' && 'btn-casino-secondary',
           variant === 'danger' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90 border border-destructive/50',
@@ -241,16 +241,18 @@ export const Controls = memo(function Controls() {
     }))
   });
 
+  // Only show valid actions
+  const visibleActions = ACTION_CONFIG.filter(({ action }) => validActions.includes(action));
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-wrap justify-center gap-2 sm:gap-3"
+      className={`flex flex-wrap justify-center gap-1.5 ${visibleActions.length <= 3 ? 'grid grid-cols-3' : visibleActions.length === 4 ? 'grid grid-cols-2' : 'flex-wrap'}`}
       style={{ position: 'relative', zIndex: 10 }}
     >
-      {ACTION_CONFIG.map(({ action, label, variant }) => {
-        const isDisabled = !validActions.includes(action) || isAnimating;
-        console.log(`[Controls] Rendering ${action} button`, { isDisabled, inValidActions: validActions.includes(action), isAnimating });
+      {visibleActions.map(({ action, label, variant }) => {
+        const isDisabled = isAnimating;
         return (
           <ActionButton
             key={action}

@@ -51,13 +51,13 @@ export const CardCountingPanel = memo(function CardCountingPanel() {
   }, [cardCount]);
   
   return (
-    <div className="flex flex-col gap-2 p-3 rounded-lg bg-card/30 border border-border">
+    <div className="flex flex-col gap-1 p-1.5 rounded-lg bg-card/30 border border-border">
       <div className="flex items-center justify-between">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Label htmlFor="card-counting-toggle" className="text-sm font-medium cursor-pointer">
-                Card Counting Trainer
+              <Label htmlFor="card-counting-toggle" className="text-xs font-medium cursor-pointer">
+                Card Counting
               </Label>
             </TooltipTrigger>
             <TooltipContent>
@@ -71,6 +71,7 @@ export const CardCountingPanel = memo(function CardCountingPanel() {
           id="card-counting-toggle"
           checked={cardCountingEnabled}
           onCheckedChange={toggleCardCounting}
+          className="scale-75"
         />
       </div>
       
@@ -79,10 +80,10 @@ export const CardCountingPanel = memo(function CardCountingPanel() {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="space-y-1 pt-2 border-t border-border"
+          className="space-y-0.5 pt-1 border-t border-border"
         >
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-muted-foreground">Running Count:</span>
+          <div className="flex justify-between items-center text-[10px]">
+            <span className="text-muted-foreground">Running:</span>
             <span className={cn(
               'font-bold',
               cardCount.runningCount > 0 ? 'text-success' : 
@@ -92,8 +93,8 @@ export const CardCountingPanel = memo(function CardCountingPanel() {
               {cardCount.runningCount > 0 ? '+' : ''}{cardCount.runningCount.toFixed(1)}
             </span>
           </div>
-          <div className="flex justify-between items-center text-xs">
-            <span className="text-muted-foreground">True Count:</span>
+          <div className="flex justify-between items-center text-[10px]">
+            <span className="text-muted-foreground">True:</span>
             <span className={cn(
               'font-bold',
               interpretation?.color || 'text-muted-foreground'
@@ -102,9 +103,8 @@ export const CardCountingPanel = memo(function CardCountingPanel() {
             </span>
           </div>
           {interpretation && (
-            <div className="text-xs text-center pt-1">
+            <div className="text-[10px] text-center pt-0.5">
               <span className={interpretation.color}>{interpretation.label}</span>
-              <span className="text-muted-foreground ml-1">({interpretation.advantage})</span>
             </div>
           )}
         </motion.div>
