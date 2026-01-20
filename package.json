@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/setup.js",
     "dev": "vite",
+    "setup": "node scripts/setup.js",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",

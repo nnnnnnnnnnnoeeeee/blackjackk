@@ -46,31 +46,25 @@ cd blackjack-brilliance
 # Installer les dépendances
 npm install
 
-# Configurer les variables d'environnement (voir ci-dessous)
-cp .env.example .env
-# Puis éditez .env avec vos clés Supabase
-
 # Lancer le serveur de développement
+# Le script de setup s'exécutera automatiquement et créera .env si nécessaire
 npm run dev
 ```
 
 L'application sera accessible sur `http://localhost:5173`
 
+> 💡 **Astuce** : Le script de setup (`scripts/setup.js`) s'exécute automatiquement avant `npm run dev` et :
+> - Vérifie que les dépendances sont installées
+> - Crée automatiquement le fichier `.env` depuis `env.template` s'il n'existe pas
+> - Affiche des instructions si les clés Supabase ne sont pas configurées
+
 ### ⚙️ Configuration des Variables d'Environnement
 
-Après avoir cloné le projet, vous devez créer un fichier `.env` avec vos clés Supabase :
+Le fichier `.env` est créé automatiquement lors du premier `npm run dev` depuis `env.template`.
 
-1. **Créez le fichier `.env`** à la racine du projet :
-   ```bash
-   cp .env.example .env
-   ```
+**Pour configurer vos clés Supabase** :
 
-2. **Créez le fichier `.env`** à partir du template :
-   ```bash
-   cp env.template .env
-   ```
-
-3. **Obtenez vos clés Supabase** :
+1. **Obtenez vos clés Supabase** :
    - Allez sur [Supabase Dashboard](https://supabase.com/dashboard)
    - Sélectionnez votre projet (ou créez-en un nouveau)
    - Allez dans `Settings` > `API`
@@ -78,13 +72,13 @@ Après avoir cloné le projet, vous devez créer un fichier `.env` avec vos clé
      - **Project URL** → `VITE_SUPABASE_URL`
      - **anon public** key → `VITE_SUPABASE_ANON_KEY`
 
-4. **Éditez le fichier `.env`** et remplissez les valeurs :
+2. **Éditez le fichier `.env`** (créé automatiquement ou manuellement) et remplissez les valeurs :
    ```env
    VITE_SUPABASE_URL=https://votre-projet.supabase.co
    VITE_SUPABASE_ANON_KEY=votre_cle_anon_ici
    ```
 
-4. **Configurez la base de données** :
+3. **Configurez la base de données** :
    - Voir le fichier `SETUP.md` pour les instructions détaillées sur les migrations
    - Appliquez les migrations dans l'ordre depuis `supabase/migrations/`
    - Activez Realtime pour les tables nécessaires
