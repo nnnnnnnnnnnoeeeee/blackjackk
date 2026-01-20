@@ -8,6 +8,7 @@
 import { existsSync, copyFileSync, readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,15 +17,35 @@ const rootDir = join(__dirname, '..');
 const ENV_TEMPLATE = join(rootDir, 'env.template');
 const ENV_FILE = join(rootDir, '.env');
 const NODE_MODULES = join(rootDir, 'node_modules');
+const PACKAGE_JSON = join(rootDir, 'package.json');
 
 console.log('🔍 Vérification de la configuration...\n');
 
-// 1. Vérifier si node_modules existe
+// Vérifier qu'on est dans le bon répertoire (package.json doit exister)
+if (!existsSync(PACKAGE_JSON)) {
+  console.log('❌ Erreur: package.json introuvable !');
+  console.log(`   Répertoire recherché: ${rootDir}`);
+  console.log(`   Script exécuté depuis: ${__dirname}`);
+  console.log('   Assurez-vous d\'être dans le répertoire racine du projet.\n');
+  process.exit(1);
+}
+
+// 1. Vérifier si node_modules existe, sinon installer automatiquement
 if (!existsSync(NODE_MODULES)) {
   console.log('📦 Les dépendances ne sont pas installées.');
-  console.log('   Exécutez d\'abord: npm install');
-  console.log('   Puis relancez: npm run dev\n');
-  process.exit(1);
+  console.log('   Installation automatique en cours...\n');
+  try {
+    execSync('npm install', { 
+      cwd: rootDir, 
+      stdio: 'inherit',
+      encoding: 'utf-8'
+    });
+    console.log('\n✅ Dépendances installées avec succès !\n');
+  } catch (error) {
+    console.log('\n❌ Erreur lors de l\'installation des dépendances.');
+    console.log('   Veuillez exécuter manuellement: npm install\n');
+    process.exit(1);
+  }
 }
 
 // 2. Vérifier si .env existe, sinon le créer depuis env.template
