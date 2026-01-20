@@ -34,21 +34,64 @@ Un jeu de Blackjack moderne et élégant, développé avec React, TypeScript et 
 ### Prérequis
 - Node.js 18+ et npm
 - (Recommandé) [nvm](https://github.com/nvm-sh/nvm) pour gérer Node.js
+- Un compte [Supabase](https://supabase.com) (gratuit) pour le mode multijoueur
 
 ### Installation
 
 ```bash
 # Cloner le repository
 git clone <YOUR_GIT_URL>
+cd blackjack-brilliance
 
 # Installer les dépendances
 npm install
+
+# Configurer les variables d'environnement (voir ci-dessous)
+cp .env.example .env
+# Puis éditez .env avec vos clés Supabase
 
 # Lancer le serveur de développement
 npm run dev
 ```
 
 L'application sera accessible sur `http://localhost:5173`
+
+### ⚙️ Configuration des Variables d'Environnement
+
+Après avoir cloné le projet, vous devez créer un fichier `.env` avec vos clés Supabase :
+
+1. **Créez le fichier `.env`** à la racine du projet :
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Créez le fichier `.env`** à partir du template :
+   ```bash
+   cp env.template .env
+   ```
+
+3. **Obtenez vos clés Supabase** :
+   - Allez sur [Supabase Dashboard](https://supabase.com/dashboard)
+   - Sélectionnez votre projet (ou créez-en un nouveau)
+   - Allez dans `Settings` > `API`
+   - Copiez :
+     - **Project URL** → `VITE_SUPABASE_URL`
+     - **anon public** key → `VITE_SUPABASE_ANON_KEY`
+
+4. **Éditez le fichier `.env`** et remplissez les valeurs :
+   ```env
+   VITE_SUPABASE_URL=https://votre-projet.supabase.co
+   VITE_SUPABASE_ANON_KEY=votre_cle_anon_ici
+   ```
+
+4. **Configurez la base de données** :
+   - Voir le fichier `SETUP.md` pour les instructions détaillées sur les migrations
+   - Appliquez les migrations dans l'ordre depuis `supabase/migrations/`
+   - Activez Realtime pour les tables nécessaires
+
+> ⚠️ **Important** : Le fichier `.env` est déjà dans `.gitignore` et ne sera jamais commité. Ne partagez jamais vos clés Supabase publiquement !
+
+> 💡 **Note** : Le mode solo fonctionne sans configuration Supabase. Seul le mode multijoueur nécessite Supabase.
 
 ### Scripts Disponibles
 
