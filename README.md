@@ -54,15 +54,25 @@ npm run dev
 L'application sera accessible sur `http://localhost:5173`
 
 > 💡 **Astuce** : Le script de setup (`scripts/setup.js`) s'exécute automatiquement avant `npm run dev` et :
-> - Vérifie que les dépendances sont installées
+> - Installe automatiquement les dépendances si `node_modules` n'existe pas
 > - Crée automatiquement le fichier `.env` depuis `env.template` s'il n'existe pas
-> - Affiche des instructions si les clés Supabase ne sont pas configurées
+> - **Configure interactivement vos clés Supabase** si elles ne sont pas configurées
+> - Vous guide étape par étape pour obtenir et entrer vos clés Supabase
+> - Une fois configuré, lance automatiquement l'application
 
 ### ⚙️ Configuration des Variables d'Environnement
 
-Le fichier `.env` est créé automatiquement lors du premier `npm run dev` depuis `env.template`.
+**Configuration automatique lors de `npm run dev`** 🎯
 
-**Pour configurer vos clés Supabase** :
+Quand vous lancez `npm run dev` pour la première fois, le script va automatiquement :
+1. Installer les dépendances si nécessaire
+2. Créer le fichier `.env` depuis `env.template`
+3. **Vous proposer de configurer vos clés Supabase interactivement**
+4. Vous guider étape par étape pour obtenir et entrer vos clés
+5. Valider les clés que vous entrez
+6. Lancer l'application une fois tout configuré
+
+**Option alternative : Configuration manuelle** ✏️
 
 1. **Obtenez vos clés Supabase** :
    - Allez sur [Supabase Dashboard](https://supabase.com/dashboard)
