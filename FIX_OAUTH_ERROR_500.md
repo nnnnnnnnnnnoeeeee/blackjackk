@@ -39,22 +39,33 @@ Lors de la redirection après connexion Google, Supabase retourne une erreur 500
    - Réécrivez l'URL complètement
    - Cliquez sur "Save"
 
-### Étape 2 : Vérifier le provider Google
+### Étape 2 : Vérifier le provider Google (CRITIQUE)
 
 1. **Allez dans** `Authentication` > `Providers`
-2. **Trouvez "Google"**
+2. **Trouvez "Google"** dans la liste
 3. **Vérifiez** :
-   - ✅ Toggle "Enable Google provider" est **ON** (vert)
-   - ✅ Client ID est rempli et correct
-   - ✅ Client Secret est rempli et correct
+   - ✅ Toggle "Enable Google provider" est **ON** (vert/actif)
+   - ✅ Client ID est rempli et correspond exactement à celui de Google Cloud
+   - ✅ Client Secret est rempli et correspond exactement à celui de Google Cloud
+   - ⚠️ **PAS d'espaces** avant ou après les identifiants
 
 4. **Si le toggle est OFF**, activez-le et sauvegardez
 
-5. **Si les identifiants sont incorrects** :
-   - Allez dans Google Cloud Console
-   - Copiez le Client ID et Client Secret
-   - Collez-les dans Supabase
+5. **Si les identifiants sont incorrects ou vides** :
+   - Allez dans Google Cloud Console > `Credentials`
+   - Copiez le **Client ID** complet (format : `xxx.apps.googleusercontent.com`)
+   - Affichez le **Client Secret** (cliquez sur l'œil 👁️ pour le voir)
+   - Retournez dans Supabase > `Authentication` > `Providers` > `Google`
+   - **Collez les identifiants exactement** (sans espaces, sans retours à la ligne)
    - Cliquez sur "Save"
+   - ⚠️ **Attendez 1-2 minutes** pour que les changements soient appliqués
+
+6. **Si ça ne fonctionne toujours pas**, essayez de :
+   - Désactiver le provider Google (toggle OFF)
+   - Sauvegarder
+   - Réactiver le provider Google (toggle ON)
+   - Re-saisir les identifiants
+   - Sauvegarder
 
 ### Étape 3 : Vérifier Google Cloud Console
 
@@ -135,10 +146,31 @@ Lors de la redirection après connexion Google, Supabase retourne une erreur 500
 ### Problème : Erreur persiste après toutes les vérifications
 
 **Solutions** :
-1. **Vérifiez les logs Supabase** pour plus de détails
-2. **Désactivez puis réactivez** le provider Google dans Supabase
-3. **Recréez** les identifiants OAuth dans Google Cloud Console
-4. **Contactez le support Supabase** si le problème persiste
+1. **Vérifiez les logs Supabase** :
+   - Allez dans `Logs` > `API Logs` ou `Postgres Logs`
+   - Cherchez les erreurs autour de l'heure de l'erreur 500
+   - Notez les détails pour diagnostic
+
+2. **Désactivez puis réactivez** le provider Google :
+   - Allez dans `Authentication` > `Providers` > `Google`
+   - Désactivez le toggle
+   - Sauvegardez
+   - Attendez 30 secondes
+   - Réactivez le toggle
+   - Re-vérifiez les identifiants
+   - Sauvegardez
+
+3. **Recréez les identifiants OAuth** dans Google Cloud Console :
+   - Créez un nouveau Client ID OAuth
+   - Copiez les nouveaux identifiants
+   - Mettez à jour dans Supabase
+
+4. **Vérifiez que l'API Google+ est activée** :
+   - Dans Google Cloud Console > `APIs & Services` > `Library`
+   - Cherchez "Google+ API"
+   - Vérifiez qu'elle est activée
+
+5. **Contactez le support Supabase** si le problème persiste avec les logs d'erreur
 
 ---
 
