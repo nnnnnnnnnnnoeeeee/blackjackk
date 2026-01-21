@@ -12,22 +12,34 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Vérifier l'utilisateur initial
     checkUser();
+    
+    // Écouter les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null);
+      const newUser = session?.user ?? null;
+      setUser(newUser);
       
       // Rediriger vers /lobby après connexion OAuth (Google, etc.)
-      if (event === 'SIGNED_IN' && session?.user && !user) {
-        // Vérifier si on vient d'un callback OAuth (token dans l'URL)
+      if (event === 'SIGNED_IN' && newUser) {
+        // Vérifier si on vient d'un callback OAuth (token dans l'URL ou hash)
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        if (hashParams.get('access_token')) {
-          // Nettoyer l'URL
+        const searchParams = new URLSearchParams(window.location.search);
+        
+        if (hashParams.get('access_token') || searchParams.get('code')) {
+          // Nettoyer l'URL complètement
           window.history.replaceState({}, document.title, window.location.pathname);
-          // Rediriger vers le lobby
-          navigate('/lobby');
+          // Rediriger vers le lobby après un court délai pour laisser la session se stabiliser
+          setTimeout(() => {
+            navigate('/lobby', { replace: true });
+          }, 100);
         }
+      } else if (event === 'SIGNED_OUT' && !newUser) {
+        // Si déconnexion, rester sur la page d'accueil
+        setUser(null);
       }
     });
+    
     return () => subscription.unsubscribe();
   }, [navigate]);
 

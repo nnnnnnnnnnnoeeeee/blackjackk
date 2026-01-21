@@ -38,16 +38,37 @@ export default function Lobby() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Vérifier si on vient d'un callback OAuth
+    // Écouter les changements d'authentification pour gérer le callback OAuth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        setUser(session.user);
+        // Nettoyer l'URL si on vient d'un callback OAuth
+        if (window.location.hash.includes('access_token')) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        // Charger les tables après connexion
+        await loadTables();
+      } else if (event === 'SIGNED_OUT' || !session) {
+        navigate('/login');
+      }
+    });
+
+    // Vérifier si on vient d'un callback OAuth (hash dans l'URL)
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     if (hashParams.get('access_token')) {
-      // Nettoyer l'URL en enlevant le hash
-      window.history.replaceState({}, document.title, window.location.pathname);
+      // Laisser Supabase gérer le callback avec detectSessionInUrl
+      // On attendra l'événement SIGNED_IN ci-dessus
+    } else {
+      // Pas de callback, vérifier l'utilisateur normalement
+      checkUser();
+      loadTables();
     }
-
-    checkUser();
-    loadTables();
+    
     subscribeToTables();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const checkUser = async () => {
