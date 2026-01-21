@@ -38,6 +38,13 @@ export default function Lobby() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Vérifier si on vient d'un callback OAuth
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    if (hashParams.get('access_token')) {
+      // Nettoyer l'URL en enlevant le hash
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     checkUser();
     loadTables();
     subscribeToTables();

@@ -13,11 +13,23 @@ const Index = () => {
 
   useEffect(() => {
     checkUser();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
+      
+      // Rediriger vers /lobby après connexion OAuth (Google, etc.)
+      if (event === 'SIGNED_IN' && session?.user && !user) {
+        // Vérifier si on vient d'un callback OAuth (token dans l'URL)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        if (hashParams.get('access_token')) {
+          // Nettoyer l'URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          // Rediriger vers le lobby
+          navigate('/lobby');
+        }
+      }
     });
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
