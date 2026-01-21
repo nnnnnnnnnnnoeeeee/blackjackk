@@ -11,12 +11,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { Chrome } from 'lucide-react';
 
 export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -42,6 +44,23 @@ export default function Register() {
       toast.error(error.message || 'Erreur lors de l\'inscription');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    setGoogleLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/lobby`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur d\'inscription Google');
+      setGoogleLoading(false);
     }
   };
 
@@ -102,6 +121,27 @@ export default function Register() {
                 {loading ? 'Inscription...' : 'S\'inscrire'}
               </Button>
             </form>
+            
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Ou</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleGoogleSignup}
+              disabled={googleLoading || loading}
+            >
+              <Chrome className="mr-2 h-4 w-4" />
+              {googleLoading ? 'Inscription...' : 'S\'inscrire avec Google'}
+            </Button>
+
             <div className="mt-4 text-center text-sm">
               <span className="text-muted-foreground">Déjà un compte ? </span>
               <Link to="/login" className="text-primary hover:underline">
