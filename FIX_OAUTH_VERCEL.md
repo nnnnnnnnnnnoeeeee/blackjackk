@@ -56,40 +56,30 @@ https://votre-domaine.com
 
 ---
 
-### Étape 3 : Configurer Supabase (CRUCIAL)
-
-⚠️ **C'est ici que se trouve le problème !** Supabase doit savoir quelle URL utiliser pour la redirection.
+### Étape 3 : Configurer Supabase
 
 1. **Allez sur** [Supabase Dashboard](https://supabase.com/dashboard)
 2. **Sélectionnez votre projet**
 3. **Allez dans** `Authentication` > `URL Configuration`
 
-4. **Dans "Site URL"**, mettez votre URL Vercel (PAS localhost) :
+4. **Dans "Site URL"**, mettez votre URL Vercel :
    ```
-   https://blackjackk-two.vercel.app
+   https://votre-app.vercel.app
    ```
-   ⚠️ **Important** : C'est cette URL qui sera utilisée pour les redirections OAuth !
 
 5. **Dans "Redirect URLs"**, ajoutez :
    ```
-   https://blackjackk-two.vercel.app
+   https://votre-app.vercel.app/**
    ```
-   ⚠️ **Important** : Ne mettez PAS `/**` ou `/*` - juste l'URL de base !
+   (Le `/**` permet toutes les routes)
 
-   Vous devriez avoir les deux :
+   Vous devriez avoir :
    ```
-   http://localhost:5173
-   https://blackjackk-two.vercel.app
+   http://localhost:5173/**
+   https://votre-app.vercel.app/**
    ```
-   
-   **Note** : Supabase accepte automatiquement toutes les routes sous ces URLs, pas besoin de wildcard.
 
 6. **Cliquez sur** "Save"
-
-⚠️ **Note importante** : 
-- Si vous testez en localhost, changez temporairement "Site URL" vers `http://localhost:5173`
-- Pour la production sur Vercel, "Site URL" doit être `https://blackjackk-two.vercel.app`
-- Vous pouvez garder les deux dans "Redirect URLs" pour que ça fonctionne partout
 
 ---
 
@@ -171,29 +161,6 @@ Le code devrait déjà gérer cela avec `detectSessionInUrl: true` dans `supabas
 2. Vérifiez que vous avez un listener `onAuthStateChange` quelque part dans votre app
 3. Vérifiez les logs Vercel pour voir s'il y a des erreurs
 
-### Problème : Redirection vers localhost:3000 au lieu de Vercel
-
-**Symptôme** : Après connexion Google, vous êtes redirigé vers `http://localhost:3000/#access_token=...` au lieu de votre URL Vercel.
-
-**Cause** : La "Site URL" dans Supabase est configurée avec `localhost:3000` au lieu de votre URL Vercel.
-
-**Solution** :
-1. **Allez dans** Supabase Dashboard > `Authentication` > `URL Configuration`
-2. **Changez "Site URL"** de `http://localhost:3000` vers :
-   ```
-   https://blackjackk-two.vercel.app
-   ```
-3. **Vérifiez "Redirect URLs"** contient :
-   ```
-   https://blackjackk-two.vercel.app
-   ```
-   ⚠️ **Sans** `/**` ou `/*` - juste l'URL de base !
-4. **Cliquez sur "Save"**
-5. **Attendez 1-2 minutes** pour que les changements soient appliqués
-6. **Réessayez** la connexion Google sur Vercel
-
-⚠️ **Important** : La "Site URL" dans Supabase détermine où Supabase redirige après OAuth. Elle doit correspondre à votre environnement de production (Vercel), pas à localhost.
-
 ---
 
 ## ✅ Checklist pour Vercel
@@ -232,10 +199,9 @@ https://votre-app.vercel.app
 
 **Redirect URLs** :
 ```
-http://localhost:5173
-https://blackjackk-two.vercel.app
+http://localhost:5173/**
+https://votre-app.vercel.app/**
 ```
-⚠️ **Sans wildcard** - Supabase accepte automatiquement toutes les routes sous ces URLs.
 
 ---
 
