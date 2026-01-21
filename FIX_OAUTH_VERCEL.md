@@ -72,15 +72,17 @@ https://votre-domaine.com
 
 5. **Dans "Redirect URLs"**, ajoutez :
    ```
-   https://blackjackk-two.vercel.app/**
+   https://blackjackk-two.vercel.app
    ```
-   (Le `/**` permet toutes les routes)
+   ⚠️ **Important** : Ne mettez PAS `/**` ou `/*` - juste l'URL de base !
 
    Vous devriez avoir les deux :
    ```
-   http://localhost:5173/**
-   https://blackjackk-two.vercel.app/**
+   http://localhost:5173
+   https://blackjackk-two.vercel.app
    ```
+   
+   **Note** : Supabase accepte automatiquement toutes les routes sous ces URLs, pas besoin de wildcard.
 
 6. **Cliquez sur** "Save"
 
@@ -183,8 +185,9 @@ Le code devrait déjà gérer cela avec `detectSessionInUrl: true` dans `supabas
    ```
 3. **Vérifiez "Redirect URLs"** contient :
    ```
-   https://blackjackk-two.vercel.app/**
+   https://blackjackk-two.vercel.app
    ```
+   ⚠️ **Sans** `/**` ou `/*` - juste l'URL de base !
 4. **Cliquez sur "Save"**
 5. **Attendez 1-2 minutes** pour que les changements soient appliqués
 6. **Réessayez** la connexion Google sur Vercel
@@ -229,9 +232,10 @@ https://votre-app.vercel.app
 
 **Redirect URLs** :
 ```
-http://localhost:5173/**
-https://votre-app.vercel.app/**
+http://localhost:5173
+https://blackjackk-two.vercel.app
 ```
+⚠️ **Sans wildcard** - Supabase accepte automatiquement toutes les routes sous ces URLs.
 
 ---
 
