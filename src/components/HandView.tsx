@@ -72,12 +72,12 @@ export const HandView = memo(function HandView({
         {isDealer ? 'Dealer' : 'Player'}
       </div>
       
-      {/* Cards container with spotlight effect for active hand */}
+      {/* Cards container with spotlight effect for active hand - Responsive */}
       <motion.div 
         className={cn(
-          'relative flex items-center justify-center min-h-[120px] sm:min-h-[140px]',
-          'p-3 rounded-xl transition-all duration-300',
-          isActive && !isDealer && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
+          'relative flex items-center justify-center min-h-[100px] sm:min-h-[120px] md:min-h-[140px]',
+          'p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl transition-all duration-300',
+          isActive && !isDealer && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2 ring-offset-background',
           getResultStyles(),
         )}
         animate={isActive && !isDealer ? {
@@ -104,7 +104,7 @@ export const HandView = memo(function HandView({
           `,
         } : {}}
       >
-        <div className="flex -space-x-8 sm:-space-x-10">
+        <div className="flex -space-x-6 sm:-space-x-8 md:-space-x-10">
           <AnimatePresence>
             {cards.map((card, index) => (
               <PlayingCard

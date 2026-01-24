@@ -56,9 +56,9 @@ const ActionButton = memo(function ActionButton({
         disabled={disabled}
         type="button"
         className={cn(
-          'px-3 py-2 rounded-lg font-semibold uppercase tracking-wider',
-          'transition-all duration-200 text-xs',
-          'relative z-10 w-full',
+          'px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 rounded-lg font-semibold uppercase tracking-wider',
+          'transition-all duration-200 text-xs sm:text-sm md:text-base',
+          'relative z-10 w-full min-h-[48px] sm:min-h-[52px]',
           variant === 'primary' && 'btn-casino',
           variant === 'secondary' && 'btn-casino-secondary',
           variant === 'danger' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90 border border-destructive/50',
@@ -244,11 +244,20 @@ export const Controls = memo(function Controls() {
   // Only show valid actions
   const visibleActions = ACTION_CONFIG.filter(({ action }) => validActions.includes(action));
   
+  // Responsive grid layout
+  const getGridClasses = () => {
+    if (visibleActions.length === 1) return 'grid grid-cols-1';
+    if (visibleActions.length === 2) return 'grid grid-cols-2 gap-2 sm:gap-3';
+    if (visibleActions.length === 3) return 'grid grid-cols-3 gap-1.5 sm:gap-2';
+    if (visibleActions.length === 4) return 'grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5';
+    return 'flex flex-wrap justify-center gap-2 sm:gap-2.5';
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`flex flex-wrap justify-center gap-1.5 ${visibleActions.length <= 3 ? 'grid grid-cols-3' : visibleActions.length === 4 ? 'grid grid-cols-2' : 'flex-wrap'}`}
+      className={getGridClasses()}
       style={{ position: 'relative', zIndex: 10 }}
     >
       {visibleActions.map(({ action, label, variant }) => {

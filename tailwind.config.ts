@@ -126,8 +126,12 @@ export default {
           "50%": { transform: "translateY(-10px)" },
         },
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 20px hsl(43 74% 49% / 0.4)" },
-          "50%": { boxShadow: "0 0 40px hsl(43 74% 49% / 0.6)" },
+          "0%, 100%": { 
+            boxShadow: "0 0 20px hsl(43 74% 49% / 0.4), 0 4px 20px rgba(212,175,55,0.4)" 
+          },
+          "50%": { 
+            boxShadow: "0 0 40px hsl(43 74% 49% / 0.6), 0 6px 30px rgba(212,175,55,0.6)" 
+          },
         },
         "slide-up": {
           "0%": { transform: "translateY(20px)", opacity: "0" },

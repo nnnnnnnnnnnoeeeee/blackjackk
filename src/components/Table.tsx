@@ -25,6 +25,7 @@ import { SettingsPanel } from './SettingsPanel';
 import { Tutorial } from './Tutorial';
 import { BasicStrategyChart } from './BasicStrategyChart';
 import { ParticleSystem } from './ParticleSystem';
+import { GameStatusBar } from './GameStatusBar';
 import { useSound } from '@/hooks/useSound';
 import { cn } from '@/lib/utils';
 
@@ -54,8 +55,14 @@ export const Table = memo(function Table() {
     volume: config.soundVolume ?? 0.5 
   });
   
-  // Play sounds and particles on settlement
+  // Play sounds and particles on settlement - Clean particles when phase changes
   useEffect(() => {
+    // Always clean particles when leaving SETTLEMENT phase
+    if (phase !== 'SETTLEMENT') {
+      setParticleTrigger(false);
+      return;
+    }
+    
     if (phase === 'SETTLEMENT' && results.length > 0) {
       const hasWin = results.some(r => r.result === 'win' || r.result === 'blackjack');
       const hasBlackjack = results.some(r => r.result === 'blackjack');
@@ -65,18 +72,21 @@ export const Table = memo(function Table() {
         playSound('blackjack');
         setParticleType('blackjack');
         setParticleTrigger(true);
-        setTimeout(() => setParticleTrigger(false), 100);
+        setTimeout(() => setParticleTrigger(false), 1200); // Longer duration for animation
       } else if (hasWin) {
         playSound('win');
         setParticleType('win');
         setParticleTrigger(true);
-        setTimeout(() => setParticleTrigger(false), 100);
+        setTimeout(() => setParticleTrigger(false), 1200);
       } else if (hasLoss) {
         playSound('lose');
         setParticleType('lose');
         setParticleTrigger(true);
-        setTimeout(() => setParticleTrigger(false), 100);
+        setTimeout(() => setParticleTrigger(false), 1200);
       }
+    } else {
+      // No results, ensure particles are cleared
+      setParticleTrigger(false);
     }
   }, [phase, results, playSound]);
   
@@ -153,91 +163,124 @@ export const Table = memo(function Table() {
   
   console.log('[Table] Render check', { phase, showNewRound, isBankrupt, bankroll });
   
-  // Phase display text
-  const getPhaseText = () => {
-    switch (phase) {
-      case 'BETTING':
-        return 'Placez votre mise';
-      case 'DEALING':
-        return 'Distribution...';
-      case 'PLAYER_TURN':
-        return playerHands.length > 1 
-          ? `À vous - Main ${activeHandIndex + 1}/${playerHands.length}`
-          : 'À vous';
-      case 'DEALER_TURN':
-        return 'Croupier joue...';
-      case 'SETTLEMENT':
-        return 'Résultat';
-      default:
-        return '';
-    }
-  };
   
   return (
     <div className="table-felt table-border h-screen flex flex-col overflow-hidden">
-      {/* Header / Stats - Compact */}
-      <header className="flex-shrink-0 p-2">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex justify-between items-center mb-1.5">
-            <h1 className="text-lg font-bold text-primary text-shadow-md">
+      {/* Header / Stats - Fully Responsive */}
+      <header className="flex-shrink-0 p-1.5 sm:p-2 md:p-3">
+        <div className="max-w-2xl mx-auto w-full px-1 sm:px-2">
+          <div className="flex justify-between items-center mb-1 sm:mb-1.5 md:mb-2 gap-2">
+            <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-primary text-shadow-md flex-shrink-0">
               ♠ Blackjack
             </h1>
-            <div className="text-right">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">
+            <div className="text-right flex-shrink-0 min-w-0">
+              <span className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider block">
                 Bankroll
               </span>
-              <div className="text-base font-bold text-foreground">
+              <div className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-foreground truncate">
                 ${bankroll.toLocaleString()}
               </div>
             </div>
           </div>
           
-          {/* Phase indicator - Compact */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            key={phase}
-            className="text-center mb-1.5"
-          >
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-card/50 backdrop-blur-sm border border-border">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              <span className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                {getPhaseText()}
-              </span>
-            </div>
-          </motion.div>
+          {/* Phase indicator - Responsive */}
+          <GameStatusBar
+            phase={phase}
+            activeHandIndex={activeHandIndex}
+            totalHands={playerHands.length}
+          />
           
-          {/* Stats Panels - Compact and Collapsible */}
-          <div className="flex flex-col gap-1.5">
+          {/* Stats Panels - Fully Responsive */}
+          <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-2">
             {!showSettings && !showStatsDashboard && !showStrategyChart && (
               <>
                 <StatsPanel />
                 <CardCountingPanel />
               </>
             )}
-            <div className="flex flex-wrap gap-1.5 justify-center">
-              <button
+            <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-2.5 justify-center">
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowSettings(!showSettings)}
-                className="btn-casino-secondary text-xs px-2 py-1"
+                className={cn(
+                  'relative px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg',
+                  'bg-gradient-to-b from-card/80 to-card/60',
+                  'border-2 border-primary/30 shadow-lg',
+                  'backdrop-blur-sm transition-all duration-200',
+                  'min-w-[48px] sm:min-w-[56px] min-h-[44px] sm:min-h-[48px]',
+                  'flex items-center justify-center',
+                  showSettings && 'border-primary/60 shadow-gold ring-2 ring-primary/20',
+                  'hover:border-primary/50 hover:shadow-xl',
+                )}
                 aria-label="Settings"
               >
-                {showSettings ? '✕' : '⚙️'}
-              </button>
-              <button
+                <span className="text-lg sm:text-xl">
+                  {showSettings ? '✕' : '⚙️'}
+                </span>
+                {showSettings && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute inset-0 rounded-lg bg-primary/10 pointer-events-none"
+                  />
+                )}
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowStatsDashboard(!showStatsDashboard)}
-                className="btn-casino-secondary text-xs px-2 py-1"
+                className={cn(
+                  'relative px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg',
+                  'bg-gradient-to-b from-card/80 to-card/60',
+                  'border-2 border-primary/30 shadow-lg',
+                  'backdrop-blur-sm transition-all duration-200',
+                  'min-w-[48px] sm:min-w-[56px] min-h-[44px] sm:min-h-[48px]',
+                  'flex items-center justify-center',
+                  showStatsDashboard && 'border-primary/60 shadow-gold ring-2 ring-primary/20',
+                  'hover:border-primary/50 hover:shadow-xl',
+                )}
                 aria-label="Stats Dashboard"
               >
-                {showStatsDashboard ? '✕' : '📊'}
-              </button>
+                <span className="text-lg sm:text-xl">
+                  {showStatsDashboard ? '✕' : '📊'}
+                </span>
+                {showStatsDashboard && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute inset-0 rounded-lg bg-primary/10 pointer-events-none"
+                  />
+                )}
+              </motion.button>
               {phase === 'PLAYER_TURN' && (
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setShowStrategyChart(!showStrategyChart)}
-                  className="btn-casino-secondary text-xs px-2 py-1"
+                  className={cn(
+                    'relative px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg',
+                    'bg-gradient-to-b from-card/80 to-card/60',
+                    'border-2 border-primary/30 shadow-lg',
+                    'backdrop-blur-sm transition-all duration-200',
+                    'min-w-[48px] sm:min-w-[56px] min-h-[44px] sm:min-h-[48px]',
+                    'flex items-center justify-center',
+                    showStrategyChart && 'border-primary/60 shadow-gold ring-2 ring-primary/20',
+                    'hover:border-primary/50 hover:shadow-xl',
+                  )}
                   aria-label="Strategy Chart"
                 >
-                  {showStrategyChart ? '✕' : '📈'}
-                </button>
+                  <span className="text-lg sm:text-xl">
+                    {showStrategyChart ? '✕' : '📈'}
+                  </span>
+                  {showStrategyChart && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="absolute inset-0 rounded-lg bg-primary/10 pointer-events-none"
+                    />
+                  )}
+                </motion.button>
               )}
             </div>
           </div>
@@ -247,12 +290,15 @@ export const Table = memo(function Table() {
       {/* Tutorial */}
       <Tutorial />
       
-      {/* Particle System */}
-      <ParticleSystem 
-        trigger={particleTrigger} 
-        type={particleType}
-        position={{ x: 50, y: 50 }}
-      />
+      {/* Particle System - Only show during SETTLEMENT */}
+      {phase === 'SETTLEMENT' && (
+        <ParticleSystem 
+          key={`particles-${phase}-${particleTrigger}`}
+          trigger={particleTrigger} 
+          type={particleType}
+          position={{ x: 50, y: 50 }}
+        />
+      )}
       
       {/* Settings Panel - Scrollable if needed */}
       {showSettings && (
@@ -290,12 +336,12 @@ export const Table = memo(function Table() {
         </motion.div>
       )}
       
-      {/* Game Area - Optimized for no scroll */}
-      <main className="flex-1 flex flex-col justify-between p-2 min-h-0 overflow-hidden">
-        <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col justify-between gap-2 table-felt table-border rounded-xl p-3 min-h-0">
+      {/* Game Area - Responsive Layout */}
+      <main className="flex-1 flex flex-col justify-between p-1.5 sm:p-2 md:p-3 min-h-0 overflow-hidden">
+        <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col justify-between gap-1.5 sm:gap-2 md:gap-3 table-felt table-border rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 min-h-0">
           
-          {/* Dealer Area - Compact */}
-          <div className="flex-shrink-0 flex justify-center">
+          {/* Dealer Area - Responsive */}
+          <div className="flex-shrink-0 flex justify-center py-1 sm:py-2">
             <AnimatePresence mode="wait">
               {dealerHand.cards.length > 0 && (
                 <HandView
@@ -308,8 +354,8 @@ export const Table = memo(function Table() {
             </AnimatePresence>
           </div>
           
-          {/* Center Area - Bet Display or Message - Compact */}
-          <div className="flex-shrink-0 flex justify-center items-center py-2">
+          {/* Center Area - Bet Display or Message - Responsive */}
+          <div className="flex-shrink-0 flex justify-center items-center py-1 sm:py-2 md:py-3">
             <AnimatePresence mode="wait">
               {isPlaying && currentBet > 0 && (
                 <motion.div
@@ -470,8 +516,8 @@ export const Table = memo(function Table() {
             </AnimatePresence>
           </div>
           
-          {/* Player Area - Compact */}
-          <div className="flex-shrink-0 flex justify-center gap-2 flex-wrap">
+          {/* Player Area - Responsive */}
+          <div className="flex-shrink-0 flex justify-center gap-1.5 sm:gap-2 md:gap-3 flex-wrap px-1">
             <AnimatePresence mode="wait">
               {playerHands.length > 0 ? (
                 playerHands.map((hand, index) => (
@@ -504,9 +550,9 @@ export const Table = memo(function Table() {
         </div>
       </main>
       
-      {/* Controls Area - Fixed Bottom */}
-      <footer className="flex-shrink-0 p-2 border-t border-border/50 bg-black/20">
-        <div className="max-w-2xl mx-auto">
+      {/* Controls Area - Fixed Bottom - Always Accessible */}
+      <footer className="flex-shrink-0 p-1 sm:p-2 md:p-3 lg:p-4 border-t-2 border-primary/30 bg-gradient-to-t from-black/40 via-black/20 to-transparent backdrop-blur-sm relative z-40 pb-20 sm:pb-0">
+        <div className="max-w-2xl mx-auto w-full">
           <AnimatePresence mode="wait">
             {phase === 'BETTING' && bankroll > 0 && (
               <motion.div
@@ -514,6 +560,7 @@ export const Table = memo(function Table() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
+                className="w-full"
               >
                 <BetPanel />
               </motion.div>
