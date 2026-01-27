@@ -2,14 +2,27 @@
 // Settings Panel - Game Rules Configuration
 // ============================================================================
 
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useGameStore, selectConfig } from '@/store/useGameStore';
+import { useGameStore, selectConfig, selectPhase } from '@/store/useGameStore';
 import { useTranslation } from '@/ui/blackjack/i18n';
 import { KeyBindingConfig } from './KeyBindingConfig';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { Slider } from './ui/slider';
+import { Button } from './ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from './ui/alert-dialog';
+import { toast } from 'sonner';
 import {
   Select,
   SelectContent,
@@ -27,8 +40,26 @@ import {
 
 export const SettingsPanel = memo(function SettingsPanel() {
   const config = useGameStore(selectConfig);
+  const phase = useGameStore(selectPhase);
   const updateConfig = useGameStore(s => s.updateConfig);
+  const resetBankroll = useGameStore(s => s.resetBankroll);
   const { t, language, setLanguage } = useTranslation();
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+
+  const handleResetBankroll = () => {
+    if (phase !== 'BETTING') {
+      toast.error('Cannot reset bankroll', {
+        description: 'You can only reset your bankroll during the betting phase.',
+      });
+      return;
+    }
+    
+    resetBankroll();
+    setResetDialogOpen(false);
+    toast.success('Bankroll reset', {
+      description: 'Your bankroll has been reset to $1000.',
+    });
+  };
 
   return (
     <motion.div
@@ -247,6 +278,46 @@ export const SettingsPanel = memo(function SettingsPanel() {
                 updateConfig({ keyBindings });
               }}
             />
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Bankroll Reset */}
+        <AccordionItem value="bankroll-reset">
+          <AccordionTrigger>Bankroll</AccordionTrigger>
+          <AccordionContent className="space-y-4">
+            <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
+              <div className="space-y-0.5">
+                <Label>{t.settings.resetBankroll}</Label>
+                <p className="text-xs text-muted-foreground">
+                  {t.settings.resetBankrollDesc}
+                </p>
+              </div>
+              <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={phase !== 'BETTING'}
+                  >
+                    {t.settings.resetBankroll}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t.settings.resetBankroll}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t.settings.resetBankrollConfirm}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleResetBankroll}>
+                      {t.settings.resetBankroll}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </AccordionContent>
         </AccordionItem>
       </Accordion>

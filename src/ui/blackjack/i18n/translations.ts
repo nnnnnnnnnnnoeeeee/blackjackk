@@ -170,6 +170,9 @@ export interface Translations {
       dealKey: string;
       pressKey: string;
       resetToDefault: string;
+      resetBankroll: string;
+      resetBankrollDesc: string;
+      resetBankrollConfirm: string;
     };
 
   // Common
@@ -348,6 +351,9 @@ export const translations: Record<Language, Translations> = {
       dealKey: 'Deal',
       pressKey: 'Press a key',
       resetToDefault: 'Reset to Default',
+      resetBankroll: 'Reset Bankroll',
+      resetBankrollDesc: 'Reset your bankroll to $1000',
+      resetBankrollConfirm: 'Are you sure you want to reset your bankroll to $1000? This action cannot be undone.',
     },
 
     // Common
@@ -525,6 +531,9 @@ export const translations: Record<Language, Translations> = {
       dealKey: 'Distribuer',
       pressKey: 'Appuyez sur une touche',
       resetToDefault: 'Réinitialiser',
+      resetBankroll: 'Réinitialiser le Bankroll',
+      resetBankrollDesc: 'Réinitialiser votre bankroll à 1000$',
+      resetBankrollConfirm: 'Êtes-vous sûr de vouloir réinitialiser votre bankroll à 1000$ ? Cette action est irréversible.',
     },
 
     // Common

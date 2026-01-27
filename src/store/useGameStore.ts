@@ -46,6 +46,7 @@ interface GameStore {
   finishRound: () => Promise<void>;
   newRound: () => void;
   resetGame: () => void;
+  resetBankroll: () => void;
   updateConfig: (config: Partial<GameConfig>) => void;
   toggleCardCounting: () => void;
   setTutorialStep: (step: number) => void;
@@ -606,6 +607,41 @@ export const useGameStore = create<GameStore>()(
           stats: INITIAL_STATS,
           isAnimating: false,
           cardCountingEnabled: false,
+        });
+      },
+      
+      // Reset bankroll to 1000
+      resetBankroll: () => {
+        const { gameState } = get();
+        // Only reset bankroll if we're in BETTING phase
+        if (gameState.phase !== 'BETTING') {
+          console.warn('[resetBankroll] Can only reset bankroll during BETTING phase');
+          return;
+        }
+        
+        set({
+          gameState: {
+            ...gameState,
+            bankroll: 1000,
+            currentBet: 0,
+            insuranceBet: 0,
+            sideBets: {},
+            sideBetResults: undefined,
+            playerHands: [],
+            dealerHand: {
+              cards: [],
+              bet: 0,
+              isDoubled: false,
+              isSplit: false,
+              isSplitAces: false,
+              isStood: false,
+              isBusted: false,
+              isBlackjack: false,
+            },
+            activeHandIndex: 0,
+            results: [],
+            splitCount: 0,
+          },
         });
       },
       
