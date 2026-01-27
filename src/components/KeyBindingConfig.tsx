@@ -5,10 +5,12 @@
 import { memo, useState, useCallback, useEffect } from 'react';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
+import { Input } from './ui/input';
 import { useTranslation } from '@/ui/blackjack/i18n';
 import type { KeyBindings } from '@/lib/blackjack/types';
-import { Keyboard } from 'lucide-react';
+import { Keyboard, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface KeyBindingConfigProps {
   keyBindings: KeyBindings;
@@ -20,7 +22,8 @@ export const KeyBindingConfig = memo(function KeyBindingConfig({
   onUpdate,
 }: KeyBindingConfigProps) {
   const { t } = useTranslation();
-  const [editingKey, setEditingKey] = useState<keyof KeyBindings | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   
   // Default bindings to ensure all keys are present
   const defaultBindings: KeyBindings = {
@@ -64,6 +67,8 @@ export const KeyBindingConfig = memo(function KeyBindingConfig({
       ...keyBindings,
     };
     setTempBindings(mergedBindings);
+    setHasChanges(false);
+    setValidationErrors({});
   }, [keyBindings]);
 
   const actionLabels: Record<keyof KeyBindings, string> = {
@@ -81,70 +86,103 @@ export const KeyBindingConfig = memo(function KeyBindingConfig({
     deal: t.settings.dealKey,
   };
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent, action: keyof KeyBindings) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      // Don't allow modifier keys alone
-      if (e.key === 'Control' || e.key === 'Alt' || e.key === 'Shift' || e.key === 'Meta') {
-        return;
-      }
-
-      // Get the key name
-      let keyName = e.key;
-      
-      // Handle special keys
-      if (keyName === ' ') {
-        keyName = 'Space';
-      } else if (keyName === 'Enter') {
-        keyName = 'Enter';
-      } else if (keyName.length === 1) {
-        keyName = keyName.toUpperCase();
-      }
-
-      // Check if key is already used
-      const isUsed = Object.values(tempBindings).some(
-        (value, index) => value === keyName && Object.keys(tempBindings)[index] !== action
-      );
-
-      if (isUsed) {
-        // Find which action uses this key
-        const usedBy = Object.entries(tempBindings).find(
-          ([key, value]) => value === keyName && key !== action
-        )?.[0];
-        const usedByLabel = usedBy ? actionLabels[usedBy as keyof KeyBindings] : '';
-        const currentActionLabel = actionLabels[action];
-        
-        // Format key name for display
-        const displayKey = keyName === 'Space' ? 'Space' : keyName === 'Enter' ? 'Enter' : keyName.toUpperCase();
-        
-        // Show error toast
-        toast.error('Touche déjà utilisée', {
-          description: `La touche "${displayKey}" est déjà assignée à "${usedByLabel}". Veuillez choisir une autre touche pour "${currentActionLabel}".`,
-          duration: 4000,
-        });
-        
-        // Reset editing state
-        setEditingKey(null);
-        return;
-      }
-
-      const newBindings = { ...tempBindings, [action]: keyName };
-      setTempBindings(newBindings);
-      onUpdate(newBindings);
-      setEditingKey(null);
-    },
-    [tempBindings, onUpdate, t, actionLabels]
-  );
-
-  useEffect(() => {
-    if (editingKey) {
-      const handleKeyDownEvent = (e: KeyboardEvent) => handleKeyDown(e, editingKey);
-      window.addEventListener('keydown', handleKeyDownEvent);
-      return () => window.removeEventListener('keydown', handleKeyDownEvent);
+  // Normalize key input (handle Space, Enter, and single letters)
+  const normalizeKey = useCallback((value: string): string => {
+    const trimmed = value.trim();
+    if (trimmed.toLowerCase() === 'space' || trimmed === ' ') {
+      return 'Space';
     }
-  }, [editingKey, handleKeyDown]);
+    if (trimmed.toLowerCase() === 'enter' || trimmed === 'Enter') {
+      return 'Enter';
+    }
+    // Take only the first character and uppercase it
+    if (trimmed.length > 0) {
+      return trimmed[0].toUpperCase();
+    }
+    return trimmed;
+  }, []);
+
+  // Handle input change
+  const handleInputChange = useCallback((action: keyof KeyBindings, value: string) => {
+    const normalized = normalizeKey(value);
+    setTempBindings(prev => ({
+      ...prev,
+      [action]: normalized,
+    }));
+    setHasChanges(true);
+    // Clear validation error for this field when user types
+    setValidationErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[action];
+      return newErrors;
+    });
+  }, [normalizeKey]);
+
+  // Validate all bindings - normalize first, then check
+  const validateBindings = useCallback((): boolean => {
+    const errors: Record<string, string> = {};
+    
+    // First, normalize all bindings
+    const normalizedBindings: Record<string, string> = {};
+    Object.entries(tempBindings).forEach(([action, key]) => {
+      normalizedBindings[action] = normalizeKey(key);
+    });
+    
+    // Check for duplicate keys
+    const keyCounts: Record<string, string[]> = {};
+    Object.entries(normalizedBindings).forEach(([action, key]) => {
+      if (!keyCounts[key]) {
+        keyCounts[key] = [];
+      }
+      keyCounts[key].push(action);
+    });
+
+    // Find duplicates
+    Object.entries(keyCounts).forEach(([key, actions]) => {
+      if (actions.length > 1 && key !== '') {
+        actions.forEach(action => {
+          const otherActions = actions.filter(a => a !== action);
+          const otherLabels = otherActions.map(a => actionLabels[a as keyof KeyBindings]).join(', ');
+          errors[action] = `Cette touche est déjà utilisée pour: ${otherLabels}`;
+        });
+      }
+    });
+
+    // Check for empty values
+    Object.entries(normalizedBindings).forEach(([action, key]) => {
+      if (!key || key.trim() === '') {
+        errors[action] = 'Veuillez entrer une touche';
+      }
+    });
+
+    setValidationErrors(errors);
+    
+    // Update tempBindings with normalized values if no errors
+    if (Object.keys(errors).length === 0) {
+      setTempBindings(normalizedBindings as KeyBindings);
+    }
+    
+    return Object.keys(errors).length === 0;
+  }, [tempBindings, actionLabels, normalizeKey]);
+
+  // Handle save
+  const handleSave = useCallback(() => {
+    if (!validateBindings()) {
+      toast.error('Erreur de validation', {
+        description: 'Veuillez corriger les erreurs avant de sauvegarder.',
+        duration: 4000,
+      });
+      return;
+    }
+    
+    onUpdate(tempBindings);
+    setHasChanges(false);
+    setValidationErrors({});
+    toast.success('Raccourcis sauvegardés', {
+      description: 'Vos raccourcis clavier ont été mis à jour.',
+      duration: 2000,
+    });
+  }, [tempBindings, validateBindings, onUpdate]);
 
   const handleReset = useCallback(() => {
     const defaultBindings: KeyBindings = {
@@ -162,8 +200,9 @@ export const KeyBindingConfig = memo(function KeyBindingConfig({
       deal: 'Enter',
     };
     setTempBindings(defaultBindings);
-    onUpdate(defaultBindings);
-  }, [onUpdate]);
+    setHasChanges(true);
+    setValidationErrors({});
+  }, []);
 
   const formatKey = useCallback((key: string): string => {
     if (key === ' ') return 'Space';
@@ -178,14 +217,26 @@ export const KeyBindingConfig = memo(function KeyBindingConfig({
           <Label className="text-base font-semibold">{t.settings.keyBindings}</Label>
           <p className="text-xs text-muted-foreground mt-1">{t.settings.keyBindingsDesc}</p>
         </div>
-        <Button
-          onClick={handleReset}
-          variant="outline"
-          size="sm"
-          className="text-xs"
-        >
-          {t.settings.resetToDefault}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleReset}
+            variant="outline"
+            size="sm"
+            className="text-xs"
+          >
+            {t.settings.resetToDefault}
+          </Button>
+          {hasChanges && (
+            <Button
+              onClick={handleSave}
+              size="sm"
+              className="text-xs"
+            >
+              <Check className="h-3 w-3 mr-1" />
+              Sauvegarder
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -196,26 +247,39 @@ export const KeyBindingConfig = memo(function KeyBindingConfig({
             {(Object.keys(tempBindings) as Array<keyof KeyBindings>)
               .filter(key => ['hit', 'stand', 'double', 'split', 'insurance', 'surrender'].includes(key))
               .map((action) => (
-                <div key={action} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/50">
-                  <Label htmlFor={`key-${action}`} className="text-sm font-medium">
-                    {actionLabels[action]}
-                  </Label>
-                  <Button
-                    id={`key-${action}`}
-                    onClick={() => setEditingKey(editingKey === action ? null : action)}
-                    variant={editingKey === action ? 'default' : 'outline'}
-                    size="sm"
-                    className="min-w-[80px] font-mono"
-                  >
-                    {editingKey === action ? (
-                      <span className="text-xs">{t.settings.pressKey}...</span>
-                    ) : (
-                      <span className="flex items-center gap-1">
-                        <Keyboard className="h-3 w-3" />
-                        {formatKey(tempBindings[action])}
-                      </span>
-                    )}
-                  </Button>
+                <div key={action} className="space-y-1">
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/50">
+                    <Label htmlFor={`key-${action}`} className="text-sm font-medium">
+                      {actionLabels[action]}
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id={`key-${action}`}
+                        type="text"
+                        value={tempBindings[action] || ''}
+                        onChange={(e) => handleInputChange(action, e.target.value)}
+                        onBlur={() => {
+                          // Normalize on blur
+                          const normalized = normalizeKey(tempBindings[action]);
+                          if (normalized !== tempBindings[action]) {
+                            setTempBindings(prev => ({ ...prev, [action]: normalized }));
+                          }
+                        }}
+                        className={cn(
+                          "w-20 text-center font-mono text-sm",
+                          validationErrors[action] && "border-destructive"
+                        )}
+                        placeholder="H"
+                        maxLength={10}
+                      />
+                      {validationErrors[action] && (
+                        <X className="h-4 w-4 text-destructive" />
+                      )}
+                    </div>
+                  </div>
+                  {validationErrors[action] && (
+                    <p className="text-xs text-destructive px-3">{validationErrors[action]}</p>
+                  )}
                 </div>
               ))}
           </div>
@@ -228,26 +292,39 @@ export const KeyBindingConfig = memo(function KeyBindingConfig({
             {(Object.keys(tempBindings) as Array<keyof KeyBindings>)
               .filter(key => ['clear', 'rebet', 'allIn', 'deal'].includes(key))
               .map((action) => (
-                <div key={action} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/50">
-                  <Label htmlFor={`key-${action}`} className="text-sm font-medium">
-                    {actionLabels[action]}
-                  </Label>
-                  <Button
-                    id={`key-${action}`}
-                    onClick={() => setEditingKey(editingKey === action ? null : action)}
-                    variant={editingKey === action ? 'default' : 'outline'}
-                    size="sm"
-                    className="min-w-[80px] font-mono"
-                  >
-                    {editingKey === action ? (
-                      <span className="text-xs">{t.settings.pressKey}...</span>
-                    ) : (
-                      <span className="flex items-center gap-1">
-                        <Keyboard className="h-3 w-3" />
-                        {formatKey(tempBindings[action])}
-                      </span>
-                    )}
-                  </Button>
+                <div key={action} className="space-y-1">
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/50">
+                    <Label htmlFor={`key-${action}`} className="text-sm font-medium">
+                      {actionLabels[action]}
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id={`key-${action}`}
+                        type="text"
+                        value={formatKey(tempBindings[action])}
+                        onChange={(e) => handleInputChange(action, e.target.value)}
+                        onBlur={() => {
+                          // Normalize on blur
+                          const normalized = normalizeKey(tempBindings[action]);
+                          if (normalized !== tempBindings[action]) {
+                            setTempBindings(prev => ({ ...prev, [action]: normalized }));
+                          }
+                        }}
+                        className={cn(
+                          "w-20 text-center font-mono text-sm",
+                          validationErrors[action] && "border-destructive"
+                        )}
+                        placeholder="C"
+                        maxLength={10}
+                      />
+                      {validationErrors[action] && (
+                        <X className="h-4 w-4 text-destructive" />
+                      )}
+                    </div>
+                  </div>
+                  {validationErrors[action] && (
+                    <p className="text-xs text-destructive px-3">{validationErrors[action]}</p>
+                  )}
                 </div>
               ))}
           </div>
