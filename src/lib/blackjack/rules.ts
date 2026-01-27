@@ -257,5 +257,10 @@ export function getNextActiveHandIndex(hands: Hand[], currentIndex: number): num
  * Validates a bet amount
  */
 export function isValidBet(amount: number, bankroll: number, config: GameConfig): boolean {
+  // Permet de jouer les derniers jetons même si c'est moins que minBet
+  // Si le montant est égal à la bankroll totale, on permet de jouer même si < minBet
+  if (amount === bankroll && amount > 0) {
+    return amount <= config.maxBet;
+  }
   return amount >= config.minBet && amount <= config.maxBet && amount <= bankroll;
 }

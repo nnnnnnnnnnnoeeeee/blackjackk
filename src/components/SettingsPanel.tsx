@@ -69,6 +69,43 @@ export const SettingsPanel = memo(function SettingsPanel() {
     >
       <h2 className="text-xl font-bold mb-4 text-center">{t.settings.title}</h2>
       
+      {/* Bankroll Reset - Above options bar */}
+      <div className="mb-4 p-4 rounded-lg border border-border bg-card/50">
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label className="text-sm font-medium">{t.settings.resetBankroll}</Label>
+            <p className="text-xs text-muted-foreground">
+              {t.settings.resetBankrollDesc}
+            </p>
+          </div>
+          <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={phase !== 'BETTING'}
+              >
+                {t.settings.resetBankroll}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t.settings.resetBankroll}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t.settings.resetBankrollConfirm}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleResetBankroll}>
+                  {t.settings.resetBankroll}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
+      
       {/* Language Selector - Always visible at the top */}
       <div className="mb-6 p-4 rounded-lg bg-muted/30 border border-border/50 relative z-10">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -278,46 +315,6 @@ export const SettingsPanel = memo(function SettingsPanel() {
                 updateConfig({ keyBindings });
               }}
             />
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* Bankroll Reset */}
-        <AccordionItem value="bankroll-reset">
-          <AccordionTrigger>Bankroll</AccordionTrigger>
-          <AccordionContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-card/50">
-              <div className="space-y-0.5">
-                <Label>{t.settings.resetBankroll}</Label>
-                <p className="text-xs text-muted-foreground">
-                  {t.settings.resetBankrollDesc}
-                </p>
-              </div>
-              <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    disabled={phase !== 'BETTING'}
-                  >
-                    {t.settings.resetBankroll}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t.settings.resetBankroll}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t.settings.resetBankrollConfirm}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleResetBankroll}>
-                      {t.settings.resetBankroll}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
           </AccordionContent>
         </AccordionItem>
       </Accordion>

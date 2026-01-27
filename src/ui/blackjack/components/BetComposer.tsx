@@ -285,8 +285,10 @@ export const BetComposer = memo(function BetComposer() {
   }, [phase, bankroll, maxBet, minBet, validateBet, validateSideBet, placeBet, placeSideBets, playSound, config]);
 
   const handleAllIn = useCallback(() => {
-    setBetAmount(Math.min(bankroll, maxBet));
-  }, [bankroll, maxBet]);
+    // Miser tout ce qui reste, même si c'est moins que maxBet
+    // Permet de jouer les derniers jetons
+    setBetAmount(bankroll);
+  }, [bankroll]);
 
   // Get key bindings from config with defaults
   const defaultKeyBindings = {
@@ -327,11 +329,16 @@ export const BetComposer = memo(function BetComposer() {
 
   // Memoized calculations - must be defined before useHotkeys
   const canDeal = useMemo(
-    () =>
-      phase === 'BETTING' &&
-      betAmount >= minBet &&
-      betAmount <= bankroll &&
-      betAmount <= maxBet,
+    () => {
+      if (phase !== 'BETTING' || betAmount <= 0 || betAmount > bankroll) {
+        return false;
+      }
+      // Permet de jouer les derniers jetons même si c'est moins que minBet
+      if (betAmount === bankroll) {
+        return betAmount <= maxBet;
+      }
+      return betAmount >= minBet && betAmount <= maxBet;
+    },
     [phase, betAmount, minBet, bankroll, maxBet]
   );
 
