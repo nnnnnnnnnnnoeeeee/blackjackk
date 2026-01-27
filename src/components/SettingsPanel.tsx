@@ -2,7 +2,7 @@
 // Settings Panel - Game Rules Configuration
 // ============================================================================
 
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore, selectConfig, selectPhase } from '@/store/useGameStore';
 import { useTranslation } from '@/ui/blackjack/i18n';
@@ -11,17 +11,6 @@ import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { Slider } from './ui/slider';
 import { Button } from './ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from './ui/alert-dialog';
 import { toast } from 'sonner';
 import {
   Select,
@@ -44,7 +33,6 @@ export const SettingsPanel = memo(function SettingsPanel() {
   const updateConfig = useGameStore(s => s.updateConfig);
   const resetBankroll = useGameStore(s => s.resetBankroll);
   const { t, language, setLanguage } = useTranslation();
-  const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   const handleResetBankroll = () => {
     if (phase !== 'BETTING') {
@@ -55,7 +43,6 @@ export const SettingsPanel = memo(function SettingsPanel() {
     }
     
     resetBankroll();
-    setResetDialogOpen(false);
     toast.success('Bankroll reset', {
       description: 'Your bankroll has been reset to $1000.',
     });
@@ -69,45 +56,8 @@ export const SettingsPanel = memo(function SettingsPanel() {
     >
       <h2 className="text-xl font-bold mb-4 text-center">{t.settings.title}</h2>
       
-      {/* Bankroll Reset - Above options bar */}
-      <div className="mb-4 p-4 rounded-lg border border-border bg-card/50">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label className="text-sm font-medium">{t.settings.resetBankroll}</Label>
-            <p className="text-xs text-muted-foreground">
-              {t.settings.resetBankrollDesc}
-            </p>
-          </div>
-          <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="destructive"
-                size="sm"
-                disabled={phase !== 'BETTING'}
-              >
-                {t.settings.resetBankroll}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t.settings.resetBankroll}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t.settings.resetBankrollConfirm}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleResetBankroll}>
-                  {t.settings.resetBankroll}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </div>
-      
       {/* Language Selector - Always visible at the top */}
-      <div className="mb-6 p-4 rounded-lg bg-muted/30 border border-border/50 relative z-10">
+      <div className="mb-4 p-4 rounded-lg bg-muted/30 border border-border/50 relative z-10">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex-1">
             <Label htmlFor="language-select" className="text-base font-semibold block mb-1">
@@ -130,6 +80,30 @@ export const SettingsPanel = memo(function SettingsPanel() {
                 <SelectItem value="fr">Français</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+        </div>
+      </div>
+      
+      {/* Bankroll Reset - In options bar */}
+      <div className="mb-6 p-4 rounded-lg bg-muted/30 border border-border/50 relative z-10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex-1">
+            <Label className="text-base font-semibold block mb-1">
+              {t.settings.resetBankroll}
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              {t.settings.resetBankrollDesc}
+            </p>
+          </div>
+          <div className="flex-shrink-0">
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={phase !== 'BETTING'}
+              onClick={handleResetBankroll}
+            >
+              {t.settings.resetBankroll}
+            </Button>
           </div>
         </div>
       </div>
