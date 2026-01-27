@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useMobileLayout } from '../hooks';
+import { useTranslation } from '../i18n';
 import { HandResultCard } from './HandResultCard';
 import { ResultSummary } from './ResultSummary';
 import type { HandResult } from '@/lib/blackjack/types';
@@ -42,6 +43,7 @@ export const SettlementSheet = memo(function SettlementSheet({
   onNewHand,
 }: SettlementSheetProps) {
   const { isMobile } = useMobileLayout();
+  const { t } = useTranslation();
   
   // Note: Radix UI Dialog/Sheet components already handle focus trap automatically
 
@@ -146,9 +148,9 @@ export const SettlementSheet = memo(function SettlementSheet({
       <button
         onClick={handleNewHand}
         className="btn-casino glow-gold w-full mt-4"
-        aria-label="Start new hand"
+        aria-label={t.common.newRound}
       >
-        New Hand
+        {t.common.newRound}
       </button>
     </div>
   );
@@ -165,8 +167,8 @@ export const SettlementSheet = memo(function SettlementSheet({
           aria-describedby="settlement-description"
         >
           <SheetHeader>
-            <SheetTitle id="settlement-title">Settlement</SheetTitle>
-            <SheetDescription id="settlement-description">Round results</SheetDescription>
+            <SheetTitle id="settlement-title">{t.results.settlement}</SheetTitle>
+            <SheetDescription id="settlement-description">{t.results.roundResults}</SheetDescription>
           </SheetHeader>
           {content}
         </SheetContent>
@@ -184,8 +186,8 @@ export const SettlementSheet = memo(function SettlementSheet({
         aria-describedby="settlement-description"
       >
         <DialogHeader>
-          <DialogTitle id="settlement-title">Settlement</DialogTitle>
-          <DialogDescription id="settlement-description">Round results</DialogDescription>
+          <DialogTitle id="settlement-title">{t.results.settlement}</DialogTitle>
+          <DialogDescription id="settlement-description">{t.results.roundResults}</DialogDescription>
         </DialogHeader>
         {content}
       </DialogContent>

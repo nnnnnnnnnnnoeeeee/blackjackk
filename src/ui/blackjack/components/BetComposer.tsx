@@ -2,25 +2,30 @@
 // Component - Bet Composer (Main Bet + Side Bets)
 // ============================================================================
 
-import { memo, useState, useCallback, useEffect, useMemo } from 'react';
+import { memo, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { useGameStore, selectBankroll, selectConfig, selectPhase } from '@/store/useGameStore';
+import { useGameStore, selectBankroll, selectConfig, selectPhase, selectPlayerHands } from '@/store/useGameStore';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useSound } from '@/hooks/useSound';
 import { DEFAULT_CONFIG } from '@/lib/blackjack/types';
 import { useBetValidation } from '../hooks';
 import { useReducedMotion, conditionalVariants } from '../a11y';
+import { useTranslation } from '../i18n';
 import { ChipSelector } from './ChipSelector';
 import { SideBetToggle } from './SideBetToggle';
+import { useHotkeys } from '../a11y';
 
 export const BetComposer = memo(function BetComposer() {
   const bankroll = useGameStore(selectBankroll);
   const config = useGameStore(selectConfig);
   const phase = useGameStore(selectPhase);
+  const playerHands = useGameStore(selectPlayerHands);
+  const gameState = useGameStore((s) => s.gameState);
   const placeBet = useGameStore((s) => s.placeBet);
   const placeSideBets = useGameStore((s) => s.placeSideBets);
   const updateConfig = useGameStore((s) => s.updateConfig);
+  const { t } = useTranslation();
   const { playSound } = useSound({
     enabled: config.soundEnabled ?? false,
     volume: config.soundVolume ?? 0.5,
@@ -30,18 +35,151 @@ export const BetComposer = memo(function BetComposer() {
   const { validateBet, validateSideBet, minBet, maxBet } = useBetValidation();
 
   const [betAmount, setBetAmount] = useState(0);
-  const [lastBetAmount, setLastBetAmount] = useState(0);
   const [perfectPairsBet, setPerfectPairsBet] = useState(0);
   const [twentyOnePlus3Bet, setTwentyOnePlus3Bet] = useState(0);
+  
+  // Use refs to persist last bet values across component remounts
+  // Also use localStorage as backup for persistence
+  const STORAGE_KEY = 'blackjack-last-bets';
+  
+  // Helper functions for localStorage (defined outside useCallback to use in ref initialization)
+  const loadLastBetsFromStorage = () => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return {
+          betAmount: parsed.betAmount || 0,
+          perfectPairsBet: parsed.perfectPairsBet || 0,
+          twentyOnePlus3Bet: parsed.twentyOnePlus3Bet || 0,
+        };
+      }
+    } catch (error) {
+      console.error('[BetComposer] Error loading last bets from localStorage:', error);
+    }
+    return { betAmount: 0, perfectPairsBet: 0, twentyOnePlus3Bet: 0 };
+  };
 
-  // Reset bet amount when phase changes to BETTING
+  const saveLastBetsToStorage = (betAmount: number, perfectPairsBet: number, twentyOnePlus3Bet: number) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        betAmount,
+        perfectPairsBet,
+        twentyOnePlus3Bet,
+      }));
+    } catch (error) {
+      console.error('[BetComposer] Error saving last bets to localStorage:', error);
+    }
+  };
+
+  // Initialize refs from localStorage on mount
+  const initialBets = loadLastBetsFromStorage();
+  const lastBetAmountRef = useRef(initialBets.betAmount);
+  const lastPerfectPairsBetRef = useRef(initialBets.perfectPairsBet);
+  const lastTwentyOnePlus3BetRef = useRef(initialBets.twentyOnePlus3Bet);
+
+  const loadLastBets = useCallback(() => {
+    return loadLastBetsFromStorage();
+  }, []);
+
+  const saveLastBets = useCallback((betAmount: number, perfectPairsBet: number, twentyOnePlus3Bet: number) => {
+    saveLastBetsToStorage(betAmount, perfectPairsBet, twentyOnePlus3Bet);
+  }, []);
+
+  // When phase changes to BETTING, try to recover last bet from gameState and localStorage
+  // Priority: gameState (handHistory/sideBetResults) > localStorage > existing refs
   useEffect(() => {
     if (phase === 'BETTING') {
+      let recoveredBetAmount = lastBetAmountRef.current;
+      let recoveredPerfectPairsBet = lastPerfectPairsBetRef.current;
+      let recoveredTwentyOnePlus3Bet = lastTwentyOnePlus3BetRef.current;
+      
+      // First, try to recover from localStorage (most reliable)
+      const storedBets = loadLastBets();
+      if (storedBets.betAmount > 0) {
+        recoveredBetAmount = storedBets.betAmount;
+        recoveredPerfectPairsBet = storedBets.perfectPairsBet;
+        recoveredTwentyOnePlus3Bet = storedBets.twentyOnePlus3Bet;
+        console.log('[BetComposer] Loaded bets from localStorage:', storedBets);
+      }
+      
+      // Then try to recover last bet from handHistory if available (more accurate)
+      if (gameState.handHistory && gameState.handHistory.length > 0) {
+        const lastHand = gameState.handHistory[gameState.handHistory.length - 1];
+        if (lastHand.bets && lastHand.bets.length > 0) {
+          const lastBet = lastHand.bets[0]; // Main bet from first hand
+          if (lastBet > 0 && lastBet <= bankroll && lastBet <= maxBet) {
+            recoveredBetAmount = lastBet;
+            console.log('[BetComposer] Recovered last bet from history:', lastBet);
+          }
+        }
+      }
+      
+      // Try to recover side bets from the last hand's side bet results if available
+      if (gameState.sideBetResults) {
+        if (gameState.sideBetResults.perfectPairs && gameState.sideBetResults.perfectPairs.bet) {
+          recoveredPerfectPairsBet = gameState.sideBetResults.perfectPairs.bet;
+          console.log('[BetComposer] Recovered Perfect Pairs bet from sideBetResults:', recoveredPerfectPairsBet);
+        }
+        if (gameState.sideBetResults.twentyOnePlus3 && gameState.sideBetResults.twentyOnePlus3.bet) {
+          recoveredTwentyOnePlus3Bet = gameState.sideBetResults.twentyOnePlus3.bet;
+          console.log('[BetComposer] Recovered 21+3 bet from sideBetResults:', recoveredTwentyOnePlus3Bet);
+        }
+      }
+      
+      // Also try to recover from current sideBets if available
+      if (gameState.sideBets) {
+        if (gameState.sideBets.perfectPairs) {
+          recoveredPerfectPairsBet = gameState.sideBets.perfectPairs;
+        }
+        if (gameState.sideBets.twentyOnePlus3) {
+          recoveredTwentyOnePlus3Bet = gameState.sideBets.twentyOnePlus3;
+        }
+      }
+      
+      // Also try to recover from current playerHands if they exist
+      if (playerHands.length > 0 && playerHands[0].bet > 0) {
+        const lastBet = playerHands[0].bet;
+        if (lastBet <= bankroll && lastBet <= maxBet) {
+          recoveredBetAmount = lastBet;
+          console.log('[BetComposer] Recovered last bet from playerHands:', lastBet);
+        }
+      }
+      
+      // Update refs with recovered values
+      if (recoveredBetAmount > 0) {
+        lastBetAmountRef.current = recoveredBetAmount;
+      }
+      if (recoveredPerfectPairsBet > 0) {
+        lastPerfectPairsBetRef.current = recoveredPerfectPairsBet;
+      }
+      if (recoveredTwentyOnePlus3Bet > 0) {
+        lastTwentyOnePlus3BetRef.current = recoveredTwentyOnePlus3Bet;
+      }
+      
+      // Save to localStorage if we have valid values
+      if (recoveredBetAmount >= minBet) {
+        saveLastBets(recoveredBetAmount, recoveredPerfectPairsBet, recoveredTwentyOnePlus3Bet);
+      }
+      
+      console.log('[BetComposer] Current rebet values:', {
+        lastBetAmount: lastBetAmountRef.current,
+        lastPerfectPairsBet: lastPerfectPairsBetRef.current,
+        lastTwentyOnePlus3Bet: lastTwentyOnePlus3BetRef.current,
+        bankroll,
+        maxBet,
+        canRebet: lastBetAmountRef.current > 0 && 
+                  lastBetAmountRef.current <= bankroll && 
+                  lastBetAmountRef.current <= maxBet &&
+                  (lastBetAmountRef.current + lastPerfectPairsBetRef.current + lastTwentyOnePlus3BetRef.current) <= bankroll
+      });
+      
+      // Reset UI state
       setBetAmount(0);
       setPerfectPairsBet(0);
       setTwentyOnePlus3Bet(0);
     }
-  }, [phase]);
+  }, [phase, gameState.handHistory, gameState.sideBetResults, gameState.sideBets, playerHands, bankroll, maxBet, minBet, loadLastBets, saveLastBets]);
 
   const handleChipClick = useCallback(
     (value: number) => {
@@ -52,31 +190,218 @@ export const BetComposer = memo(function BetComposer() {
   );
 
   const handleClear = useCallback(() => {
-    setLastBetAmount(betAmount);
     setBetAmount(0);
     setPerfectPairsBet(0);
     setTwentyOnePlus3Bet(0);
-  }, [betAmount]);
+  }, []);
 
   const handleRebet = useCallback(() => {
-    if (lastBetAmount > 0 && lastBetAmount <= bankroll && lastBetAmount <= maxBet) {
-      setBetAmount(lastBetAmount);
-    } else {
+    // Check if we're in BETTING phase
+    if (phase !== 'BETTING') {
       toast.error('Rebet unavailable', {
-        description: 'Previous bet amount is invalid',
+        description: 'Can only rebet during betting phase',
       });
+      return;
     }
-  }, [lastBetAmount, bankroll, maxBet]);
+
+    const lastBetAmount = lastBetAmountRef.current;
+    const lastPerfectPairsBet = lastPerfectPairsBetRef.current;
+    const lastTwentyOnePlus3Bet = lastTwentyOnePlus3BetRef.current;
+    
+    // Calculate total bet needed (main bet + side bets)
+    const totalBetNeeded = lastBetAmount + lastPerfectPairsBet + lastTwentyOnePlus3Bet;
+
+    console.log('[BetComposer] Rebet clicked:', { 
+      lastBetAmount, 
+      lastPerfectPairsBet, 
+      lastTwentyOnePlus3Bet, 
+      totalBetNeeded,
+      bankroll, 
+      maxBet, 
+      phase 
+    });
+
+    // Check if we have a valid last bet
+    if (lastBetAmount === 0 || lastBetAmount < minBet) {
+      toast.error('Rebet unavailable', {
+        description: 'No previous bet to rebet',
+      });
+      return;
+    }
+
+    // Check if bet amount is valid
+    if (lastBetAmount > maxBet) {
+      toast.error('Rebet unavailable', {
+        description: `Previous bet ($${lastBetAmount}) exceeds maximum bet ($${maxBet})`,
+      });
+      return;
+    }
+
+    // Check if player has enough money for the total bet (main + side bets)
+    if (totalBetNeeded > bankroll) {
+      toast.error('Rebet unavailable', {
+        description: `Insufficient funds. Need $${totalBetNeeded}, have $${bankroll}`,
+      });
+      return;
+    }
+
+    // Validate and place bets directly without setting state first
+    // This avoids timing issues with useEffect that resets on phase change
+    try {
+      validateBet(lastBetAmount);
+      if (config.perfectPairs?.enabled && lastPerfectPairsBet > 0) {
+        validateSideBet('perfectPairs', lastPerfectPairsBet);
+      }
+      if (config.twentyOnePlus3?.enabled && lastTwentyOnePlus3Bet > 0) {
+        validateSideBet('twentyOnePlus3', lastTwentyOnePlus3Bet);
+      }
+
+      console.log('[BetComposer] Rebet validation passed, placing bets...');
+
+      // Update UI state for visual feedback (but useEffect might reset it, that's OK)
+      setBetAmount(lastBetAmount);
+      setPerfectPairsBet(lastPerfectPairsBet);
+      setTwentyOnePlus3Bet(lastTwentyOnePlus3Bet);
+
+      // Place side bets FIRST (while phase is still BETTING)
+      placeSideBets(lastPerfectPairsBet, lastTwentyOnePlus3Bet);
+      
+      // Then place main bet (this will change phase from BETTING to DEALING/PLAYER_TURN)
+      placeBet(lastBetAmount);
+      playSound('chipStack');
+      
+      console.log('[BetComposer] Rebet successful!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error placing bet';
+      toast.error('Rebet unavailable', {
+        description: message,
+      });
+      console.error('[BetComposer] Rebet error:', error);
+      // Reset UI state on error
+      setBetAmount(0);
+      setPerfectPairsBet(0);
+      setTwentyOnePlus3Bet(0);
+    }
+  }, [phase, bankroll, maxBet, minBet, validateBet, validateSideBet, placeBet, placeSideBets, playSound, config]);
 
   const handleAllIn = useCallback(() => {
     setBetAmount(Math.min(bankroll, maxBet));
   }, [bankroll, maxBet]);
+
+  // Get key bindings from config with defaults
+  const defaultKeyBindings = {
+    hit: 'H',
+    stand: 'S',
+    double: 'D',
+    split: 'P',
+    insurance: 'I',
+    surrender: 'R',
+    enter: 'Enter',
+    space: ' ',
+    clear: 'C',
+    rebet: 'R',
+    allIn: 'A',
+    deal: 'Enter',
+  };
+  
+  const keyBindings = {
+    ...defaultKeyBindings,
+    ...(config.keyBindings || {}),
+  };
+  
+  // Ensure all keys are defined (fallback to defaults if undefined)
+  const keyBindingsSafe = {
+    hit: keyBindings.hit || defaultKeyBindings.hit,
+    stand: keyBindings.stand || defaultKeyBindings.stand,
+    double: keyBindings.double || defaultKeyBindings.double,
+    split: keyBindings.split || defaultKeyBindings.split,
+    insurance: keyBindings.insurance || defaultKeyBindings.insurance,
+    surrender: keyBindings.surrender || defaultKeyBindings.surrender,
+    enter: keyBindings.enter || defaultKeyBindings.enter,
+    space: keyBindings.space || defaultKeyBindings.space,
+    clear: keyBindings.clear || defaultKeyBindings.clear,
+    rebet: keyBindings.rebet || defaultKeyBindings.rebet,
+    allIn: keyBindings.allIn || defaultKeyBindings.allIn,
+    deal: keyBindings.deal || defaultKeyBindings.deal,
+  };
+
+  // Memoized calculations - must be defined before useHotkeys
+  const canDeal = useMemo(
+    () =>
+      phase === 'BETTING' &&
+      betAmount >= minBet &&
+      betAmount <= bankroll &&
+      betAmount <= maxBet,
+    [phase, betAmount, minBet, bankroll, maxBet]
+  );
+
+  // Setup keyboard shortcuts for betting actions
+  useHotkeys(
+    [
+      {
+        key: keyBindingsSafe.clear,
+        handler: () => {
+          if (phase === 'BETTING') {
+            handleClear();
+          }
+        },
+        enabled: phase === 'BETTING',
+        scope: 'bet-composer',
+      },
+      {
+        key: keyBindingsSafe.rebet,
+        handler: () => {
+          if (phase === 'BETTING') {
+            handleRebet();
+          }
+        },
+        enabled: phase === 'BETTING' && 
+                 lastBetAmountRef.current > 0 && 
+                 lastBetAmountRef.current >= minBet &&
+                 lastBetAmountRef.current <= maxBet &&
+                 (lastBetAmountRef.current + lastPerfectPairsBetRef.current + lastTwentyOnePlus3BetRef.current) <= bankroll,
+        scope: 'bet-composer',
+      },
+      {
+        key: keyBindingsSafe.allIn,
+        handler: () => {
+          if (phase === 'BETTING' && bankroll > 0) {
+            handleAllIn();
+          }
+        },
+        enabled: phase === 'BETTING' && bankroll > 0,
+        scope: 'bet-composer',
+      },
+      {
+        key: keyBindingsSafe.deal,
+        handler: () => {
+          if (phase === 'BETTING' && canDeal) {
+            handleDeal();
+          }
+        },
+        enabled: phase === 'BETTING' && canDeal,
+        scope: 'bet-composer',
+      },
+    ],
+    'bet-composer'
+  );
 
   const handleDeal = useCallback(() => {
     try {
       validateBet(betAmount);
       if (config.perfectPairs?.enabled) validateSideBet('perfectPairs', perfectPairsBet);
       if (config.twentyOnePlus3?.enabled) validateSideBet('twentyOnePlus3', twentyOnePlus3Bet);
+
+      // Save bets for rebet functionality BEFORE placing them
+      // Only save if betAmount is valid (>= minBet)
+      // Use refs AND localStorage so values persist across component remounts
+      if (betAmount >= minBet) {
+        lastBetAmountRef.current = betAmount;
+        lastPerfectPairsBetRef.current = perfectPairsBet;
+        lastTwentyOnePlus3BetRef.current = twentyOnePlus3Bet;
+        saveLastBets(betAmount, perfectPairsBet, twentyOnePlus3Bet);
+        console.log('[BetComposer] Saved bets for rebet:', { betAmount, perfectPairsBet, twentyOnePlus3Bet });
+      }
 
       // Place side bets FIRST (while phase is still BETTING)
       // Always call placeSideBets to ensure side bets are set (even if 0)
@@ -92,7 +417,7 @@ export const BetComposer = memo(function BetComposer() {
       });
       console.error('BetComposer error:', error);
     }
-  }, [betAmount, perfectPairsBet, twentyOnePlus3Bet, validateBet, validateSideBet, placeBet, placeSideBets, playSound, config]);
+  }, [betAmount, perfectPairsBet, twentyOnePlus3Bet, minBet, validateBet, validateSideBet, placeBet, placeSideBets, playSound, config]);
 
   useEffect(() => {
     if (betAmount > maxBet) {
@@ -102,16 +427,6 @@ export const BetComposer = memo(function BetComposer() {
       setBetAmount(bankroll);
     }
   }, [maxBet, bankroll, betAmount]);
-
-  // Memoized calculations
-  const canDeal = useMemo(
-    () =>
-      phase === 'BETTING' &&
-      betAmount >= minBet &&
-      betAmount <= bankroll &&
-      betAmount <= maxBet,
-    [phase, betAmount, minBet, bankroll, maxBet]
-  );
 
   const totalBets = useMemo(
     () => betAmount + perfectPairsBet + twentyOnePlus3Bet,
@@ -167,25 +482,34 @@ export const BetComposer = memo(function BetComposer() {
         <button
           onClick={handleClear}
           className="btn-casino-secondary text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 flex-1 min-h-[44px] sm:min-h-[48px]"
-          aria-label="Clear bet"
+          aria-label={`${t.betting.clearButton} (${keyBindingsSafe.clear})`}
+          title={`${t.betting.clearButton} (${keyBindingsSafe.clear})`}
         >
-          Clear
+          {t.betting.clearButton} ({keyBindingsSafe.clear})
         </button>
         <button
           onClick={handleRebet}
-          disabled={lastBetAmount === 0 || lastBetAmount > bankroll || lastBetAmount > maxBet}
+          disabled={
+            phase !== 'BETTING' || 
+            lastBetAmountRef.current === 0 || 
+            lastBetAmountRef.current < minBet ||
+            lastBetAmountRef.current > maxBet ||
+            (lastBetAmountRef.current + lastPerfectPairsBetRef.current + lastTwentyOnePlus3BetRef.current) > bankroll
+          }
           className="btn-casino-secondary text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 flex-1 min-h-[44px] sm:min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed"
-          aria-label="Rebet last bet"
+          aria-label={`${t.actions.rebet} (${keyBindingsSafe.rebet})`}
+          title={`${t.actions.rebet} (${keyBindingsSafe.rebet})`}
         >
-          Rebet
+          {t.actions.rebet} ({keyBindingsSafe.rebet})
         </button>
         <button
           onClick={handleAllIn}
           disabled={bankroll === 0}
           className="btn-casino-secondary text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 flex-1 min-h-[44px] sm:min-h-[48px]"
-          aria-label="Bet all"
+          aria-label={`${t.betting.allInButton} (${keyBindingsSafe.allIn})`}
+          title={`${t.betting.allInButton} (${keyBindingsSafe.allIn})`}
         >
-          All In
+          {t.betting.allInButton} ({keyBindingsSafe.allIn})
         </button>
       </div>
 
@@ -349,7 +673,7 @@ export const BetComposer = memo(function BetComposer() {
         >
           <span className="flex items-center justify-center gap-2">
             <span className="text-xl sm:text-2xl">🎲</span>
-            <span>Deal</span>
+            <span>{t.betting.dealButton} ({keyBindingsSafe.deal})</span>
             {canDeal && <span className="text-sm sm:text-base">✓</span>}
           </span>
         </motion.button>

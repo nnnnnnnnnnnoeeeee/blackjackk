@@ -5,9 +5,18 @@
 import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore, selectConfig } from '@/store/useGameStore';
+import { useTranslation } from '@/ui/blackjack/i18n';
+import { KeyBindingConfig } from './KeyBindingConfig';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { Slider } from './ui/slider';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 import { cn } from '@/lib/utils';
 import {
   Accordion,
@@ -19,6 +28,7 @@ import {
 export const SettingsPanel = memo(function SettingsPanel() {
   const config = useGameStore(selectConfig);
   const updateConfig = useGameStore(s => s.updateConfig);
+  const { t, language, setLanguage } = useTranslation();
 
   return (
     <motion.div
@@ -26,18 +36,48 @@ export const SettingsPanel = memo(function SettingsPanel() {
       animate={{ opacity: 1, y: 0 }}
       className="w-full max-w-2xl mx-auto p-4 sm:p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border"
     >
-      <h2 className="text-xl font-bold mb-4 text-center">Game Settings</h2>
+      <h2 className="text-xl font-bold mb-4 text-center">{t.settings.title}</h2>
+      
+      {/* Language Selector - Always visible at the top */}
+      <div className="mb-6 p-4 rounded-lg bg-muted/30 border border-border/50 relative z-10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex-1">
+            <Label htmlFor="language-select" className="text-base font-semibold block mb-1">
+              {t.settings.language}
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              {language === 'fr' ? 'Changer la langue de l\'interface' : 'Change the interface language'}
+            </p>
+          </div>
+          <div className="flex-shrink-0 relative z-[100]">
+            <Select value={language} onValueChange={(value) => setLanguage(value as 'fr' | 'en')}>
+              <SelectTrigger id="language-select" className="w-full sm:w-[200px] min-h-[44px] text-base">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent 
+                position="popper"
+                sideOffset={4}
+              >
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="fr">Français</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
       
       <Accordion type="single" collapsible className="w-full">
+
+        {/* Dealer Rules */}
         {/* Dealer Rules */}
         <AccordionItem value="dealer-rules">
-          <AccordionTrigger>Dealer Rules</AccordionTrigger>
+          <AccordionTrigger>{t.settings.dealerRules}</AccordionTrigger>
           <AccordionContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="h17-toggle">Dealer Hits Soft 17 (H17)</Label>
+                <Label htmlFor="h17-toggle">{t.settings.dealerHitsSoft17}</Label>
                 <p className="text-xs text-muted-foreground">
-                  When OFF: Dealer stands on all 17s (S17)
+                  {t.settings.dealerHitsSoft17Desc}
                 </p>
               </div>
               <Switch
@@ -53,13 +93,13 @@ export const SettingsPanel = memo(function SettingsPanel() {
 
         {/* Player Rules */}
         <AccordionItem value="player-rules">
-          <AccordionTrigger>Player Rules</AccordionTrigger>
+          <AccordionTrigger>{t.settings.playerRules}</AccordionTrigger>
           <AccordionContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="das-toggle">Double After Split (DAS)</Label>
+                <Label htmlFor="das-toggle">{t.settings.doubleAfterSplit}</Label>
                 <p className="text-xs text-muted-foreground">
-                  Allow doubling on hands created by splitting
+                  {t.settings.doubleAfterSplitDesc}
                 </p>
               </div>
               <Switch
@@ -73,9 +113,9 @@ export const SettingsPanel = memo(function SettingsPanel() {
             
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="resplit-aces-toggle">Resplit Aces</Label>
+                <Label htmlFor="resplit-aces-toggle">{t.settings.resplitAces}</Label>
                 <p className="text-xs text-muted-foreground">
-                  Allow resplitting aces (up to max splits)
+                  {t.settings.resplitAcesDesc}
                 </p>
               </div>
               <Switch
@@ -88,7 +128,7 @@ export const SettingsPanel = memo(function SettingsPanel() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="max-splits">Max Splits: {config.maxSplits}</Label>
+              <Label htmlFor="max-splits">{t.settings.maxSplits}: {config.maxSplits}</Label>
               <Slider
                 id="max-splits"
                 min={1}
@@ -105,13 +145,13 @@ export const SettingsPanel = memo(function SettingsPanel() {
 
         {/* Side Bets */}
         <AccordionItem value="side-bets">
-          <AccordionTrigger>Side Bets</AccordionTrigger>
+          <AccordionTrigger>{t.settings.sideBets}</AccordionTrigger>
           <AccordionContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="perfect-pairs-toggle">Perfect Pairs</Label>
+                <Label htmlFor="perfect-pairs-toggle">{t.settings.perfectPairs}</Label>
                 <p className="text-xs text-muted-foreground">
-                  Bet on matching pairs in your initial hand
+                  {t.settings.perfectPairsDesc}
                 </p>
               </div>
               <Switch
@@ -127,9 +167,9 @@ export const SettingsPanel = memo(function SettingsPanel() {
             
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="21plus3-toggle">21+3</Label>
+                <Label htmlFor="21plus3-toggle">{t.settings.twentyOnePlus3}</Label>
                 <p className="text-xs text-muted-foreground">
-                  Bet on poker hand with your 2 cards + dealer upcard
+                  {t.settings.twentyOnePlus3Desc}
                 </p>
               </div>
               <Switch
@@ -150,13 +190,13 @@ export const SettingsPanel = memo(function SettingsPanel() {
 
         {/* Sound Settings */}
         <AccordionItem value="sound-settings">
-          <AccordionTrigger>Sound Settings</AccordionTrigger>
+          <AccordionTrigger>{t.settings.soundSettings}</AccordionTrigger>
           <AccordionContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="sound-toggle">Enable Sounds</Label>
+                <Label htmlFor="sound-toggle">{t.settings.enableSounds}</Label>
                 <p className="text-xs text-muted-foreground">
-                  Play sound effects during gameplay
+                  {t.settings.enableSoundsDesc}
                 </p>
               </div>
               <Switch
@@ -171,7 +211,7 @@ export const SettingsPanel = memo(function SettingsPanel() {
             {config.soundEnabled && (
               <div className="space-y-2">
                 <Label htmlFor="sound-volume">
-                  Volume: {Math.round((config.soundVolume ?? 0.5) * 100)}%
+                  {t.settings.volume}: {Math.round((config.soundVolume ?? 0.5) * 100)}%
                 </Label>
                 <Slider
                   id="sound-volume"
@@ -185,6 +225,28 @@ export const SettingsPanel = memo(function SettingsPanel() {
                 />
               </div>
             )}
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Keyboard Shortcuts */}
+        <AccordionItem value="key-bindings">
+          <AccordionTrigger>{t.settings.keyBindings}</AccordionTrigger>
+          <AccordionContent className="space-y-4">
+            <KeyBindingConfig
+              keyBindings={config.keyBindings || {
+                hit: 'H',
+                stand: 'S',
+                double: 'D',
+                split: 'P',
+                insurance: 'I',
+                surrender: 'R',
+                enter: 'Enter',
+                space: ' ',
+              }}
+              onUpdate={(keyBindings) => {
+                updateConfig({ keyBindings });
+              }}
+            />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

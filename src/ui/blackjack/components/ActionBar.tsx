@@ -4,32 +4,45 @@
 
 import { memo, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useGameStore } from '@/store/useGameStore';
+import { useGameStore, selectConfig } from '@/store/useGameStore';
 import { useValidActions } from '../hooks';
-import { useHotkeys, BLACKJACK_HOTKEYS } from '../a11y';
+import { useHotkeys } from '../a11y';
 import { useReducedMotion, conditionalVariants } from '../a11y';
 import { ActionButton } from './ActionButton';
 import { toast } from 'sonner';
 import type { PlayerAction } from '@/lib/blackjack/types';
 
-const ACTION_CONFIG: Array<{
-  action: PlayerAction;
-  label: string;
-  variant: 'primary' | 'secondary' | 'danger';
-  shortcut: string;
-}> = [
-  { action: 'hit', label: 'Hit', variant: 'secondary', shortcut: BLACKJACK_HOTKEYS.HIT.key },
-  { action: 'stand', label: 'Stand', variant: 'primary', shortcut: BLACKJACK_HOTKEYS.STAND.key },
-  { action: 'double', label: 'Double', variant: 'secondary', shortcut: BLACKJACK_HOTKEYS.DOUBLE.key },
-  { action: 'split', label: 'Split', variant: 'secondary', shortcut: BLACKJACK_HOTKEYS.SPLIT.key },
-  { action: 'insurance', label: 'Insurance', variant: 'secondary', shortcut: BLACKJACK_HOTKEYS.INSURANCE.key },
-];
-
 export const ActionBar = memo(function ActionBar() {
   const executeAction = useGameStore((s) => s.action);
   const isAnimating = useGameStore((s) => s.isAnimating);
+  const config = useGameStore(selectConfig);
   const { validActions, getActionReason } = useValidActions();
   const prefersReducedMotion = useReducedMotion();
+
+  // Get key bindings from config, fallback to defaults
+  const keyBindings = config.keyBindings || {
+    hit: 'H',
+    stand: 'S',
+    double: 'D',
+    split: 'P',
+    insurance: 'I',
+    surrender: 'R',
+    enter: 'Enter',
+    space: ' ',
+  };
+
+  const ACTION_CONFIG: Array<{
+    action: PlayerAction;
+    label: string;
+    variant: 'primary' | 'secondary' | 'danger';
+    shortcut: string;
+  }> = useMemo(() => [
+    { action: 'hit', label: 'Hit', variant: 'secondary', shortcut: keyBindings.hit },
+    { action: 'stand', label: 'Stand', variant: 'primary', shortcut: keyBindings.stand },
+    { action: 'double', label: 'Double', variant: 'secondary', shortcut: keyBindings.double },
+    { action: 'split', label: 'Split', variant: 'secondary', shortcut: keyBindings.split },
+    { action: 'insurance', label: 'Insurance', variant: 'secondary', shortcut: keyBindings.insurance },
+  ], [keyBindings]);
 
   const handleAction = useCallback(
     (action: PlayerAction) => {
@@ -57,7 +70,7 @@ export const ActionBar = memo(function ActionBar() {
     [executeAction, isAnimating, validActions, getActionReason]
   );
 
-  // Setup keyboard shortcuts
+  // Setup keyboard shortcuts using custom key bindings
   useHotkeys(
     [
       ...ACTION_CONFIG.map(({ action, shortcut }) => ({
@@ -67,7 +80,7 @@ export const ActionBar = memo(function ActionBar() {
         scope: 'action-bar',
       })),
       {
-        key: BLACKJACK_HOTKEYS.ENTER.key,
+        key: keyBindings.enter,
         handler: () => {
           if (validActions.includes('stand')) {
             handleAction('stand');
@@ -77,7 +90,7 @@ export const ActionBar = memo(function ActionBar() {
         scope: 'action-bar',
       },
       {
-        key: BLACKJACK_HOTKEYS.SPACE.key,
+        key: keyBindings.space,
         handler: () => {
           if (validActions.includes('stand')) {
             handleAction('stand');

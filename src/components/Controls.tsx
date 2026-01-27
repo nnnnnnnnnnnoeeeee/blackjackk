@@ -4,7 +4,7 @@
 
 import { memo, useCallback, useEffect, useMemo, type MouseEvent } from 'react';
 import { motion } from 'framer-motion';
-import { useGameStore, selectIsAnimating } from '@/store/useGameStore';
+import { useGameStore, selectIsAnimating, selectConfig } from '@/store/useGameStore';
 import { PlayerAction } from '@/lib/blackjack/types';
 import { canInsure } from '@/lib/blackjack/rules';
 import { cn } from '@/lib/utils';
@@ -78,22 +78,35 @@ const ActionButton = memo(function ActionButton({
   );
 });
 
-const ACTION_CONFIG: Array<{
-  action: PlayerAction;
-  label: string;
-  variant: 'primary' | 'secondary' | 'danger';
-  shortcut: string;
-}> = [
-  { action: 'hit', label: 'Hit', variant: 'secondary', shortcut: 'H' },
-  { action: 'stand', label: 'Stand', variant: 'primary', shortcut: 'S' },
-  { action: 'double', label: 'Double', variant: 'secondary', shortcut: 'D' },
-  { action: 'split', label: 'Split', variant: 'secondary', shortcut: 'P' },
-  { action: 'insurance', label: 'Insurance', variant: 'secondary', shortcut: 'I' },
-];
-
 export const Controls = memo(function Controls() {
   const executeAction = useGameStore(s => s.action);
   const isAnimating = useGameStore(selectIsAnimating);
+  const config = useGameStore(selectConfig);
+  
+  // Get key bindings from config, fallback to defaults
+  const keyBindings = config.keyBindings || {
+    hit: 'H',
+    stand: 'S',
+    double: 'D',
+    split: 'P',
+    insurance: 'I',
+    surrender: 'R',
+    enter: 'Enter',
+    space: ' ',
+  };
+
+  const ACTION_CONFIG: Array<{
+    action: PlayerAction;
+    label: string;
+    variant: 'primary' | 'secondary' | 'danger';
+    shortcut: string;
+  }> = [
+    { action: 'hit', label: 'Hit', variant: 'secondary', shortcut: keyBindings.hit },
+    { action: 'stand', label: 'Stand', variant: 'primary', shortcut: keyBindings.stand },
+    { action: 'double', label: 'Double', variant: 'secondary', shortcut: keyBindings.double },
+    { action: 'split', label: 'Split', variant: 'secondary', shortcut: keyBindings.split },
+    { action: 'insurance', label: 'Insurance', variant: 'secondary', shortcut: keyBindings.insurance },
+  ];
   
   // Get only the values we need to determine valid actions
   const gameState = useGameStore(s => s.gameState);
@@ -206,16 +219,17 @@ export const Controls = memo(function Controls() {
       const key = e.key.toUpperCase();
       
       // Action shortcuts
-      const actionConfig = ACTION_CONFIG.find(a => a.shortcut === key);
+      const actionConfig = ACTION_CONFIG.find(a => a.shortcut.toUpperCase() === key);
       if (actionConfig && validActions.includes(actionConfig.action)) {
         e.preventDefault();
         handleAction(actionConfig.action);
         return;
       }
       
-      // Additional shortcuts
-      if (key === ' ' || key === 'ENTER') {
-        // Space or Enter for primary action (usually Stand or Deal)
+      // Additional shortcuts (Enter/Space for stand)
+      const spaceKey = keyBindings.space === ' ' ? ' ' : keyBindings.space.toUpperCase();
+      const enterKey = keyBindings.enter.toUpperCase();
+      if (key === spaceKey || key === enterKey) {
         e.preventDefault();
         if (validActions.includes('stand')) {
           handleAction('stand');

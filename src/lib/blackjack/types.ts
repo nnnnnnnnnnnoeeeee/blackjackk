@@ -63,6 +63,21 @@ export interface TwentyOnePlus3Config {
   };
 }
 
+export interface KeyBindings {
+  hit: string;
+  stand: string;
+  double: string;
+  split: string;
+  insurance: string;
+  surrender: string;
+  enter: string; // For stand action
+  space: string; // For stand action
+  clear: string; // Clear bet
+  rebet: string; // Rebet last bet
+  allIn: string; // All in bet
+  deal: string; // Deal cards
+}
+
 export interface GameConfig {
   deckCount: number;
   blackjackPayout: number; // 1.5 for 3:2, 1.2 for 6:5
@@ -81,6 +96,7 @@ export interface GameConfig {
   twentyOnePlus3: TwentyOnePlus3Config;
   soundEnabled: boolean;
   soundVolume: number; // 0.0 to 1.0
+  keyBindings: KeyBindings;
 }
 
 export interface SideBetResults {
@@ -186,6 +202,20 @@ export const DEFAULT_CONFIG: GameConfig = {
   },
   soundEnabled: false, // OFF by default
   soundVolume: 0.5, // 50% volume
+  keyBindings: {
+    hit: 'H',
+    stand: 'S',
+    double: 'D',
+    split: 'P',
+    insurance: 'I',
+    surrender: 'R',
+    enter: 'Enter',
+    space: ' ',
+    clear: 'C',
+    rebet: 'R',
+    allIn: 'A',
+    deal: 'Enter',
+  },
 };
 
 export const INITIAL_STATS: GameStats = {

@@ -31,6 +31,11 @@ export function useHotkeys(
     enabledRef.current.clear();
 
     hotkeys.forEach(({ key, handler, enabled = true }) => {
+      // Skip if key is undefined or null
+      if (!key) {
+        console.warn('[useHotkeys] Skipping hotkey with undefined/null key:', { key, handler });
+        return;
+      }
       const normalizedKey = key.toUpperCase();
       handlersRef.current.set(normalizedKey, handler);
       enabledRef.current.set(normalizedKey, enabled);

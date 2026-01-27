@@ -37,6 +37,7 @@ interface GameStore {
   cardCountingEnabled: boolean;
   tutorialCompleted: boolean;
   tutorialStep: number;
+  language: 'fr' | 'en';
   
   // Actions
   placeBet: (amount: number) => void;
@@ -50,6 +51,7 @@ interface GameStore {
   setTutorialStep: (step: number) => void;
   completeTutorial: () => void;
   addHandToHistory: (history: HandHistory) => void;
+  setLanguage: (language: 'fr' | 'en') => void;
   
   // Selectors (computed)
   getValidActions: () => PlayerAction[];
@@ -69,9 +71,10 @@ interface PartialGameStore {
   gameState?: Partial<GameState>;
   stats?: Partial<GameStats>;
   isAnimating?: boolean;
+  language?: 'fr' | 'en';
 }
 
-const validateState = (state: unknown): GameStore => {
+const validateState = (state: unknown): Partial<GameStore> => {
   // Ensure state exists and has required properties
   if (!state || typeof state !== 'object') {
     return {
@@ -79,6 +82,7 @@ const validateState = (state: unknown): GameStore => {
       stats: INITIAL_STATS,
       isAnimating: false,
       cardCountingEnabled: false,
+      language: 'en' as 'fr' | 'en',
     };
   }
   
@@ -91,6 +95,7 @@ const validateState = (state: unknown): GameStore => {
       stats: INITIAL_STATS,
       isAnimating: false,
       cardCountingEnabled: false,
+      language: 'en' as 'fr' | 'en',
     };
   }
   
@@ -156,6 +161,11 @@ const validateState = (state: unknown): GameStore => {
     gameState.shoe = createShuffledShoe(gameState.config?.deckCount || DEFAULT_CONFIG.deckCount);
   }
   
+  // Ensure language is valid
+  if (partialState.language !== 'fr' && partialState.language !== 'en') {
+    partialState.language = 'en';
+  }
+  
   // Ensure results is an array
   if (!Array.isArray(gameState.results)) {
     gameState.results = [];
@@ -178,6 +188,7 @@ const validateState = (state: unknown): GameStore => {
     tutorialCompleted: typeof partialState.tutorialCompleted === 'boolean' ? partialState.tutorialCompleted : false,
     tutorialStep: typeof partialState.tutorialStep === 'number' ? partialState.tutorialStep : 0,
     cardCountingEnabled: typeof partialState.cardCountingEnabled === 'boolean' ? partialState.cardCountingEnabled : false,
+    language: (partialState.language === 'fr' || partialState.language === 'en') ? partialState.language : 'en',
   };
 };
 
@@ -191,6 +202,7 @@ export const useGameStore = create<GameStore>()(
       cardCountingEnabled: false,
       tutorialCompleted: false,
       tutorialStep: 0,
+      language: 'en' as 'fr' | 'en',
       
       // Place side bets
       placeSideBets: (perfectPairs?: number, twentyOnePlus3?: number) => {
@@ -600,7 +612,12 @@ export const useGameStore = create<GameStore>()(
       // Update game configuration
       updateConfig: (config: Partial<GameConfig>) => {
         const { gameState } = get();
-        const newConfig = { ...gameState.config, ...config };
+        const newConfig = { 
+          ...gameState.config, 
+          ...config,
+          // Ensure keyBindings are always present
+          keyBindings: config.keyBindings || gameState.config.keyBindings || DEFAULT_CONFIG.keyBindings,
+        };
         set({
           gameState: {
             ...gameState,
@@ -667,6 +684,11 @@ export const useGameStore = create<GameStore>()(
         const { gameState } = get();
         return gameState.phase === 'BETTING' && gameState.bankroll >= gameState.config.minBet;
       },
+      
+      // Set language
+      setLanguage: (language: 'fr' | 'en') => {
+        set({ language });
+      },
     }),
     {
       name: 'blackjack-storage',
@@ -687,6 +709,7 @@ export const useGameStore = create<GameStore>()(
         },
         stats: state.stats,
         cardCountingEnabled: state.cardCountingEnabled,
+        language: state.language,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {

@@ -20,11 +20,13 @@ import { useSound } from '@/hooks/useSound';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useMobileLayout } from '@/ui/blackjack/hooks';
+import { useTranslation } from '@/ui/blackjack/i18n';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Settings, BarChart, TrendingUp, ArrowLeft } from 'lucide-react';
 
 export const NewTable = memo(function NewTable() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const phase = useGameStore((s) => s.gameState.phase);
   const dealerHand = useGameStore((s) => s.gameState.dealerHand);
@@ -160,10 +162,10 @@ export const NewTable = memo(function NewTable() {
         variant="outline"
         size="sm"
         className="fixed top-4 left-4 z-[100] bg-card/95 backdrop-blur-md border-2 border-primary/30 shadow-lg"
-        aria-label="Retour à la sélection de mode"
+        aria-label={t.common.back}
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Retour
+        {t.common.back}
       </Button>
 
       {/* Floating Menu Button - Top Right (moved down a bit) */}
@@ -179,7 +181,7 @@ export const NewTable = memo(function NewTable() {
           }}
           className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-card/95 backdrop-blur-md border-2 border-primary/30 min-h-[44px] transition-all hover:border-primary/50 hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
           style={{ pointerEvents: 'auto' }}
-          aria-label="Settings"
+          aria-label={t.a11y.settings}
           type="button"
         >
           {showSettings ? '✕' : '⚙️'}
@@ -195,7 +197,7 @@ export const NewTable = memo(function NewTable() {
           }}
           className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-card/95 backdrop-blur-md border-2 border-primary/30 min-h-[44px] transition-all hover:border-primary/50 hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
           style={{ pointerEvents: 'auto' }}
-          aria-label="Stats"
+          aria-label={t.a11y.stats}
           type="button"
         >
           {showStatsDashboard ? '✕' : '📊'}
@@ -212,7 +214,7 @@ export const NewTable = memo(function NewTable() {
             }}
             className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-card/95 backdrop-blur-md border-2 border-primary/30 min-h-[44px] transition-all hover:border-primary/50 hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
             style={{ pointerEvents: 'auto' }}
-            aria-label="Strategy Chart"
+            aria-label={t.a11y.strategy}
             type="button"
           >
             {showStrategyChart ? '✕' : '📈'}
@@ -227,7 +229,7 @@ export const NewTable = memo(function NewTable() {
           initial={{ opacity: 0, scale: 0.9, x: 20 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
           exit={{ opacity: 0, scale: 0.9, x: 20 }}
-          className="fixed top-28 right-2 sm:top-32 sm:right-4 z-[90] w-[calc(100vw-1rem)] sm:w-[400px] md:w-[500px] max-h-[calc(100vh-8rem)] overflow-y-auto bg-card/95 backdrop-blur-md rounded-lg border-2 border-primary/30 shadow-xl p-4"
+          className="fixed top-28 right-2 sm:top-32 sm:right-4 z-[90] w-[calc(100vw-1rem)] sm:w-[400px] md:w-[500px] max-h-[calc(100vh-8rem)] overflow-y-auto overflow-x-visible bg-card/95 backdrop-blur-md rounded-lg border-2 border-primary/30 shadow-xl p-4"
           onClick={(e) => e.stopPropagation()}
         >
           <SettingsPanel />
@@ -323,16 +325,16 @@ export const NewTable = memo(function NewTable() {
                   className="btn-casino glow-gold"
                   type="button"
                 >
-                  New Hand
+                  {t.common.newRound}
                 </button>
               ) : undefined
             }
             bankruptContent={
               isBankrupt ? (
                 <>
-                  <div className="text-xl font-bold text-destructive mb-4">Out of chips!</div>
+                  <div className="text-xl font-bold text-destructive mb-4">{t.common.outOfChips}</div>
                   <button onClick={resetGame} className="btn-casino">
-                    Start Over ($1,000)
+                    {t.common.startOver}
                   </button>
                 </>
               ) : undefined
@@ -352,7 +354,7 @@ export const NewTable = memo(function NewTable() {
             playingContent={phase === 'PLAYER_TURN' ? <ActionBar /> : undefined}
             waitingContent={
               (phase === 'DEALER_TURN' || phase === 'DEALING') && isAnimating ? (
-                <span className="animate-pulse text-muted-foreground">Dealer playing...</span>
+                <span className="animate-pulse text-muted-foreground">{t.status.dealerPlaying}</span>
               ) : undefined
             }
           />
