@@ -16,6 +16,7 @@ export interface Hand {
   bet: number;
   isDoubled: boolean;
   isSplit: boolean;
+  isSplitAces: boolean; // True if this hand came from splitting aces (special rules apply)
   isStood: boolean;
   isBusted: boolean;
   isBlackjack: boolean;
@@ -124,6 +125,7 @@ export interface GameState {
   results: HandResult[];
   config: GameConfig;
   handHistory?: HandHistory[]; // Last 50 hands
+  splitCount: number; // Global counter for splits in current round (0-4 max)
 }
 
 export interface CardCountingStats {
@@ -151,7 +153,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   blackjackPayout: 1.5,
   dealerHitsSoft17: false, // S17 by default
   allowSplit: true,
-  maxSplits: 1,
+  maxSplits: 4, // Allow up to 4 splits (5 hands max)
   allowDouble: true,
   allowDoubleAfterSplit: true,
   allowSurrender: false,

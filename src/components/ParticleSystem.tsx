@@ -34,6 +34,12 @@ export const ParticleSystem = memo(function ParticleSystem({
   const [particles, setParticles] = useState<Particle[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const triggerRef = useRef(trigger);
+  
+  // Update trigger ref when trigger changes
+  useEffect(() => {
+    triggerRef.current = trigger;
+  }, [trigger]);
   
   // Clean particles immediately when trigger becomes false
   useEffect(() => {
@@ -51,14 +57,8 @@ export const ParticleSystem = memo(function ParticleSystem({
       setParticles([]);
       return;
     }
-  }, [trigger]);
-  
-  useEffect(() => {
-    if (!trigger) {
-      // Ensure particles are cleared
-      setParticles([]);
-      return;
-    }
+    
+    // Only proceed if trigger is true
     
     const config = {
       win: { count: 30, colors: ['#22c55e', '#10b981', '#34d399'], speed: 2 },
@@ -118,16 +118,18 @@ export const ParticleSystem = memo(function ParticleSystem({
     // Clear any existing intervals/timeouts
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
     
     // Animate particles with faster decay
     intervalRef.current = setInterval(() => {
       setParticles(prev => {
         // If trigger is false, clear immediately and stop interval
-        if (!trigger) {
+        if (!triggerRef.current) {
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
@@ -183,10 +185,8 @@ export const ParticleSystem = memo(function ParticleSystem({
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
-      // Force clear particles on cleanup
-      setParticles([]);
     };
-  }, [trigger, type, position]);
+  }, [trigger, type, position.x, position.y]);
   
   // Don't render if no particles or trigger is false
   if (!trigger || particles.length === 0) {
@@ -195,7 +195,7 @@ export const ParticleSystem = memo(function ParticleSystem({
   
   return (
     <div className="fixed inset-0 pointer-events-none z-50">
-      <AnimatePresence mode="popLayout" onExitComplete={() => setParticles([])}>
+      <AnimatePresence mode="popLayout">
         {particles.map(particle => {
           const isBlackjack = particle.id.startsWith('bj-');
           const isStar = particle.isStar || false;

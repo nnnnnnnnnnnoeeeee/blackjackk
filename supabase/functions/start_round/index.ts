@@ -129,10 +129,10 @@ serve(async (req) => {
       const playersWithBets = Object.keys(currentState.playerHands).length;
       const totalPlayers = table.table_players.length;
 
-      // Minimum 2 players required to start
-      if (totalPlayers < 2) {
+      // Minimum 1 player required to start
+      if (totalPlayers < 1) {
         return new Response(
-          JSON.stringify({ error: 'At least 2 players are required to start' }),
+          JSON.stringify({ error: 'At least 1 player is required to start' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }

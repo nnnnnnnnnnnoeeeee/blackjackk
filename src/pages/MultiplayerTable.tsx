@@ -9,14 +9,13 @@ import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { HandView } from '@/components/HandView';
-import { BetPanel } from '@/components/BetPanel';
-import { Controls } from '@/components/Controls';
-import { CircularTimer } from '@/components/CircularTimer';
+import { TimerBadge, TurnIndicator, BetComposerMultiplayer, ActionBarMultiplayer } from '@/ui/blackjack/components';
+import { OpponentsZone } from '@/ui/blackjack/table';
 import { ChipStack } from '@/components/ChipStack';
 import { ChatPanel } from '@/components/ChatPanel';
 // Toast import removed - all notifications disabled
 import { ArrowLeft, Copy, Hash, MessageSquare, Users } from 'lucide-react';
-import type { Hand, Card as BlackjackCard } from '@/lib/blackjack/types';
+import type { Hand, Card as BlackjackCard, PlayerAction } from '@/lib/blackjack/types';
 import { createShuffledShoe, drawCard } from '@/lib/blackjack/deck';
 import { addCardToHand, createEmptyHand, isBusted, isBlackjack, getBestHandValue, isSoftHand, canSplit } from '@/lib/blackjack/hand';
 import { getNextActiveHandIndex, areAllHandsFinished, shouldDealerHit, calculatePayout, canInsure } from '@/lib/blackjack/rules';
@@ -712,8 +711,8 @@ export default function MultiplayerTable() {
         return;
       }
 
-      // Check minimum players
-      if (!table || table.table_players.length < 2) {
+      // Check minimum players (at least 1 player required)
+      if (!table || table.table_players.length < 1) {
         // Notification removed
         return;
       }
@@ -909,7 +908,7 @@ export default function MultiplayerTable() {
               <div className="flex items-center gap-2 px-3 py-1 bg-gold/20 rounded-full border border-gold/30">
                 <Users className="h-3 w-3 text-gold" />
                 <span className="text-xs font-bold text-gold">
-                  {activePlayer.user_id === currentUser?.id ? 'Votre tour' : `Tour: ${activePlayer.profile?.username || `Joueur ${activePlayer.seat}`}`}
+                  {activePlayer.user_id === currentUser?.id ? 'Your Turn' : `Turn: ${activePlayer.profile?.username || `Player ${activePlayer.seat}`}`}
                 </span>
               </div>
             )}
@@ -956,97 +955,21 @@ export default function MultiplayerTable() {
           </motion.div>
         </div>
 
-        {/* Opponents Section - Clean Horizontal Layout */}
+        {/* Opponents Section - Using OpponentsZone */}
         {table.table_players.filter(p => p.user_id !== currentUser?.id).length > 0 && (
-          <div className="flex-shrink-0 px-4 py-3 bg-black/40 backdrop-blur-sm border-y border-gold/20">
-            <div className="max-w-7xl mx-auto">
-              <h3 className="text-sm font-bold text-gold/80 mb-3 uppercase tracking-wider">Adversaires</h3>
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {table.table_players
-                  .filter(p => p.user_id !== currentUser?.id)
-                  .sort((a, b) => a.seat - b.seat)
-                  .map((player, index) => {
-                    const hands = gameState.playerHands[player.seat] || [];
-                    const isActive = gameState.activeSeat === player.seat && gameState.phase === 'playing';
-
-                    return (
-                      <motion.div
-                        key={player.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className={`
-                          flex-shrink-0 bg-black/60 rounded-lg border-2 p-2 min-w-[180px]
-                          ${isActive ? 'border-gold bg-gold/20 shadow-lg shadow-gold/50' : 'border-gold/30'}
-                          transition-all duration-300
-                        `}
-                      >
-                        {/* Player Header */}
-                        <div className="flex items-center justify-between mb-1.5 pb-1.5 border-b border-gold/20">
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-5 h-5 bg-gold text-black rounded-full flex items-center justify-center text-xs font-bold">
-                              {player.seat}
-                            </div>
-                            <div>
-                              <div className="text-xs font-bold text-gold leading-tight">
-                                {player.profile?.username || `J${player.seat}`}
-                              </div>
-                              <div className="text-xs text-gold/70 leading-tight">
-                                ${player.bankroll.toLocaleString()}
-                              </div>
-                            </div>
-                          </div>
-                          {isActive && (
-                            <motion.div
-                              className="text-xs font-bold text-gold"
-                              animate={{ opacity: [1, 0.5, 1] }}
-                              transition={{ duration: 1, repeat: Infinity }}
-                            >
-                              ⭐
-                            </motion.div>
-                          )}
-                        </div>
-
-                        {/* Cards Display */}
-                        <div className="space-y-1.5">
-                          {hands.length > 0 ? (
-                            hands.map((hand, idx) => (
-                              <div key={idx} className="bg-black/40 rounded p-1.5 border border-gold/20">
-                                <HandView
-                                  hand={hand}
-                                  isActive={isActive && idx === 0}
-                                  showValue={true}
-                                />
-                                {hand.bet > 0 && (
-                                  <div className="mt-1 flex justify-center">
-                                    <ChipStack amount={hand.bet} size="sm" />
-                                  </div>
-                                )}
-                                {/* Status badges */}
-                                {hand.isBlackjack && (
-                                  <div className="mt-1 text-center">
-                                    <span className="text-xs font-bold bg-gold text-black px-1.5 py-0.5 rounded">BJ</span>
-                                  </div>
-                                )}
-                                {hand.isBusted && (
-                                  <div className="mt-1 text-center">
-                                    <span className="text-xs font-bold bg-red-600 text-white px-1.5 py-0.5 rounded">BUST</span>
-                                  </div>
-                                )}
-                              </div>
-                            ))
-                          ) : (
-                            <div className="text-center text-xs text-gold/50 py-1">
-                              ...
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-              </div>
-            </div>
-          </div>
+          <OpponentsZone
+            opponents={table.table_players
+              .filter(p => p.user_id !== currentUser?.id)
+              .map(player => ({
+                id: player.id,
+                seat: player.seat,
+                username: player.profile?.username || `J${player.seat}`,
+                bankroll: player.bankroll,
+                hands: gameState.playerHands[player.seat] || [],
+              }))}
+            activeSeat={gameState.activeSeat}
+            phase={gameState.phase}
+          />
         )}
 
         {/* MY CARDS SECTION - Fixed Bottom, Always Visible */}
@@ -1129,58 +1052,19 @@ export default function MultiplayerTable() {
                 {/* Controls Section - Right Side */}
                 <div className="flex-shrink-0 w-80">
                   {/* Betting Phase */}
-                  {gameState.phase === 'betting' && (
-                    <div className="bg-gold/10 rounded-lg p-3 border border-gold/30">
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm font-semibold text-gold">
-                          Placez votre mise
-                        </p>
-                        {isTableCreator && bettingTimeLeft > 0 && (
-                          <CircularTimer
-                            timeLeft={bettingTimeLeft}
-                            totalTime={10}
-                            size={35}
-                            color="gold"
-                            showText={true}
-                          />
-                        )}
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[10, 25, 50, 100, 250, 500].map((amount) => {
-                          const canAfford = myPlayer.bankroll >= amount;
-                          return (
-                            <motion.div
-                              key={amount}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                            >
-                              <Button
-                                onClick={() => handleAction('bet', { amount })}
-                                disabled={!canAfford}
-                                className={`
-                                  w-full text-xs font-bold h-8
-                                  ${canAfford 
-                                    ? 'bg-gold hover:bg-gold/90 text-black' 
-                                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                  }
-                                `}
-                              >
-                                ${amount}
-                              </Button>
-                            </motion.div>
-                          );
-                        })}
-                      </div>
-                      {isTableCreator && Object.keys(gameState.playerHands || {}).length > 0 && (
-                        <Button
-                          onClick={handleStartRound}
-                          size="sm"
-                          className="mt-2 w-full bg-green-600 hover:bg-green-700 text-white font-bold"
-                        >
-                          🎲 Distribuer
-                        </Button>
-                      )}
-                    </div>
+                  {gameState.phase === 'betting' && myPlayer && (
+                    <BetComposerMultiplayer
+                      bankroll={myPlayer.bankroll}
+                      minBet={10}
+                      maxBet={500}
+                      onBet={(amount) => handleAction('bet', { amount })}
+                      onDeal={isTableCreator && Object.keys(gameState.playerHands || {}).length > 0 ? handleStartRound : undefined}
+                      isTableCreator={isTableCreator}
+                      bettingTimeLeft={bettingTimeLeft}
+                      canDeal={isTableCreator && Object.keys(gameState.playerHands || {}).length > 0}
+                      soundEnabled={false}
+                      soundVolume={0.5}
+                    />
                   )}
 
                   {/* Playing Phase - My Turn */}
@@ -1206,56 +1090,25 @@ export default function MultiplayerTable() {
                       myPlayer.bankroll >= (activeHand?.bet || 0) / 2;
                     
                     const actions = [
-                      { action: 'hit', label: 'Hit', icon: '➕', enabled: true },
-                      { action: 'stand', label: 'Stand', icon: '✋', enabled: true },
-                      { action: 'double', label: 'Double', icon: '✖️', enabled: !!canDoubleHand },
-                      { action: 'split', label: 'Split', icon: '✂️', enabled: !!canSplitHand },
+                      { action: 'hit' as PlayerAction, label: 'Hit', enabled: true },
+                      { action: 'stand' as PlayerAction, label: 'Stand', enabled: true },
+                      { action: 'double' as PlayerAction, label: 'Double', enabled: !!canDoubleHand, reason: !canDoubleHand ? 'Can only double on first two cards' : undefined },
+                      { action: 'split' as PlayerAction, label: 'Split', enabled: !!canSplitHand, reason: !canSplitHand ? 'Can only split with two cards of same rank' : undefined },
                     ];
                     
                     if (canInsurance) {
-                      actions.push({ action: 'insurance', label: 'Insurance', icon: '🛡️', enabled: true });
+                      actions.push({ action: 'insurance' as PlayerAction, label: 'Insurance', enabled: true });
                     }
                     
                     return (
-                      <div className="bg-red-500/20 rounded-lg p-3 border-2 border-red-500/50">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-base font-bold text-red-400 animate-pulse">
-                            ⭐ À VOTRE TOUR !
-                          </p>
-                          {actionTimeLeft > 0 && (
-                            <CircularTimer
-                              timeLeft={actionTimeLeft}
-                              totalTime={10}
-                              size={30}
-                              color="red"
-                              showText={true}
-                            />
-                          )}
-                        </div>
-                        <div className={`grid gap-2 ${actions.length <= 4 ? 'grid-cols-2' : 'grid-cols-3'}`}>
-                          {actions.map(({ action, label, icon, enabled }) => (
-                            <motion.div
-                              key={action}
-                              whileHover={enabled ? { scale: 1.05 } : {}}
-                              whileTap={enabled ? { scale: 0.95 } : {}}
-                            >
-                              <Button
-                                onClick={() => enabled && handleAction(action)}
-                                disabled={!enabled}
-                                className={`
-                                  w-full text-xs font-bold h-9
-                                  ${enabled 
-                                    ? 'bg-gold hover:bg-gold/90 text-black' 
-                                    : 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                                  }
-                                `}
-                              >
-                                {icon} {label}
-                              </Button>
-                            </motion.div>
-                          ))}
-                        </div>
-                      </div>
+                      <ActionBarMultiplayer
+                        actions={actions}
+                        onAction={(action) => handleAction(action)}
+                        actionTimeLeft={actionTimeLeft}
+                        isAnimating={false}
+                        soundEnabled={false}
+                        soundVolume={0.5}
+                      />
                     );
                   })()}
 
@@ -1283,7 +1136,7 @@ export default function MultiplayerTable() {
                         <Button
                           onClick={handleStartRound}
                           size="sm"
-                          disabled={table.table_players.length < 2}
+                          disabled={table.table_players.length < 1}
                           className="w-full bg-gold hover:bg-gold/90 text-black font-bold"
                         >
                           🎰 Démarrer ({table.table_players.length} joueur{table.table_players.length > 1 ? 's' : ''})

@@ -33,7 +33,7 @@ export default function Login() {
       if (error) throw error;
 
       toast.success('Connexion réussie !');
-      navigate('/lobby');
+      navigate('/mode-selection');
     } catch (error: any) {
       toast.error(error.message || 'Erreur de connexion');
     } finally {
@@ -135,11 +135,6 @@ export default function Login() {
               <span className="text-muted-foreground">Pas encore de compte ? </span>
               <Link to="/register" className="text-primary hover:underline">
                 S'inscrire
-              </Link>
-            </div>
-            <div className="mt-4 text-center">
-              <Link to="/" className="text-sm text-muted-foreground hover:underline">
-                ← Retour au jeu solo
               </Link>
             </div>
           </CardContent>

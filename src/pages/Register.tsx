@@ -53,7 +53,7 @@ export default function Register() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/lobby`,
+          redirectTo: `${window.location.origin}/mode-selection`,
         },
       });
 
@@ -149,8 +149,8 @@ export default function Register() {
               </Link>
             </div>
             <div className="mt-4 text-center">
-              <Link to="/" className="text-sm text-muted-foreground hover:underline">
-                ← Retour au jeu solo
+              <Link to="/login" className="text-sm text-muted-foreground hover:underline">
+                ← Retour à la connexion
               </Link>
             </div>
           </CardContent>

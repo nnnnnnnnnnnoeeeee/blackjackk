@@ -57,6 +57,7 @@ export function createInitialState(
     results: [],
     config: fullConfig,
     handHistory: [],
+    splitCount: 0, // Initialize split counter
   };
 }
 
@@ -82,6 +83,7 @@ export function resetForNewRound(state: GameState): GameState {
     sideBets: {},
     sideBetResults: undefined,
     results: [],
+    splitCount: 0, // Reset split counter for new round
   };
 }
 
@@ -106,6 +108,7 @@ export function placeBet(state: GameState, amount: number): GameState {
     currentBet: amount,
     bankroll: state.bankroll - amount,
     playerHands: [createEmptyHand(amount)],
+    splitCount: 0, // Reset split count when placing a new bet
   };
 }
 
@@ -213,6 +216,7 @@ export function dealInitialCards(state: GameState): GameState {
     playerHands: [playerHand],
     activeHandIndex: 0,
     sideBetResults,
+    splitCount: state.splitCount ?? 0, // Preserve split count (should be 0 at start of round)
   };
 }
 
@@ -351,6 +355,11 @@ function executeSplit(state: GameState): GameState {
     throw new Error('Can only split hands with exactly 2 cards');
   }
   
+  // Check split limit (max 4 splits = 5 hands total)
+  if (state.splitCount >= state.config.maxSplits) {
+    throw new Error(`Maximum splits reached (${state.config.maxSplits} splits allowed)`);
+  }
+  
   // Validate bankroll is sufficient for the additional bet
   if (state.bankroll < hand.bet) {
     throw new Error('Insufficient bankroll for split');
@@ -366,17 +375,22 @@ function executeSplit(state: GameState): GameState {
   
   const [card1, card2] = hand.cards;
   
+  // Check if splitting aces (special rules apply)
+  const isSplittingAces = card1.rank === 'A' && card2.rank === 'A';
+  
   // Create two new hands from the split
   const hand1: Hand = {
     ...createEmptyHand(hand.bet),
     cards: [card1],
     isSplit: true,
+    isSplitAces: isSplittingAces,
   };
   
   const hand2: Hand = {
     ...createEmptyHand(hand.bet),
     cards: [card2],
     isSplit: true,
+    isSplitAces: isSplittingAces,
   };
   
   // Draw one card for each hand
@@ -397,6 +411,53 @@ function executeSplit(state: GameState): GameState {
   const newHand1 = addCardToHand(hand1, newCard1);
   const newHand2 = addCardToHand(hand2, newCard2);
   
+  // Special handling for split aces:
+  // - Only one card is dealt to each hand
+  // - Hands are automatically stood (no Hit/Double allowed)
+  // - A 21 is treated as 21, not blackjack
+  if (isSplittingAces) {
+    // Mark both hands as stood (can't hit or double after splitting aces)
+    const finalHand1: Hand = { ...newHand1, isStood: true };
+    const finalHand2: Hand = { ...newHand2, isStood: true };
+    
+    // Replace current hand with two new hands
+    const newHands = [...state.playerHands];
+    newHands.splice(handIndex, 1, finalHand1, finalHand2);
+    
+    // Increment split count
+    const newSplitCount = state.splitCount + 1;
+    
+    // Find next active hand
+    let nextActiveIndex = getNextActiveHandIndex(newHands, handIndex - 1);
+    if (nextActiveIndex === -1) {
+      nextActiveIndex = getNextActiveHandIndex(newHands, -1);
+    }
+    
+    // If all hands finished, move to dealer turn
+    if (areAllHandsFinished(newHands) || nextActiveIndex === -1) {
+      return {
+        ...state,
+        shoe,
+        bankroll: state.bankroll - hand.bet,
+        playerHands: newHands,
+        activeHandIndex: 0,
+        splitCount: newSplitCount,
+        phase: 'DEALER_TURN',
+      };
+    }
+    
+    return {
+      ...state,
+      shoe,
+      bankroll: state.bankroll - hand.bet,
+      playerHands: newHands,
+      activeHandIndex: nextActiveIndex,
+      splitCount: newSplitCount,
+      phase: 'PLAYER_TURN',
+    };
+  }
+  
+  // Regular split (non-aces)
   // If a hand gets blackjack after split, it's automatically finished
   // (Note: Split blackjacks are usually not treated as natural blackjacks, but we still mark them as finished)
   const finalHand1: Hand = newHand1.isBlackjack 
@@ -459,12 +520,16 @@ function executeSplit(state: GameState): GameState {
     }
   }
   
+  // Increment split count
+  const newSplitCount = state.splitCount + 1;
+  
   const newState: GameState = {
     ...state,
     shoe,
     bankroll: state.bankroll - hand.bet, // Second hand costs another bet
     playerHands: newHands,
     activeHandIndex: nextActiveIndex,
+    splitCount: newSplitCount, // Increment split counter
     phase: 'PLAYER_TURN',
   };
   

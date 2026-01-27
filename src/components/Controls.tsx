@@ -141,7 +141,9 @@ export const Controls = memo(function Controls() {
         if (config.allowDouble && (!handIsSplit || config.allowDoubleAfterSplit)) {
           actions.push('double');
         }
-        if (config.allowSplit && playerHands.length - 1 < config.maxSplits) {
+        // Use splitCount from gameState instead of playerHands.length - 1
+        const splitCount = gameState.splitCount ?? 0;
+        if (config.allowSplit && splitCount < config.maxSplits) {
           const canSplit = handCard1Rank === handCard2Rank || 
             (['10', 'J', 'Q', 'K'].includes(handCard1Rank || '') && ['10', 'J', 'Q', 'K'].includes(handCard2Rank || ''));
           if (canSplit) {
@@ -161,7 +163,7 @@ export const Controls = memo(function Controls() {
     
     console.log('[Controls] Valid actions calculated:', actions);
     return actions;
-  }, [gameState, phase, handCardsLength, handIsStood, handIsBusted, handIsBlackjack, handIsSplit, handBet, handCard1Rank, handCard2Rank, activeHandIndex, bankroll, playerHands.length, config.allowDouble, config.allowDoubleAfterSplit, config.allowSplit, config.maxSplits, config.allowSurrender]);
+  }, [gameState, phase, handCardsLength, handIsStood, handIsBusted, handIsBlackjack, handIsSplit, handBet, handCard1Rank, handCard2Rank, activeHandIndex, bankroll, gameState.splitCount, config.allowDouble, config.allowDoubleAfterSplit, config.allowSplit, config.maxSplits, config.allowSurrender]);
   
   const handleAction = useCallback((action: PlayerAction) => {
     console.log('[Controls] handleAction called', { action, isAnimating, validActions });

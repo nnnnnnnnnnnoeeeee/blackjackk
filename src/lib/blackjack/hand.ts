@@ -112,16 +112,29 @@ export function isBlackjack(cards: Card[]): boolean {
 }
 
 /**
- * Formats hand value for display (e.g., "17" or "17 (soft)")
+ * Formats hand value for display (e.g., "17" or "5 / 15" for soft hands)
  */
 export function formatHandValue(cards: Card[]): string {
-  const value = getBestHandValue(cards);
+  const values = calculateHandValues(cards);
+  const bestValue = values[0];
   const soft = isSoftHand(cards);
   
-  if (value > 21) return `${value} BUST`;
+  if (bestValue > 21) return `${bestValue} BUST`;
   if (isBlackjack(cards)) return 'BLACKJACK';
   
-  return soft ? `${value} (soft)` : `${value}`;
+  // If soft hand, show both possible values (e.g., "5 / 15")
+  if (soft && values.length >= 2) {
+    // Get the lower value (with ace as 1) and higher value (with ace as 11)
+    const lowerValue = values[values.length - 1]; // Lowest valid value
+    const higherValue = values[0]; // Highest valid value
+    
+    // Only show both if they're different and both valid
+    if (lowerValue !== higherValue && lowerValue <= 21 && higherValue <= 21) {
+      return `${lowerValue} / ${higherValue}`;
+    }
+  }
+  
+  return `${bestValue}`;
 }
 
 /**
@@ -161,6 +174,7 @@ export function createEmptyHand(bet: number = 0): Hand {
     bet,
     isDoubled: false,
     isSplit: false,
+    isSplitAces: false,
     isStood: false,
     isBusted: false,
     isBlackjack: false,
@@ -176,6 +190,7 @@ export function createHand(cards: Card[], bet: number = 0): Hand {
     bet,
     isDoubled: false,
     isSplit: false,
+    isSplitAces: false,
     isStood: false,
     isBusted: isBusted(cards),
     isBlackjack: isBlackjack(cards),
@@ -184,14 +199,17 @@ export function createHand(cards: Card[], bet: number = 0): Hand {
 
 /**
  * Adds a card to a hand (immutable)
+ * Special rule: Hands from splitting aces are never considered blackjack (even if A+10)
  */
 export function addCardToHand(hand: Hand, card: Card): Hand {
   const newCards = [...hand.cards, card];
+  // If this is a split aces hand, never mark as blackjack (21 is just 21, not blackjack)
+  const shouldBeBlackjack = isBlackjack(newCards) && !hand.isSplitAces;
   return {
     ...hand,
     cards: newCards,
     isBusted: isBusted(newCards),
-    isBlackjack: isBlackjack(newCards),
+    isBlackjack: shouldBeBlackjack,
   };
 }
 

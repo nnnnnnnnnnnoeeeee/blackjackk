@@ -99,6 +99,39 @@ export const casinoTheme = {
       desktop: 'text-sm',
     },
   },
+
+  // Z-index layers
+  zIndex: {
+    modal: 100,
+    tooltip: 50,
+    dock: 40,
+    header: 30,
+    card: 10,
+    base: 1,
+  },
+
+  // Animations
+  animations: {
+    duration: {
+      fast: 150,
+      normal: 200,
+      slow: 300,
+      slower: 500,
+    },
+    easing: {
+      easeOut: 'cubic-bezier(0.0, 0, 0.2, 1)',
+      easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
+      easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    },
+  },
+
+  // Safe area (iOS notch, Android bars)
+  safeArea: {
+    top: 'env(safe-area-inset-top, 0px)',
+    bottom: 'env(safe-area-inset-bottom, 0px)',
+    left: 'env(safe-area-inset-left, 0px)',
+    right: 'env(safe-area-inset-right, 0px)',
+  },
 } as const;
 
 /**
@@ -127,14 +160,14 @@ export const useBreakpoint = () => {
 };
 
 /**
- * Phase display text mapping
+ * Phase display text mapping (English)
  */
 export const phaseText = {
-  BETTING: 'Placez votre mise',
-  DEALING: 'Distribution...',
-  PLAYER_TURN: 'À vous',
-  DEALER_TURN: 'Croupier joue...',
-  SETTLEMENT: 'Résultat',
+  BETTING: 'Place Your Bet',
+  DEALING: 'Dealing...',
+  PLAYER_TURN: 'Your Turn',
+  DEALER_TURN: 'Dealer Playing',
+  SETTLEMENT: 'Settlement',
 } as const;
 
 /**

@@ -115,10 +115,16 @@ const validateState = (state: unknown): GameStore => {
       bet: 0,
       isDoubled: false,
       isSplit: false,
+      isSplitAces: false,
       isStood: false,
       isBusted: false,
       isBlackjack: false,
     };
+  }
+  
+  // Ensure splitCount exists and is valid (0-4)
+  if (typeof gameState.splitCount !== 'number' || gameState.splitCount < 0) {
+    gameState.splitCount = 0;
   }
   
   // Ensure config exists and is valid

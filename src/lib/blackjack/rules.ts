@@ -28,7 +28,7 @@ export function isActionValid(
     case 'double':
       return canDouble(hand, state.bankroll, state.config);
     case 'split':
-      return canSplitHand(hand, state.playerHands.length - 1, state.bankroll, state.config);
+      return canSplitHand(hand, state.splitCount, state.bankroll, state.config);
     case 'surrender':
       return canSurrender(hand, state.config);
     case 'insurance':
@@ -59,8 +59,10 @@ export function getValidActions(state: GameState): PlayerAction[] {
 
 /**
  * Can always hit if hand is not stood or busted
+ * Special rule: Cannot hit after splitting aces (only one card dealt)
  */
 export function canHit(hand: Hand): boolean {
+  if (hand.isSplitAces) return false; // Cannot hit after splitting aces
   return !hand.isStood && !hand.isBusted && !hand.isBlackjack;
 }
 
@@ -80,6 +82,9 @@ export function canDouble(hand: Hand, bankroll: number, config: GameConfig): boo
   if (hand.cards.length !== 2) return false;
   if (bankroll < hand.bet) return false; // Need to match the bet
   
+  // Special rule: Cannot double after splitting aces
+  if (hand.isSplitAces) return false;
+  
   // If this is a split hand, check if double after split is allowed
   if (hand.isSplit && !config.allowDoubleAfterSplit) return false;
   
@@ -89,17 +94,22 @@ export function canDouble(hand: Hand, bankroll: number, config: GameConfig): boo
 /**
  * Can split if same value cards and haven't exceeded max splits
  */
+/**
+ * Can split if same value cards and haven't exceeded max splits
+ * Uses splitCount from GameState instead of playerHands.length
+ */
 export function canSplitHand(
   hand: Hand,
-  currentSplitCount: number,
+  splitCount: number, // Use splitCount from GameState
   bankroll: number,
   config: GameConfig
 ): boolean {
   if (!config.allowSplit) return false;
   if (hand.isStood || hand.isBusted) return false;
   if (bankroll < hand.bet) return false; // Need to match the bet
+  if (splitCount >= config.maxSplits) return false; // Check split limit
   
-  return canSplit(hand, config.maxSplits, currentSplitCount, config.resplitAces);
+  return canSplit(hand, config.maxSplits, splitCount, config.resplitAces);
 }
 
 /**
@@ -164,9 +174,11 @@ export function calculatePayout(
   const dealerBusted = dealerValue > 21;
   
   // Natural blackjack: EXACTLY 2 cards, A + 10/J/Q/K, NOT from split
+  // Special case: Hands from splitting aces are never natural blackjacks (even if they have 21)
   const isNaturalBlackjack = playerHand.isBlackjack && 
                              playerHand.cards.length === 2 && 
-                             !playerHand.isSplit;
+                             !playerHand.isSplit &&
+                             !playerHand.isSplitAces;
   
   // Use explicit dealer blackjack status if provided, otherwise calculate from cards
   const dealerBJ = dealerHasBlackjack !== undefined 
