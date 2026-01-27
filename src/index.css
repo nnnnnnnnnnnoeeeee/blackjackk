@@ -129,6 +129,39 @@
     padding-bottom: var(--safe-area-inset-bottom);
     padding-left: var(--safe-area-inset-left);
     padding-right: var(--safe-area-inset-right);
+    /* Prevent pull-to-refresh on mobile */
+    overscroll-behavior-y: none;
+    /* Prevent text selection on buttons and interactive elements */
+    -webkit-tap-highlight-color: transparent;
+    /* Improve touch scrolling */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Optimize touch targets for mobile */
+  button, a, [role="button"] {
+    /* Minimum touch target size: 44x44px */
+    min-height: 44px;
+    min-width: 44px;
+    /* Improve touch responsiveness */
+    touch-action: manipulation;
+    /* Prevent text selection on buttons */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Prevent zoom on input focus on iOS */
+  input, select, textarea {
+    font-size: 16px !important;
+    touch-action: manipulation;
+  }
+  
+  @media (max-width: 640px) {
+    /* Larger touch targets on mobile */
+    button, a, [role="button"] {
+      min-height: 48px;
+      padding: 12px 16px;
+    }
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -156,8 +189,8 @@
     @apply bg-[hsl(var(--card-white))] text-[hsl(var(--card-black))];
     @apply border-2 border-[hsl(var(--card-white))];
     aspect-ratio: 2.5 / 3.5;
-    min-width: 70px;
-    max-width: 100px;
+    min-width: 60px;
+    max-width: 90px;
     
     /* Ombres portées réalistes */
     box-shadow: 
@@ -213,6 +246,10 @@
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
     width: 48px;
     height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .poker-chip.red {
@@ -382,11 +419,11 @@
   }
   
   .poker-chip {
-    width: 40px;
-    height: 40px;
-    font-size: 0.65rem;
-    min-width: 40px;
-    min-height: 40px;
+    width: 48px;
+    height: 48px;
+    font-size: 0.7rem;
+    min-width: 48px;
+    min-height: 48px;
   }
   
   .btn-casino,

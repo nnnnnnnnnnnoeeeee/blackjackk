@@ -222,44 +222,83 @@ export const NewTable = memo(function NewTable() {
         )}
       </div>
 
-      {/* Floating Panels - Top Right (adjusted to not overflow) */}
-      {showSettings && (
-        <motion.div
-          key="settings-panel"
-          initial={{ opacity: 0, scale: 0.9, x: 20 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          exit={{ opacity: 0, scale: 0.9, x: 20 }}
-          className="fixed top-28 right-2 sm:top-32 sm:right-4 z-[90] w-[calc(100vw-1rem)] sm:w-[400px] md:w-[500px] max-h-[calc(100vh-8rem)] overflow-y-auto overflow-x-visible bg-card/95 backdrop-blur-md rounded-lg border-2 border-primary/30 shadow-xl p-4"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <SettingsPanel />
-        </motion.div>
-      )}
+      {/* Floating Panels - Use Sheet on mobile, motion.div on desktop */}
+      {isMobile ? (
+        <>
+          <Sheet open={showSettings} onOpenChange={setShowSettings}>
+            <SheetContent side="right" className="w-full sm:w-[400px] md:w-[500px] overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>{t.settings.title}</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4">
+                <SettingsPanel />
+              </div>
+            </SheetContent>
+          </Sheet>
 
-      {showStatsDashboard && (
-        <motion.div
-          key="stats-panel"
-          initial={{ opacity: 0, scale: 0.9, x: 20 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          exit={{ opacity: 0, scale: 0.9, x: 20 }}
-          className="fixed top-28 right-2 sm:top-32 sm:right-4 z-[90] w-[calc(100vw-1rem)] sm:w-[400px] md:w-[500px] max-h-[calc(100vh-8rem)] overflow-y-auto bg-card/95 backdrop-blur-md rounded-lg border-2 border-primary/30 shadow-xl p-4"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <StatsDashboard />
-        </motion.div>
-      )}
+          <Sheet open={showStatsDashboard} onOpenChange={setShowStatsDashboard}>
+            <SheetContent side="right" className="w-full sm:w-[400px] md:w-[500px] overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>{t.a11y.stats}</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4">
+                <StatsDashboard />
+              </div>
+            </SheetContent>
+          </Sheet>
 
-      {showStrategyChart && phase === 'PLAYER_TURN' && (
-        <motion.div
-          key="strategy-chart-panel"
-          initial={{ opacity: 0, scale: 0.9, x: 20 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          exit={{ opacity: 0, scale: 0.9, x: 20 }}
-          className="fixed top-28 right-2 sm:top-32 sm:right-4 z-[90] w-[calc(100vw-1rem)] sm:w-[400px] md:w-[500px] max-h-[calc(100vh-8rem)] overflow-y-auto bg-card/95 backdrop-blur-md rounded-lg border-2 border-primary/30 shadow-xl p-4"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <BasicStrategyChart />
-        </motion.div>
+          <Sheet open={showStrategyChart && phase === 'PLAYER_TURN'} onOpenChange={setShowStrategyChart}>
+            <SheetContent side="right" className="w-full sm:w-[400px] md:w-[500px] overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>{t.a11y.strategy}</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4">
+                <BasicStrategyChart />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </>
+      ) : (
+        <>
+          {showSettings && (
+            <motion.div
+              key="settings-panel"
+              initial={{ opacity: 0, scale: 0.9, x: 20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, x: 20 }}
+              className="fixed top-28 right-2 sm:top-32 sm:right-4 z-[90] w-[calc(100vw-1rem)] sm:w-[400px] md:w-[500px] max-h-[calc(100vh-8rem)] overflow-y-auto overflow-x-visible bg-card/95 backdrop-blur-md rounded-lg border-2 border-primary/30 shadow-xl p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <SettingsPanel />
+            </motion.div>
+          )}
+
+          {showStatsDashboard && (
+            <motion.div
+              key="stats-panel"
+              initial={{ opacity: 0, scale: 0.9, x: 20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, x: 20 }}
+              className="fixed top-28 right-2 sm:top-32 sm:right-4 z-[90] w-[calc(100vw-1rem)] sm:w-[400px] md:w-[500px] max-h-[calc(100vh-8rem)] overflow-y-auto bg-card/95 backdrop-blur-md rounded-lg border-2 border-primary/30 shadow-xl p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <StatsDashboard />
+            </motion.div>
+          )}
+
+          {showStrategyChart && phase === 'PLAYER_TURN' && (
+            <motion.div
+              key="strategy-chart-panel"
+              initial={{ opacity: 0, scale: 0.9, x: 20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, x: 20 }}
+              className="fixed top-28 right-2 sm:top-32 sm:right-4 z-[90] w-[calc(100vw-1rem)] sm:w-[400px] md:w-[500px] max-h-[calc(100vh-8rem)] overflow-y-auto bg-card/95 backdrop-blur-md rounded-lg border-2 border-primary/30 shadow-xl p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <BasicStrategyChart />
+            </motion.div>
+          )}
+        </>
       )}
 
       <TableShell
