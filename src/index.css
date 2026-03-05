@@ -123,7 +123,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Georgia', 'Times New Roman', serif;
+    font-family: 'Outfit', system-ui, sans-serif;
     /* Support safe area padding */
     padding-top: var(--safe-area-inset-top);
     padding-bottom: var(--safe-area-inset-bottom);
@@ -165,8 +165,8 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    @apply font-semibold tracking-tight;
+    font-family: 'Playfair Display', 'Georgia', serif;
+    @apply font-bold tracking-tight;
   }
 
   /* Reduced motion support */
@@ -185,156 +185,303 @@
 @layer components {
   /* Playing Card Styles - Premium design */
   .playing-card {
-    @apply relative flex flex-col items-center justify-center rounded-lg;
-    @apply bg-[hsl(var(--card-white))] text-[hsl(var(--card-black))];
-    @apply border-2 border-[hsl(var(--card-white))];
+    @apply relative flex flex-col items-center justify-center;
+    @apply bg-white text-[#111];
     aspect-ratio: 2.5 / 3.5;
     min-width: 60px;
     max-width: 90px;
-    
-    /* Ombres portées réalistes */
-    box-shadow: 
-      0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06),
-      0 0 0 1px rgba(0, 0, 0, 0.05),
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
-    
-    /* Texture de papier/carton subtile */
-    background-image: 
-      radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.02) 0%, transparent 50%);
-    
-    /* Reflets subtils */
-    position: relative;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.12);
+    font-family: 'Outfit', system-ui, sans-serif;
+
+    box-shadow:
+      0 6px 14px rgba(0,0,0,0.4),
+      0 2px 4px rgba(0,0,0,0.25),
+      inset 0 1px 0 rgba(255,255,255,0.8);
   }
-  
+
+  /* Subtle top-left sheen on face-up cards */
   .playing-card::before {
     content: '';
-    @apply absolute inset-0 rounded-lg pointer-events-none;
+    @apply absolute inset-0 pointer-events-none;
+    border-radius: inherit;
     background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      transparent 50%,
-      rgba(0, 0, 0, 0.05) 100%
+      125deg,
+      rgba(255,255,255,0.5) 0%,
+      rgba(255,255,255,0.1) 30%,
+      transparent 55%
     );
+    z-index: 1;
+  }
+
+  .playing-card.red { color: #cc0000; }
+  .playing-card.black { color: #111; }
+
+  /* Face-down: classic navy back with simple frame */
+  .playing-card.face-down {
+    background-color: #1a2744;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow:
+      0 6px 14px rgba(0,0,0,0.5),
+      0 2px 4px rgba(0,0,0,0.3),
+      inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+
+  /* Inner frame on face-down card */
+  .playing-card.face-down::before {
+    background: none;
+    border: 2px solid rgba(212,175,55,0.5);
+    border-radius: 3px;
+    inset: 5px;
+  }
+
+  /* Subtle dot pattern overlay on face-down */
+  .playing-card.face-down::after {
+    content: '';
+    @apply absolute pointer-events-none;
+    inset: 8px;
+    border-radius: 2px;
+    background-image: radial-gradient(circle, rgba(212,175,55,0.25) 1px, transparent 1px);
+    background-size: 6px 6px;
+  }
+
+  /* Poker Chip Styles — Premium 3D look */
+  .poker-chip {
+    @apply relative flex items-center justify-center rounded-full font-bold;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    min-height: 52px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .poker-chip::before {
+    content: '';
+    @apply absolute rounded-full pointer-events-none;
+    inset: 4px;
+    border: 2px dashed rgba(255,255,255,0.35);
+  }
+
+  /* Top-light shimmer */
+  .poker-chip::after {
+    content: '';
+    @apply absolute rounded-full pointer-events-none;
+    inset: 0;
+    background: linear-gradient(145deg, rgba(255,255,255,0.35) 0%, transparent 55%);
     border-radius: inherit;
   }
 
-  .playing-card.red {
-    @apply text-[hsl(var(--card-red))];
-  }
-
-  .playing-card.black {
-    @apply text-[hsl(var(--card-black))];
-  }
-
-  .playing-card.face-down {
-    @apply bg-gradient-to-br from-primary to-[hsl(43_74%_35%)] border-primary;
-    background-image: 
-      repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 10px,
-        hsl(43 74% 40% / 0.3) 10px,
-        hsl(43 74% 40% / 0.3) 20px
-      );
-  }
-
-  /* Poker Chip Styles */
-  .poker-chip {
-    @apply relative flex items-center justify-center rounded-full font-bold shadow-lg;
-    @apply border-4 border-dashed transition-transform hover:scale-110;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
-    min-height: 48px;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-  }
-
   .poker-chip.red {
-    @apply bg-[hsl(var(--chip-red))] border-[hsl(0_60%_70%)] text-white;
+    background: radial-gradient(circle at 35% 35%, #f87171, #dc2626 60%, #991b1b);
+    box-shadow: 0 4px 0 #7f1d1d, 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+    color: white;
   }
 
   .poker-chip.blue {
-    @apply bg-[hsl(var(--chip-blue))] border-[hsl(217_70%_75%)] text-white;
+    background: radial-gradient(circle at 35% 35%, #60a5fa, #2563eb 60%, #1e40af);
+    box-shadow: 0 4px 0 #1e3a8a, 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+    color: white;
   }
 
   .poker-chip.green {
-    @apply bg-[hsl(var(--chip-green))] border-[hsl(142_50%_60%)] text-white;
+    background: radial-gradient(circle at 35% 35%, #4ade80, #16a34a 60%, #14532d);
+    box-shadow: 0 4px 0 #14532d, 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+    color: white;
   }
 
   .poker-chip.black {
-    @apply bg-[hsl(var(--chip-black))] border-[hsl(0_0%_35%)] text-white;
+    background: radial-gradient(circle at 35% 35%, #374151, #111827 60%, #030712);
+    box-shadow: 0 4px 0 #000, 0 6px 12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+    color: #d1d5db;
   }
 
   .poker-chip.gold {
-    @apply bg-[hsl(var(--chip-gold))] border-[hsl(43_60%_65%)] text-[hsl(var(--chip-black))];
+    background: radial-gradient(circle at 35% 35%, #fde68a, #d97706 60%, #92400e);
+    box-shadow: 0 4px 0 #78350f, 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.4);
+    color: #1c1917;
   }
 
-  /* Table felt pattern - Premium texture */
+  /* Table felt pattern - Premium texture with overhead spotlight */
   .table-felt {
     @apply relative overflow-hidden;
-    /* Couleur de base avec gradient */
-    background: 
-      linear-gradient(135deg, #0d5d2e 0%, #0a4a24 100%),
-      /* Texture de feutre */
+    background-color: #0b4d24;
+    background-image:
+      /* Overhead spotlight */
+      radial-gradient(ellipse 70% 45% at 50% 0%, rgba(26,122,62,0.5) 0%, transparent 70%),
+      /* Depth vignette */
+      radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.5) 100%),
+      /* Fine felt weave */
       repeating-linear-gradient(
         0deg,
-        rgba(0, 0, 0, 0.03) 0px,
+        rgba(255,255,255,0.012) 0px,
         transparent 1px,
-        transparent 2px,
-        rgba(0, 0, 0, 0.03) 3px
+        transparent 3px,
+        rgba(255,255,255,0.012) 4px
       ),
-      /* Motif subtil */
-      radial-gradient(
-        circle at 30% 30%,
-        rgba(26, 122, 62, 0.2) 0%,
-        transparent 50%
-      ),
-      /* Overlay de profondeur */
-      linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.1) 0%,
-        transparent 50%,
-        rgba(0, 0, 0, 0.1) 100%
+      repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.008) 0px,
+        transparent 1px,
+        transparent 3px,
+        rgba(255,255,255,0.008) 4px
       );
-    position: relative;
-    
-    /* Effet de texture avec SVG noise */
-    background-image: 
-      url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
-    
-    /* Ombre portée pour profondeur */
-    box-shadow: 
-      inset 0 0 100px rgba(0, 0, 0, 0.3),
-      0 10px 40px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      inset 0 0 80px rgba(0,0,0,0.4),
+      0 10px 40px rgba(0,0,0,0.3);
   }
 
   .table-felt::before {
     content: '';
-    @apply absolute inset-0 opacity-10 pointer-events-none;
-    background-image: 
+    @apply absolute inset-0 opacity-[0.06] pointer-events-none;
+    background-image:
       url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
 
+  /* Subtle gold shimmer top+bottom */
   .table-felt::after {
     content: '';
     @apply absolute inset-0 pointer-events-none;
-    background: 
-      radial-gradient(ellipse 80% 50% at 50% 0%, hsl(43 74% 49% / 0.05) 0%, transparent 50%),
-      radial-gradient(ellipse 80% 50% at 50% 100%, hsl(43 74% 49% / 0.05) 0%, transparent 50%);
+    background:
+      radial-gradient(ellipse 60% 30% at 50% 0%, hsl(43 74% 49% / 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 30% at 50% 100%, hsl(43 74% 49% / 0.04) 0%, transparent 50%);
   }
-  
-  /* Bordure dorée pour la table */
+
+  /* Animated gold border */
   .table-border {
     @apply relative;
-    border: 3px solid hsl(43 74% 49%);
+    border: 2px solid hsl(43 74% 52%);
     border-radius: 1rem;
-    box-shadow: 
-      0 0 0 2px rgba(0, 0, 0, 0.3),
-      inset 0 0 20px hsl(43 74% 49% / 0.2),
-      0 0 30px hsl(43 74% 49% / 0.3);
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,0.4),
+      inset 0 0 24px hsl(43 74% 49% / 0.12),
+      0 0 20px hsl(43 74% 49% / 0.25),
+      0 0 60px hsl(43 74% 49% / 0.08);
+    animation: border-breathe 3s ease-in-out infinite;
+  }
+
+  /* ====== Semantic Action Buttons ====== */
+
+  /* HIT — Green, primary action */
+  .btn-action-hit {
+    @apply relative font-extrabold uppercase tracking-wide rounded-lg;
+    @apply transition-all duration-150;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    background: linear-gradient(160deg, #22c55e 0%, #16a34a 60%, #15803d 100%);
+    color: #fff;
+    box-shadow: 0 4px 0 #14532d, 0 6px 16px rgba(34,197,94,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  .btn-action-hit:hover:not(:disabled) {
+    background: linear-gradient(160deg, #4ade80 0%, #22c55e 60%, #16a34a 100%);
+    box-shadow: 0 5px 0 #14532d, 0 8px 20px rgba(34,197,94,0.45), inset 0 1px 0 rgba(255,255,255,0.3);
+    transform: translateY(-1px);
+  }
+
+  .btn-action-hit:active:not(:disabled) {
+    box-shadow: 0 1px 0 #14532d, 0 2px 8px rgba(34,197,94,0.3);
+    transform: translateY(3px);
+  }
+
+  /* STAND — Red, stop action */
+  .btn-action-stand {
+    @apply relative font-extrabold uppercase tracking-wide rounded-lg;
+    @apply transition-all duration-150;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    background: linear-gradient(160deg, #ef4444 0%, #dc2626 60%, #b91c1c 100%);
+    color: #fff;
+    box-shadow: 0 4px 0 #7f1d1d, 0 6px 16px rgba(239,68,68,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  .btn-action-stand:hover:not(:disabled) {
+    background: linear-gradient(160deg, #f87171 0%, #ef4444 60%, #dc2626 100%);
+    box-shadow: 0 5px 0 #7f1d1d, 0 8px 20px rgba(239,68,68,0.45), inset 0 1px 0 rgba(255,255,255,0.3);
+    transform: translateY(-1px);
+  }
+
+  .btn-action-stand:active:not(:disabled) {
+    box-shadow: 0 1px 0 #7f1d1d, 0 2px 8px rgba(239,68,68,0.3);
+    transform: translateY(3px);
+  }
+
+  /* DOUBLE — Blue */
+  .btn-action-double {
+    @apply relative font-bold uppercase tracking-wide rounded-lg;
+    @apply transition-all duration-150;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    background: linear-gradient(160deg, #3b82f6 0%, #2563eb 60%, #1d4ed8 100%);
+    color: #fff;
+    box-shadow: 0 3px 0 #1e3a8a, 0 5px 12px rgba(59,130,246,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  .btn-action-double:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 #1e3a8a, 0 7px 16px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.25);
+  }
+
+  .btn-action-double:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #1e3a8a, 0 2px 6px rgba(59,130,246,0.3);
+  }
+
+  /* SPLIT — Amber/Orange */
+  .btn-action-split {
+    @apply relative font-bold uppercase tracking-wide rounded-lg;
+    @apply transition-all duration-150;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    background: linear-gradient(160deg, #f59e0b 0%, #d97706 60%, #b45309 100%);
+    color: #fff;
+    box-shadow: 0 3px 0 #78350f, 0 5px 12px rgba(245,158,11,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  .btn-action-split:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 #78350f, 0 7px 16px rgba(245,158,11,0.4);
+  }
+
+  .btn-action-split:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #78350f, 0 2px 6px rgba(245,158,11,0.3);
+  }
+
+  /* SECONDARY (insurance, surrender) */
+  .btn-action-secondary {
+    @apply relative font-semibold uppercase tracking-wide rounded-lg;
+    @apply transition-all duration-150;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    background: rgba(255,255,255,0.07);
+    color: hsl(var(--muted-foreground));
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  .btn-action-secondary:hover:not(:disabled) {
+    background: rgba(255,255,255,0.12);
+    color: hsl(var(--foreground));
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  /* Disabled state for all action buttons */
+  .btn-action-hit:disabled,
+  .btn-action-stand:disabled,
+  .btn-action-double:disabled,
+  .btn-action-split:disabled,
+  .btn-action-secondary:disabled {
+    @apply opacity-40 cursor-not-allowed;
+    filter: grayscale(0.6);
+    transform: none !important;
   }
 
   /* Casino button */

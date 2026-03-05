@@ -16,7 +16,11 @@ import { SettingsPanel } from './SettingsPanel';
 import { Tutorial } from './Tutorial';
 import { BasicStrategyChart } from './BasicStrategyChart';
 import { ParticleSystem } from './ParticleSystem';
+import { LevelUpNotification } from './LevelUpNotification';
+import { XPBar } from './XPBar';
 import { useSound } from '@/hooks/useSound';
+import { useHaptic } from '@/hooks/useHaptic';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useMobileLayout } from '@/ui/blackjack/hooks';
@@ -48,70 +52,99 @@ export const NewTable = memo(function NewTable() {
   const [showSettlement, setShowSettlement] = useState(false);
   const [particleTrigger, setParticleTrigger] = useState(false);
   const [particleType, setParticleType] = useState<'win' | 'lose' | 'blackjack' | 'chip'>('win');
-  
+  const [flashType, setFlashType] = useState<'win' | 'lose' | 'blackjack' | null>(null);
+  const [resultBanner, setResultBanner] = useState<string | null>(null);
+
   const { isMobile } = useMobileLayout();
-  
+
   // Sound effects
-  const { playSound } = useSound({ 
-    enabled: config.soundEnabled ?? false, 
-    volume: config.soundVolume ?? 0.5 
+  const { playSound } = useSound({
+    enabled: config.soundEnabled ?? false,
+    volume: config.soundVolume ?? 0.5,
+  });
+
+  // Haptic feedback
+  const haptic = useHaptic();
+
+  // Swipe gesture — Hit = swipe up, Stand = swipe down
+  // Use getState() inside callbacks to avoid snapshot-comparison loops
+  const swipeHandlers = useSwipeGesture({
+    onSwipeUp: () => {
+      const store = useGameStore.getState();
+      if (store.gameState.phase !== 'PLAYER_TURN') return;
+      haptic.buttonPress();
+      try { store.action('hit'); } catch { /* invalid action — ignore */ }
+    },
+    onSwipeDown: () => {
+      const store = useGameStore.getState();
+      if (store.gameState.phase !== 'PLAYER_TURN') return;
+      haptic.buttonPress();
+      try { store.action('stand'); } catch { /* invalid action — ignore */ }
+    },
   });
   
-  // Play sounds and particles on settlement
-  // Track if we've already triggered particles for this settlement round
+  // Play sounds, particles, haptic and visual feedback on settlement
   const settlementRoundRef = useRef<string>('');
-  
+
   useEffect(() => {
     if (phase !== 'SETTLEMENT') {
       setParticleTrigger(false);
+      setFlashType(null);
+      setResultBanner(null);
       settlementRoundRef.current = '';
       return;
     }
-    
+
     if (results.length === 0) {
       setParticleTrigger(false);
       return;
     }
-    
-    // Create a unique key for this settlement round
+
     const settlementKey = `${results.length}-${results.map(r => r.result).join(',')}`;
-    
-    // Only trigger once per settlement round
-    if (settlementRoundRef.current === settlementKey) {
-      return;
-    }
-    
+    if (settlementRoundRef.current === settlementKey) return;
     settlementRoundRef.current = settlementKey;
-    
-    const hasWin = results.some(r => r.result === 'win' || r.result === 'blackjack');
+
     const hasBlackjack = results.some(r => r.result === 'blackjack');
+    const hasWin = results.some(r => r.result === 'win' || r.result === 'blackjack');
     const hasLoss = results.some(r => r.result === 'lose');
-    
-    let timeoutId: NodeJS.Timeout | undefined;
-    
+    const allBusted = results.every(r => r.result === 'lose') && playerHands.every(h => h.isBusted);
+
+    const timers: NodeJS.Timeout[] = [];
+
     if (hasBlackjack) {
       playSound('blackjack');
+      haptic.blackjack();
       setParticleType('blackjack');
       setParticleTrigger(true);
-      timeoutId = setTimeout(() => setParticleTrigger(false), 1200);
+      setFlashType('blackjack');
+      setResultBanner('✦ BLACKJACK ✦');
+      timers.push(setTimeout(() => setParticleTrigger(false), 1800));
+      timers.push(setTimeout(() => setFlashType(null), 600));
+      timers.push(setTimeout(() => setResultBanner(null), 2000));
     } else if (hasWin) {
       playSound('win');
+      haptic.win();
       setParticleType('win');
       setParticleTrigger(true);
-      timeoutId = setTimeout(() => setParticleTrigger(false), 1200);
+      setFlashType('win');
+      setResultBanner('VICTOIRE');
+      timers.push(setTimeout(() => setParticleTrigger(false), 1200));
+      timers.push(setTimeout(() => setFlashType(null), 400));
+      timers.push(setTimeout(() => setResultBanner(null), 1600));
     } else if (hasLoss) {
       playSound('lose');
+      allBusted ? haptic.bust() : haptic.lose();
       setParticleType('lose');
       setParticleTrigger(true);
-      timeoutId = setTimeout(() => setParticleTrigger(false), 1200);
+      setFlashType('lose');
+      setResultBanner(allBusted ? 'BUST' : 'PERDU');
+      timers.push(setTimeout(() => setParticleTrigger(false), 900));
+      timers.push(setTimeout(() => setFlashType(null), 400));
+      timers.push(setTimeout(() => setResultBanner(null), 1400));
     }
-    
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [phase, results.length, playSound]);
+
+    return () => timers.forEach(clearTimeout);
+  }, [phase, results.length, playSound, haptic, playerHands]);
   
   // Show settlement sheet when phase is SETTLEMENT
   useEffect(() => {
@@ -150,9 +183,87 @@ export const NewTable = memo(function NewTable() {
   
   return (
     <>
+      {/* Swipe overlay (PLAYER_TURN only) */}
+      {phase === 'PLAYER_TURN' && (
+        <div
+          {...swipeHandlers}
+          className="fixed inset-0 z-[10] pointer-events-auto"
+          aria-hidden="true"
+        />
+      )}
       {/* Particle System */}
       <ParticleSystem trigger={particleTrigger} type={particleType} />
-      
+
+      {/* Level Up Notification */}
+      <LevelUpNotification />
+
+      {/* Screen Flash Overlay */}
+      <AnimatePresence>
+        {flashType && (
+          <motion.div
+            key={flashType + settlementRoundRef.current}
+            initial={{ opacity: 0.55 }}
+            animate={{ opacity: 0 }}
+            transition={{ duration: 0.45, ease: 'easeOut' }}
+            className="fixed inset-0 z-[60] pointer-events-none"
+            style={{
+              background:
+                flashType === 'blackjack'
+                  ? 'radial-gradient(ellipse at center, rgba(212,175,55,0.5) 0%, transparent 70%)'
+                  : flashType === 'win'
+                  ? 'radial-gradient(ellipse at center, rgba(34,197,94,0.4) 0%, transparent 70%)'
+                  : 'radial-gradient(ellipse at center, rgba(239,68,68,0.4) 0%, transparent 70%)',
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Result Banner */}
+      <AnimatePresence>
+        {resultBanner && (
+          <motion.div
+            key={resultBanner + settlementRoundRef.current}
+            initial={{ scale: 0.4, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 1.3, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 20 }}
+            className="fixed inset-0 flex items-center justify-center z-[70] pointer-events-none"
+          >
+            <div
+              className="px-8 py-4 rounded-2xl text-3xl sm:text-4xl font-extrabold tracking-widest shadow-2xl border-2"
+              style={{
+                background:
+                  resultBanner.includes('BLACKJACK')
+                    ? 'rgba(0,0,0,0.85)'
+                    : resultBanner === 'VICTOIRE'
+                    ? 'rgba(0,0,0,0.8)'
+                    : 'rgba(0,0,0,0.8)',
+                borderColor:
+                  resultBanner.includes('BLACKJACK')
+                    ? '#d4af37'
+                    : resultBanner === 'VICTOIRE'
+                    ? '#22c55e'
+                    : '#ef4444',
+                color:
+                  resultBanner.includes('BLACKJACK')
+                    ? '#d4af37'
+                    : resultBanner === 'VICTOIRE'
+                    ? '#22c55e'
+                    : '#ef4444',
+                textShadow:
+                  resultBanner.includes('BLACKJACK')
+                    ? '0 0 30px rgba(212,175,55,0.8)'
+                    : resultBanner === 'VICTOIRE'
+                    ? '0 0 20px rgba(34,197,94,0.6)'
+                    : '0 0 20px rgba(239,68,68,0.6)',
+              }}
+            >
+              {resultBanner}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Tutorial */}
       <Tutorial />
       
@@ -418,7 +529,6 @@ export const NewTable = memo(function NewTable() {
         sideBetResults={sideBetResults}
         onNewHand={handleNewHand}
       />
-      
     </>
   );
 });

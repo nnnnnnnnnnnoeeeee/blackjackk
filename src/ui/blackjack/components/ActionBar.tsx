@@ -37,10 +37,10 @@ export const ActionBar = memo(function ActionBar() {
     variant: 'primary' | 'secondary' | 'danger';
     shortcut: string;
   }> = useMemo(() => [
-    { action: 'hit', label: 'Hit', variant: 'secondary', shortcut: keyBindings.hit },
-    { action: 'stand', label: 'Stand', variant: 'primary', shortcut: keyBindings.stand },
-    { action: 'double', label: 'Double', variant: 'secondary', shortcut: keyBindings.double },
-    { action: 'split', label: 'Split', variant: 'secondary', shortcut: keyBindings.split },
+    { action: 'hit',       label: 'Hit',       variant: 'primary',   shortcut: keyBindings.hit },
+    { action: 'stand',     label: 'Stand',     variant: 'danger',    shortcut: keyBindings.stand },
+    { action: 'double',    label: 'Double',    variant: 'secondary', shortcut: keyBindings.double },
+    { action: 'split',     label: 'Split',     variant: 'secondary', shortcut: keyBindings.split },
     { action: 'insurance', label: 'Insurance', variant: 'secondary', shortcut: keyBindings.insurance },
   ], [keyBindings]);
 
@@ -109,13 +109,12 @@ export const ActionBar = memo(function ActionBar() {
     [validActions]
   );
 
-  // Responsive grid layout (memoized)
+  // Responsive grid layout — HIT+STAND always in a 2-col first row
   const gridClasses = useMemo(() => {
-    if (visibleActions.length === 1) return 'grid grid-cols-1';
-    if (visibleActions.length === 2) return 'grid grid-cols-2 gap-2 sm:gap-3';
-    if (visibleActions.length === 3) return 'grid grid-cols-3 gap-1.5 sm:gap-2';
-    if (visibleActions.length === 4) return 'grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5';
-    return 'flex flex-wrap justify-center gap-2 sm:gap-2.5';
+    if (visibleActions.length <= 2) return 'grid grid-cols-2 gap-2 sm:gap-3';
+    if (visibleActions.length === 3) return 'grid grid-cols-2 gap-2 sm:gap-3';
+    if (visibleActions.length === 4) return 'grid grid-cols-2 gap-2 sm:gap-3';
+    return 'grid grid-cols-2 gap-2 sm:gap-3';
   }, [visibleActions.length]);
 
   const variants = conditionalVariants(

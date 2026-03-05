@@ -3,7 +3,7 @@
 // ============================================================================
 
 import { memo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { HandView } from '@/components/HandView';
 import { ChipStack } from '@/components/ChipStack';
 import { TurnIndicator } from '../components/TurnIndicator';
@@ -81,16 +81,45 @@ export const OpponentsZone = memo(function OpponentsZone({
                   {/* Player Header */}
                   <div className="flex items-center justify-between mb-1.5 pb-1.5 border-b border-primary/20">
                     <div className="flex items-center gap-1.5">
-                      <div className="w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
-                        {opponent.seat}
+                      <div className="relative">
+                        <div className="w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
+                          {opponent.seat}
+                        </div>
+                        {/* Active pulse ring */}
+                        {isActive && (
+                          <motion.div
+                            className="absolute inset-0 rounded-full border-2 border-gold"
+                            animate={{ scale: [1, 1.5, 1], opacity: [1, 0, 1] }}
+                            transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+                          />
+                        )}
                       </div>
                       <div>
                         <div className="text-xs font-bold text-primary leading-tight">
                           {opponent.username}
                         </div>
-                        <div className="text-xs text-primary/70 leading-tight">
-                          ${opponent.bankroll.toLocaleString()}
-                        </div>
+                        {/* Thinking indicator or bankroll */}
+                        {isActive ? (
+                          <div className="flex gap-0.5 items-center h-[14px]">
+                            {[0, 1, 2].map((i) => (
+                              <motion.div
+                                key={i}
+                                className="w-1 h-1 rounded-full bg-gold"
+                                animate={{ y: [0, -3, 0] }}
+                                transition={{
+                                  duration: 0.6,
+                                  repeat: Infinity,
+                                  delay: i * 0.15,
+                                  ease: 'easeInOut',
+                                }}
+                              />
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-xs text-primary/70 leading-tight">
+                            ${opponent.bankroll.toLocaleString()}
+                          </div>
+                        )}
                       </div>
                     </div>
                     {isActive && <TurnIndicator isActive={true} />}

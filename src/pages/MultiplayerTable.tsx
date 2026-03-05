@@ -2,7 +2,7 @@
 // Multiplayer Table Page
 // ============================================================================
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
@@ -13,8 +13,10 @@ import { TimerBadge, TurnIndicator, BetComposerMultiplayer, ActionBarMultiplayer
 import { OpponentsZone } from '@/ui/blackjack/table';
 import { ChipStack } from '@/components/ChipStack';
 import { ChatPanel } from '@/components/ChatPanel';
+import { QuickChatBar } from '@/components/QuickChatBar';
+import { EmoteOverlay, type ActiveEmote } from '@/components/EmoteOverlay';
 // Toast import removed - all notifications disabled
-import { ArrowLeft, Copy, Hash, MessageSquare, Users } from 'lucide-react';
+import { ArrowLeft, Copy, Hash, MessageSquare, Trophy, Users } from 'lucide-react';
 import type { Hand, Card as BlackjackCard, PlayerAction } from '@/lib/blackjack/types';
 import { createShuffledShoe, drawCard } from '@/lib/blackjack/deck';
 import { addCardToHand, createEmptyHand, isBusted, isBlackjack, getBestHandValue, isSoftHand, canSplit } from '@/lib/blackjack/hand';
@@ -62,6 +64,10 @@ export default function MultiplayerTable() {
   const [bettingTimeLeft, setBettingTimeLeft] = useState<number>(10);
   const [actionTimeLeft, setActionTimeLeft] = useState<number>(10);
   const [chatOpen, setChatOpen] = useState(false);
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
+  const [activeEmotes, setActiveEmotes] = useState<ActiveEmote[]>([]);
+  const [initialBankrolls, setInitialBankrolls] = useState<Record<string, number>>({});
+  const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -302,6 +308,15 @@ export default function MultiplayerTable() {
     }
   }, [gameState?.phase, id, table]);
 
+  const spawnEmote = useCallback((emote: string) => {
+    const id = `${Date.now()}-${Math.random()}`;
+    const x = 10 + Math.random() * 80;
+    setActiveEmotes((prev) => [...prev, { id, emote, x }]);
+    setTimeout(() => {
+      setActiveEmotes((prev) => prev.filter((e) => e.id !== id));
+    }, 2600);
+  }, []);
+
   const loadTable = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -345,6 +360,17 @@ export default function MultiplayerTable() {
       }
 
       setTable(tableData);
+
+      // Track initial bankrolls for session leaderboard (only set once per player)
+      setInitialBankrolls((prev) => {
+        const updated = { ...prev };
+        for (const p of tableData.table_players) {
+          if (!(p.user_id in updated)) {
+            updated[p.user_id] = p.bankroll;
+          }
+        }
+        return updated;
+      });
 
       const myPlayer = tableData.table_players.find((p: any) => p.user_id === user.id);
       setMySeat(myPlayer?.seat || null);
@@ -408,10 +434,18 @@ export default function MultiplayerTable() {
           loadTable();
         }
       )
+      .on('broadcast', { event: 'emote' }, (payload) => {
+        if (payload.payload?.emote) {
+          spawnEmote(payload.payload.emote as string);
+        }
+      })
       .subscribe();
+
+    realtimeChannelRef.current = channel;
 
     return () => {
       supabase.removeChannel(channel);
+      realtimeChannelRef.current = null;
     };
   };
 
@@ -862,11 +896,25 @@ export default function MultiplayerTable() {
   const activePlayer = gameState.activeSeat ? table.table_players.find(p => p.seat === gameState.activeSeat) : null;
   const myPlayer = table.table_players.find(p => p.user_id === currentUser?.id);
 
+  // Session leaderboard: net gain since sitting down
+  const sessionLeaderboard = table.table_players
+    .map((p) => ({
+      userId: p.user_id,
+      username: p.profile?.username || `J${p.seat}`,
+      isMe: p.user_id === currentUser?.id,
+      net: p.bankroll - (initialBankrolls[p.user_id] ?? p.bankroll),
+      bankroll: p.bankroll,
+    }))
+    .sort((a, b) => b.net - a.net);
+
   return (
     <div className="h-screen bg-table-felt flex flex-col relative overflow-hidden">
       {/* Casino-style table border */}
       <div className="absolute inset-0 border-8 border-gold/30 rounded-lg pointer-events-none" />
       <div className="absolute inset-2 border-4 border-gold/20 rounded-lg pointer-events-none" />
+
+      {/* Emote overlay - above everything */}
+      <EmoteOverlay emotes={activeEmotes} />
 
       {/* Header - Compact */}
       <header className="p-3 border-b border-gold/20 bg-black/20 backdrop-blur-sm relative z-10 flex-shrink-0">
@@ -899,7 +947,7 @@ export default function MultiplayerTable() {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <div className="text-xs text-gold/80 font-semibold">
               Round {gameState.currentRound}
             </div>
@@ -908,10 +956,66 @@ export default function MultiplayerTable() {
               <div className="flex items-center gap-2 px-3 py-1 bg-gold/20 rounded-full border border-gold/30">
                 <Users className="h-3 w-3 text-gold" />
                 <span className="text-xs font-bold text-gold">
-                  {activePlayer.user_id === currentUser?.id ? 'Your Turn' : `Turn: ${activePlayer.profile?.username || `Player ${activePlayer.seat}`}`}
+                  {activePlayer.user_id === currentUser?.id ? 'Votre tour !' : `Tour : ${activePlayer.profile?.username || `J${activePlayer.seat}`}`}
                 </span>
               </div>
             )}
+
+            {/* Session Leaderboard toggle */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setLeaderboardOpen((v) => !v)}
+                className="text-gold hover:text-gold/80 hover:bg-gold/10 h-8 w-8"
+                title="Classement de la session"
+              >
+                <Trophy className="h-4 w-4" />
+              </Button>
+              <AnimatePresence>
+                {leaderboardOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 4 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: 4 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full right-0 mt-1 bg-black/95 border border-gold/30 rounded-xl p-3 shadow-2xl z-50 w-52"
+                  >
+                    <div className="text-xs font-bold text-gold mb-2 flex items-center gap-1.5">
+                      <Trophy className="h-3 w-3" />
+                      Classement session
+                    </div>
+                    <div className="space-y-1.5">
+                      {sessionLeaderboard.map((p, i) => (
+                        <div
+                          key={p.userId}
+                          className={`flex items-center justify-between text-xs px-2 py-1 rounded ${p.isMe ? 'bg-gold/20 text-gold font-semibold' : 'text-gold/70'}`}
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span className="text-gold/50">{i + 1}.</span>
+                            {p.username}
+                            {p.isMe && <span className="text-[9px] opacity-60">(vous)</span>}
+                          </span>
+                          <span className={p.net >= 0 ? 'text-green-400' : 'text-red-400'}>
+                            {p.net >= 0 ? '+' : ''}{p.net}$
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Quick Chat */}
+            {currentUser && id && (
+              <QuickChatBar
+                tableId={id}
+                userId={currentUser.id}
+                onEmote={(emote) => spawnEmote(emote)}
+              />
+            )}
+
             <Button
               variant="ghost"
               size="icon"

@@ -4,15 +4,19 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { 
-  GameState, 
-  GameStats, 
+import {
+  GameState,
+  GameStats,
   GameConfig,
   GamePhase,
   PlayerAction,
   HandHistory,
+  XPSystem,
   DEFAULT_CONFIG,
   INITIAL_STATS,
+  INITIAL_XP,
+  XP_REWARDS,
+  getLevelFromXP,
 } from '@/lib/blackjack/types';
 import {
   createInitialState,
@@ -33,13 +37,16 @@ interface GameStore {
   // State
   gameState: GameState;
   stats: GameStats;
+  xpSystem: XPSystem;
+  pendingLevelUp: number | null; // new level to display, then clear
   isAnimating: boolean;
   cardCountingEnabled: boolean;
   tutorialCompleted: boolean;
   tutorialStep: number;
   language: 'fr' | 'en';
-  
+
   // Actions
+  clearLevelUp: () => void;
   placeBet: (amount: number) => void;
   placeSideBets: (perfectPairs?: number, twentyOnePlus3?: number) => void;
   action: (action: PlayerAction) => void;
@@ -199,11 +206,15 @@ export const useGameStore = create<GameStore>()(
       // Initial state
       gameState: createInitialState(1000),
       stats: INITIAL_STATS,
+      xpSystem: INITIAL_XP,
+      pendingLevelUp: null,
       isAnimating: false,
       cardCountingEnabled: false,
       tutorialCompleted: false,
       tutorialStep: 0,
       language: 'en' as 'fr' | 'en',
+
+      clearLevelUp: () => set({ pendingLevelUp: null }),
       
       // Place side bets
       placeSideBets: (perfectPairs?: number, twentyOnePlus3?: number) => {
@@ -447,38 +458,81 @@ export const useGameStore = create<GameStore>()(
           // Update stats
           const newStats = { ...stats };
           newStats.handsPlayed += finalState.playerHands.length;
-          
+
+          // XP calculation
+          const { xpSystem } = get();
+          let earnedXP = XP_REWARDS.play * finalState.playerHands.length;
+          let roundHasWin = false;
+          let roundHasLoss = false;
+
           for (const result of finalState.results) {
             const hand = finalState.playerHands[result.handIndex];
             const wagered = hand?.bet || 0;
             const netResult = result.payout - wagered;
-            
+
             newStats.totalWagered += wagered;
             newStats.totalWon += result.payout;
-            
+
+            // Double-down tracking
+            if (hand?.isDoubled) {
+              newStats.doubleDownTotal++;
+              if (result.result === 'win' || result.result === 'blackjack') {
+                newStats.doubleDownWins++;
+                earnedXP += XP_REWARDS.doubleWin;
+              }
+            }
+
             switch (result.result) {
               case 'win':
                 newStats.handsWon++;
+                roundHasWin = true;
+                earnedXP += XP_REWARDS.win;
                 if (netResult > newStats.biggestWin) newStats.biggestWin = netResult;
                 break;
               case 'blackjack':
                 newStats.handsWon++;
                 newStats.blackjacks++;
+                roundHasWin = true;
+                earnedXP += XP_REWARDS.blackjack;
                 if (netResult > newStats.biggestWin) newStats.biggestWin = netResult;
                 break;
               case 'lose':
                 newStats.handsLost++;
+                roundHasLoss = true;
                 if (hand?.isBusted) newStats.busts++;
                 if (wagered > newStats.biggestLoss) newStats.biggestLoss = wagered;
                 break;
               case 'push':
                 newStats.handsPushed++;
+                earnedXP += XP_REWARDS.push;
                 break;
               case 'surrender':
                 newStats.handsLost++;
+                roundHasLoss = true;
                 break;
             }
           }
+
+          // Streak update (based on dominant round result)
+          if (roundHasWin && !roundHasLoss) {
+            newStats.currentStreak = (newStats.currentStreak || 0) + 1;
+            if (newStats.currentStreak > newStats.bestStreak) {
+              newStats.bestStreak = newStats.currentStreak;
+            }
+          } else if (roundHasLoss) {
+            newStats.currentStreak = 0;
+          }
+
+          // XP system update
+          const newTotalXP = xpSystem.xp + earnedXP;
+          const oldLevel = xpSystem.level;
+          const newLevel = getLevelFromXP(newTotalXP);
+          const newXPSystem: XPSystem = {
+            xp: newTotalXP,
+            level: newLevel,
+            totalXpEarned: xpSystem.totalXpEarned + earnedXP,
+          };
+          const leveledUp = newLevel > oldLevel;
           
           // Add to hand history
           const handHistory: HandHistory = {
@@ -522,9 +576,11 @@ export const useGameStore = create<GameStore>()(
           
           console.log('[finishRound] Setting final state:', { phase: settlementState.phase, isAnimating: false, resultsCount: settlementState.results.length });
           
-          set({ 
-            gameState: settlementState, 
+          set({
+            gameState: settlementState,
             stats: newStats,
+            xpSystem: newXPSystem,
+            pendingLevelUp: leveledUp ? newLevel : null,
             isAnimating: false,
           });
           
@@ -744,6 +800,7 @@ export const useGameStore = create<GameStore>()(
           results: [],
         },
         stats: state.stats,
+        xpSystem: state.xpSystem,
         cardCountingEnabled: state.cardCountingEnabled,
         language: state.language,
       }),
@@ -769,3 +826,5 @@ export const selectResults = (state: GameStore) => state.gameState.results;
 export const selectConfig = (state: GameStore) => state.gameState.config;
 export const selectStats = (state: GameStore) => state.stats;
 export const selectIsAnimating = (state: GameStore) => state.isAnimating;
+export const selectXPSystem = (state: GameStore) => state.xpSystem;
+export const selectPendingLevelUp = (state: GameStore) => state.pendingLevelUp;

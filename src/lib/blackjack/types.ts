@@ -161,8 +161,56 @@ export interface GameStats {
   totalWon: number;
   biggestWin: number;
   biggestLoss: number;
+  // Double down tracking
+  doubleDownTotal: number;
+  doubleDownWins: number;
+  // Streak tracking
+  currentStreak: number;
+  bestStreak: number;
   cardCounting?: CardCountingStats;
 }
+
+// ============================================================================
+// XP / Level System
+// ============================================================================
+
+export interface XPSystem {
+  xp: number;
+  level: number;
+  totalXpEarned: number;
+}
+
+export const LEVEL_THRESHOLDS = [0, 500, 1200, 2500, 5000, 8000, 12000, 18000, 25000, 35000];
+export const LEVEL_NAMES = [
+  'Newbie', 'Amateur', 'Régulier', 'Expérimenté',
+  'Habile', 'Expert', 'Vétéran', 'Maître', 'Légende', 'Blackjack God',
+];
+
+export const XP_REWARDS = {
+  play: 5,      // just for finishing a hand
+  push: 10,
+  win: 50,
+  blackjack: 150,
+  doubleWin: 25, // bonus on top of win
+};
+
+export const getLevelFromXP = (xp: number): number => {
+  let level = 0;
+  for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
+    if (xp >= LEVEL_THRESHOLDS[i]) { level = i; break; }
+  }
+  return Math.min(level, LEVEL_THRESHOLDS.length - 1);
+};
+
+export const getXPProgress = (xp: number): { current: number; needed: number; pct: number } => {
+  const level = getLevelFromXP(xp);
+  const currentThreshold = LEVEL_THRESHOLDS[level];
+  const nextThreshold = LEVEL_THRESHOLDS[level + 1];
+  if (!nextThreshold) return { current: 0, needed: 0, pct: 1 };
+  const current = xp - currentThreshold;
+  const needed = nextThreshold - currentThreshold;
+  return { current, needed, pct: current / needed };
+};
 
 export const DEFAULT_CONFIG: GameConfig = {
   deckCount: 6,
@@ -229,6 +277,16 @@ export const INITIAL_STATS: GameStats = {
   totalWon: 0,
   biggestWin: 0,
   biggestLoss: 0,
+  doubleDownTotal: 0,
+  doubleDownWins: 0,
+  currentStreak: 0,
+  bestStreak: 0,
+};
+
+export const INITIAL_XP: XPSystem = {
+  xp: 0,
+  level: 0,
+  totalXpEarned: 0,
 };
 
 export const SUIT_SYMBOLS: Record<Suit, string> = {

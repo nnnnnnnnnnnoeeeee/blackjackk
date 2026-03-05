@@ -5,6 +5,7 @@
 import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore, selectStats, selectBankroll } from '@/store/useGameStore';
+import { XPBar } from './XPBar';
 import { cn } from '@/lib/utils';
 
 interface StatItemProps {
@@ -43,6 +44,7 @@ export const StatsPanel = memo(function StatsPanel() {
       animate={{ opacity: 1 }}
       className="w-full p-1 sm:p-1.5 md:p-2 rounded-lg bg-card/30 backdrop-blur-sm border border-border"
     >
+      <XPBar className="mb-1.5 sm:mb-2" />
       <div className="flex flex-wrap justify-center gap-1 sm:gap-1.5 md:gap-2">
         <StatItem 
           label="Bankroll" 

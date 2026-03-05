@@ -4,11 +4,12 @@
 
 import { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useGameStore, selectStats, selectBankroll } from '@/store/useGameStore';
+import { useGameStore, selectStats, selectBankroll, selectXPSystem } from '@/store/useGameStore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, TrendingDown, Trophy, Target, BarChart3, Clock } from 'lucide-react';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { TrendingUp, TrendingDown, Trophy, Target, BarChart3, Clock, Zap, Flame } from 'lucide-react';
+import { LEVEL_NAMES, getXPProgress } from '@/lib/blackjack/types';
 import { cn } from '@/lib/utils';
 
 const COLORS = {
@@ -21,6 +22,7 @@ const COLORS = {
 export const StatsDashboard = memo(function StatsDashboard() {
   const stats = useGameStore(selectStats);
   const bankroll = useGameStore(selectBankroll);
+  const xpSystem = useGameStore(selectXPSystem);
   const handHistory = useGameStore(s => s.gameState.handHistory || []);
   
   const winRate = useMemo(() => {
@@ -53,6 +55,17 @@ export const StatsDashboard = memo(function StatsDashboard() {
     { name: 'Push', value: stats.handsPushed, color: COLORS.push },
   ], [stats]);
   
+  const doubleDownRate = useMemo(() => {
+    if (!stats.doubleDownTotal) return null;
+    return ((stats.doubleDownWins / stats.doubleDownTotal) * 100).toFixed(1);
+  }, [stats.doubleDownWins, stats.doubleDownTotal]);
+
+  const { current: xpCurrent, needed: xpNeeded, pct: xpPct } = useMemo(
+    () => getXPProgress(xpSystem.xp),
+    [xpSystem.xp]
+  );
+  const levelName = LEVEL_NAMES[xpSystem.level] ?? LEVEL_NAMES[LEVEL_NAMES.length - 1];
+
   const recentResults = useMemo(() => {
     if (!handHistory || handHistory.length === 0) return [];
     return handHistory.slice(0, 20).map((hand, index) => ({
@@ -142,6 +155,30 @@ export const StatsDashboard = memo(function StatsDashboard() {
             </Card>
           </div>
           
+          {/* XP / Level Card */}
+          <Card className="border-primary/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Niveau • {levelName}</CardTitle>
+              <Zap className="h-4 w-4 text-primary" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">Niveau {xpSystem.level + 1}</div>
+              <div className="mt-2">
+                <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                  <span>{xpCurrent} XP</span>
+                  {xpNeeded > 0 && <span>Prochain: {xpNeeded} XP</span>}
+                </div>
+                <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-primary/80 to-primary transition-all duration-700"
+                    style={{ width: `${xpPct * 100}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{xpSystem.totalXpEarned.toLocaleString()} XP total</p>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Quick Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card>
@@ -158,14 +195,16 @@ export const StatsDashboard = memo(function StatsDashboard() {
             </Card>
             <Card>
               <CardContent className="pt-6">
-                <div className="text-sm text-muted-foreground">Mains perdues</div>
-                <div className="text-2xl font-bold text-destructive">{stats.handsLost}</div>
+                <div className="text-sm text-muted-foreground">Série actuelle</div>
+                <div className={cn('text-2xl font-bold', stats.currentStreak > 0 ? 'text-success' : 'text-muted-foreground')}>
+                  {stats.currentStreak > 0 ? `🔥 ${stats.currentStreak}` : stats.currentStreak}
+                </div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6">
-                <div className="text-sm text-muted-foreground">Push</div>
-                <div className="text-2xl font-bold text-warning">{stats.handsPushed}</div>
+                <div className="text-sm text-muted-foreground">Meilleure série</div>
+                <div className="text-2xl font-bold text-primary">{stats.bestStreak}</div>
               </CardContent>
             </Card>
           </div>
@@ -191,11 +230,13 @@ export const StatsDashboard = memo(function StatsDashboard() {
                       labelFormatter={(label) => `Main ${label}`}
                     />
                     <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="bankroll" 
-                      stroke="#d4af37" 
+                    <ReferenceLine y={1000} stroke="rgba(255,255,255,0.2)" strokeDasharray="4 3" label={{ value: 'Start $1000', fill: 'rgba(255,255,255,0.4)', fontSize: 10 }} />
+                    <Line
+                      type="monotone"
+                      dataKey="bankroll"
+                      stroke="#d4af37"
                       strokeWidth={2}
+                      dot={false}
                       name="Bankroll"
                     />
                   </LineChart>
@@ -362,11 +403,30 @@ export const StatsDashboard = memo(function StatsDashboard() {
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Mise moyenne</span>
                   <span className="font-semibold">
-                    ${stats.handsPlayed > 0 
-                      ? (stats.totalWagered / stats.handsPlayed).toFixed(0) 
+                    ${stats.handsPlayed > 0
+                      ? (stats.totalWagered / stats.handsPlayed).toFixed(0)
                       : 0}
                   </span>
                 </div>
+                {stats.doubleDownTotal > 0 && (
+                  <>
+                    <div className="my-2 border-t border-border/40" />
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Double down tentés</span>
+                      <span className="font-semibold">{stats.doubleDownTotal}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Double down gagnés</span>
+                      <span className="font-semibold text-success">{stats.doubleDownWins}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Taux double down</span>
+                      <span className={cn('font-semibold', parseFloat(doubleDownRate ?? '0') >= 50 ? 'text-success' : 'text-destructive')}>
+                        {doubleDownRate}%
+                      </span>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
             
