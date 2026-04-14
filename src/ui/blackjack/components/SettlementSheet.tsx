@@ -17,6 +17,7 @@ import { useTranslation } from '../i18n';
 import { HandResultCard } from './HandResultCard';
 import { ResultSummary } from './ResultSummary';
 import type { HandResult } from '@/lib/blackjack/types';
+import type { CoachSession } from '@/components/NewTable';
 
 interface SettlementSheetProps {
   open: boolean;
@@ -30,6 +31,7 @@ interface SettlementSheetProps {
     twentyOnePlus3?: { bet: number; payout: number; handType?: string };
   };
   onNewHand: () => void;
+  coachSession?: CoachSession;
 }
 
 export const SettlementSheet = memo(function SettlementSheet({
@@ -41,6 +43,7 @@ export const SettlementSheet = memo(function SettlementSheet({
   insuranceResult,
   sideBetResults,
   onNewHand,
+  coachSession,
 }: SettlementSheetProps) {
   const { isMobile } = useMobileLayout();
   const { t } = useTranslation();
@@ -143,6 +146,68 @@ export const SettlementSheet = memo(function SettlementSheet({
         }))}
         className="pt-4 border-t-2 border-primary/20"
       />
+
+      {/* Coach Mode Session Summary */}
+      {coachSession && coachSession.totalDecisions > 0 && (
+        <div className="mt-4 pt-4 border-t-2 border-warning/30">
+          <div className="text-xs uppercase tracking-wider text-warning font-bold mb-2 flex items-center gap-1.5">
+            <span>🎓</span> Mode Entraîneur
+          </div>
+          {/* Accuracy bar */}
+          <div className="mb-2">
+            <div className="flex justify-between text-xs text-muted-foreground mb-1">
+              <span>Précision stratégique</span>
+              <span className={cn(
+                'font-bold',
+                coachSession.correctDecisions / coachSession.totalDecisions >= 0.9
+                  ? 'text-success'
+                  : coachSession.correctDecisions / coachSession.totalDecisions >= 0.7
+                  ? 'text-warning'
+                  : 'text-destructive',
+              )}>
+                {Math.round((coachSession.correctDecisions / coachSession.totalDecisions) * 100)}%
+              </span>
+            </div>
+            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+              <div
+                className={cn(
+                  'h-full rounded-full transition-all duration-700',
+                  coachSession.correctDecisions / coachSession.totalDecisions >= 0.9
+                    ? 'bg-success'
+                    : coachSession.correctDecisions / coachSession.totalDecisions >= 0.7
+                    ? 'bg-warning'
+                    : 'bg-destructive',
+                )}
+                style={{
+                  width: `${Math.round((coachSession.correctDecisions / coachSession.totalDecisions) * 100)}%`,
+                }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {coachSession.correctDecisions}/{coachSession.totalDecisions} décisions correctes
+            </p>
+          </div>
+
+          {/* Last mistakes (max 3) */}
+          {coachSession.mistakes.length > 0 && (
+            <div className="space-y-1.5">
+              <p className="text-xs text-muted-foreground font-medium">
+                Erreurs récentes ({coachSession.mistakes.length}) :
+              </p>
+              {coachSession.mistakes.slice(-3).reverse().map((m, i) => (
+                <div key={i} className="text-xs rounded-lg px-2.5 py-1.5 bg-destructive/10 border border-destructive/20">
+                  <span className="font-medium text-foreground">{m.handSummary}</span>
+                  {' — '}
+                  <span className="text-muted-foreground">
+                    joué <span className="text-destructive capitalize">{m.playerAction}</span>
+                    , optimal <span className="text-warning capitalize">{m.optimalAction}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* New Hand Button */}
       <button

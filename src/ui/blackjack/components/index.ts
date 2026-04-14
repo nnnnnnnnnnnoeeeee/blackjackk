@@ -15,5 +15,6 @@ export { Hand } from './Hand';
 export { HandResultCard } from './HandResultCard';
 export { ResultSummary } from './ResultSummary';
 export { SettlementSheet } from './SettlementSheet';
+export { CoachFeedback, type CoachFeedbackData } from './CoachFeedback';
 export { TurnIndicator } from './TurnIndicator';
 export { TimerBadge } from './TimerBadge';

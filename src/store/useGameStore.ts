@@ -41,6 +41,7 @@ interface GameStore {
   pendingLevelUp: number | null; // new level to display, then clear
   isAnimating: boolean;
   cardCountingEnabled: boolean;
+  coachMode: boolean;
   tutorialCompleted: boolean;
   tutorialStep: number;
   language: 'fr' | 'en';
@@ -56,6 +57,7 @@ interface GameStore {
   resetBankroll: () => void;
   updateConfig: (config: Partial<GameConfig>) => void;
   toggleCardCounting: () => void;
+  toggleCoachMode: () => void;
   setTutorialStep: (step: number) => void;
   completeTutorial: () => void;
   addHandToHistory: (history: HandHistory) => void;
@@ -210,6 +212,7 @@ export const useGameStore = create<GameStore>()(
       pendingLevelUp: null,
       isAnimating: false,
       cardCountingEnabled: false,
+      coachMode: false,
       tutorialCompleted: false,
       tutorialStep: 0,
       language: 'en' as 'fr' | 'en',
@@ -722,6 +725,10 @@ export const useGameStore = create<GameStore>()(
       toggleCardCounting: () => {
         set({ cardCountingEnabled: !get().cardCountingEnabled });
       },
+
+      toggleCoachMode: () => {
+        set({ coachMode: !get().coachMode });
+      },
       
       // Tutorial management
       setTutorialStep: (step: number) => {
@@ -802,6 +809,7 @@ export const useGameStore = create<GameStore>()(
         stats: state.stats,
         xpSystem: state.xpSystem,
         cardCountingEnabled: state.cardCountingEnabled,
+        coachMode: state.coachMode,
         language: state.language,
       }),
       onRehydrateStorage: () => (state, error) => {

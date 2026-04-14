@@ -6,8 +6,38 @@ import { memo, useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TableShell, HeaderBar, BottomActionDock } from '@/ui/blackjack/layout';
 import { DealerZone, PlayerZone, CenterPotZone } from '@/ui/blackjack/table';
-import { ActionBar, BetComposer, SettlementSheet } from '@/ui/blackjack/components';
+import { ActionBar, BetComposer, SettlementSheet, CoachFeedback, type CoachFeedbackData } from '@/ui/blackjack/components';
 import { useGameStore } from '@/store/useGameStore';
+import { getBasicStrategyRecommendation, type StrategyAction } from '@/lib/blackjack/basicStrategy';
+import { getBestHandValue } from '@/lib/blackjack/hand';
+import type { PlayerAction } from '@/lib/blackjack/types';
+
+// ---- Coach mode types & helpers ----
+interface CoachMistake {
+  handSummary: string;
+  playerAction: PlayerAction;
+  optimalAction: PlayerAction;
+  explanation: string;
+}
+
+export interface CoachSession {
+  totalDecisions: number;
+  correctDecisions: number;
+  mistakes: CoachMistake[];
+}
+
+function strategyToPlayerAction(action: StrategyAction): PlayerAction {
+  switch (action) {
+    case 'S': return 'stand';
+    case 'D':
+    case 'DH':
+    case 'DS': return 'double';
+    case 'P': return 'split';
+    case 'RS':
+    case 'RH': return 'surrender';
+    default:   return 'hit';
+  }
+}
 import { HandView } from './HandView';
 import { StatsPanel } from './StatsPanel';
 import { StatsDashboard } from './StatsDashboard';
@@ -46,6 +76,9 @@ export const NewTable = memo(function NewTable() {
   const resetGame = useGameStore((s) => s.resetGame);
   const config = useGameStore((s) => s.gameState.config);
   
+  const coachMode = useGameStore((s) => s.coachMode);
+  const toggleCoachMode = useGameStore((s) => s.toggleCoachMode);
+
   const [showSettings, setShowSettings] = useState(false);
   const [showStatsDashboard, setShowStatsDashboard] = useState(false);
   const [showStrategyChart, setShowStrategyChart] = useState(false);
@@ -54,6 +87,11 @@ export const NewTable = memo(function NewTable() {
   const [particleType, setParticleType] = useState<'win' | 'lose' | 'blackjack' | 'chip'>('win');
   const [flashType, setFlashType] = useState<'win' | 'lose' | 'blackjack' | null>(null);
   const [resultBanner, setResultBanner] = useState<string | null>(null);
+
+  // Coach mode session
+  const [coachSession, setCoachSession] = useState<CoachSession>({ totalDecisions: 0, correctDecisions: 0, mistakes: [] });
+  const [coachFeedback, setCoachFeedback] = useState<CoachFeedbackData | null>(null);
+  const coachFeedbackTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const { isMobile } = useMobileLayout();
 
@@ -162,6 +200,64 @@ export const NewTable = memo(function NewTable() {
     }
   }, [phase, isAnimating]);
   
+  // Coach mode: evaluate a player action against basic strategy
+  const handleCoachCheck = useCallback(
+    (playerAction: PlayerAction) => {
+      if (!coachMode) return;
+
+      const gs = useGameStore.getState().gameState;
+      const activeHand = gs.playerHands[gs.activeHandIndex];
+      const dealerUpcard = gs.dealerHand.cards.find((c) => c.faceUp);
+
+      if (!activeHand || !dealerUpcard || gs.phase !== 'PLAYER_TURN') return;
+
+      const canDouble =
+        activeHand.cards.length === 2 &&
+        gs.bankroll >= activeHand.bet &&
+        !activeHand.isDoubled;
+      const canSplit =
+        activeHand.cards.length === 2 &&
+        activeHand.cards[0].rank === activeHand.cards[1].rank &&
+        gs.bankroll >= activeHand.bet;
+      const canSurrender = !!gs.config.allowSurrender;
+
+      const recommendation = getBasicStrategyRecommendation(
+        activeHand.cards,
+        dealerUpcard,
+        canDouble,
+        canSplit,
+        canSurrender,
+      );
+      if (!recommendation) return;
+
+      const optimalAction = strategyToPlayerAction(recommendation.action);
+      const handValue = getBestHandValue(activeHand.cards);
+      const dr = dealerUpcard.rank;
+      const dealerLabel = ['J', 'Q', 'K'].includes(dr) ? '10' : dr;
+      const handSummary = `${handValue} vs ${dealerLabel}`;
+      const isCorrect = playerAction === optimalAction;
+
+      setCoachSession((prev) => ({
+        totalDecisions: prev.totalDecisions + 1,
+        correctDecisions: isCorrect ? prev.correctDecisions + 1 : prev.correctDecisions,
+        mistakes: isCorrect
+          ? prev.mistakes
+          : [
+              ...prev.mistakes,
+              { handSummary, playerAction, optimalAction, explanation: recommendation.explanation },
+            ],
+      }));
+
+      clearTimeout(coachFeedbackTimerRef.current);
+      setCoachFeedback({ handSummary, playerAction, optimalAction, explanation: recommendation.explanation, isCorrect });
+      coachFeedbackTimerRef.current = setTimeout(
+        () => setCoachFeedback(null),
+        isCorrect ? 1200 : 3800,
+      );
+    },
+    [coachMode],
+  );
+
   const getHandResult = useCallback((index: number) => {
     if (phase !== 'SETTLEMENT') return null;
     const result = results.find((r) => r.handIndex === index);
@@ -264,6 +360,9 @@ export const NewTable = memo(function NewTable() {
         )}
       </AnimatePresence>
 
+      {/* Coach Feedback overlay */}
+      <CoachFeedback feedback={coachFeedback} />
+
       {/* Tutorial */}
       <Tutorial />
       
@@ -331,6 +430,26 @@ export const NewTable = memo(function NewTable() {
             {showStrategyChart ? '✕' : '📈'}
           </button>
         )}
+        {/* Coach mode toggle */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleCoachMode();
+          }}
+          className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg backdrop-blur-md border-2 min-h-[44px] transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg ${
+            coachMode
+              ? 'bg-warning/20 border-warning/60 text-warning'
+              : 'bg-card/95 border-primary/30'
+          }`}
+          style={{ pointerEvents: 'auto' }}
+          aria-label="Mode Entraîneur"
+          aria-pressed={coachMode}
+          title={coachMode ? 'Mode Entraîneur actif' : 'Activer le Mode Entraîneur'}
+          type="button"
+        >
+          🎓
+        </button>
       </div>
 
       {/* Floating Panels - Use Sheet on mobile, motion.div on desktop */}
@@ -501,7 +620,7 @@ export const NewTable = memo(function NewTable() {
         bottomDock={
           <BottomActionDock
             bettingContent={phase === 'BETTING' && bankroll > 0 ? <BetComposer /> : undefined}
-            playingContent={phase === 'PLAYER_TURN' ? <ActionBar /> : undefined}
+            playingContent={phase === 'PLAYER_TURN' ? <ActionBar onBeforeAction={handleCoachCheck} /> : undefined}
             waitingContent={
               (phase === 'DEALER_TURN' || phase === 'DEALING') && isAnimating ? (
                 <span className="animate-pulse text-muted-foreground">{t.status.dealerPlaying}</span>
@@ -528,6 +647,7 @@ export const NewTable = memo(function NewTable() {
         }
         sideBetResults={sideBetResults}
         onNewHand={handleNewHand}
+        coachSession={coachMode ? coachSession : undefined}
       />
     </>
   );

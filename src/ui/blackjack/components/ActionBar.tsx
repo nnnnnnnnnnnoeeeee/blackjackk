@@ -12,7 +12,12 @@ import { ActionButton } from './ActionButton';
 import { toast } from 'sonner';
 import type { PlayerAction } from '@/lib/blackjack/types';
 
-export const ActionBar = memo(function ActionBar() {
+interface ActionBarProps {
+  /** Called with the player's action right before it's executed (only for valid actions). Used by coach mode. */
+  onBeforeAction?: (action: PlayerAction) => void;
+}
+
+export const ActionBar = memo(function ActionBar({ onBeforeAction }: ActionBarProps) {
   const executeAction = useGameStore((s) => s.action);
   const isAnimating = useGameStore((s) => s.isAnimating);
   const config = useGameStore(selectConfig);
@@ -58,6 +63,9 @@ export const ActionBar = memo(function ActionBar() {
         return;
       }
 
+      // Coach mode hook — fires before executing so the state is still pre-action
+      onBeforeAction?.(action);
+
       try {
         executeAction(action);
       } catch (error) {
@@ -67,7 +75,7 @@ export const ActionBar = memo(function ActionBar() {
         });
       }
     },
-    [executeAction, isAnimating, validActions, getActionReason]
+    [executeAction, isAnimating, validActions, getActionReason, onBeforeAction]
   );
 
   // Setup keyboard shortcuts using custom key bindings
