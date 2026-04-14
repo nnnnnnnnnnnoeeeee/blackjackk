@@ -37,6 +37,7 @@ export const BetComposer = memo(function BetComposer() {
   const [betAmount, setBetAmount] = useState(0);
   const [perfectPairsBet, setPerfectPairsBet] = useState(0);
   const [twentyOnePlus3Bet, setTwentyOnePlus3Bet] = useState(0);
+  const [sideBetsOpen, setSideBetsOpen] = useState(false);
   
   // Use refs to persist last bet values across component remounts
   // Also use localStorage as backup for persistence
@@ -542,106 +543,117 @@ export const BetComposer = memo(function BetComposer() {
         </div>
       </div>
 
-      {/* Side Bets Section - Scrollable ONLY if needed */}
-      <div className="w-full border-t-2 border-primary/20 pt-2 sm:pt-3 mt-2 sm:mt-3 space-y-2 sm:space-y-3 max-h-[120px] sm:max-h-[140px] overflow-y-auto flex-shrink">
-        <div className="relative text-center mb-1 sm:mb-2">
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 border border-primary/30">
-            <span className="text-sm sm:text-base md:text-lg">🎰</span>
-            <span className="text-[10px] sm:text-xs md:text-sm uppercase tracking-wider font-bold text-primary">
-              Side Bets
-            </span>
-          </div>
-        </div>
+      {/* Side Bets Section - Collapsible */}
+      <div className="w-full border-t-2 border-primary/20 pt-2 sm:pt-3 mt-2 sm:mt-3 flex-shrink-0">
+        {/* Toggle header */}
+        <button
+          type="button"
+          onClick={() => setSideBetsOpen((v) => !v)}
+          className="w-full inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 border border-primary/30 hover:border-primary/60 transition-colors"
+          aria-expanded={sideBetsOpen}
+        >
+          <span className="text-sm sm:text-base">🎰</span>
+          <span className="text-[10px] sm:text-xs uppercase tracking-wider font-bold text-primary">
+            Side Bets
+            {(perfectPairsBet > 0 || twentyOnePlus3Bet > 0) && (
+              <span className="ml-1 text-foreground/70">(${perfectPairsBet + twentyOnePlus3Bet})</span>
+            )}
+          </span>
+          <span className="text-primary text-xs ml-auto">{sideBetsOpen ? '▲' : '▼'}</span>
+        </button>
 
-        {/* Perfect Pairs */}
-        {config.perfectPairs && (
-          <SideBetToggle
-            name="perfectPairs"
-            label="Perfect Pairs"
-            description="Win if your first 2 cards form a pair"
-            config={config.perfectPairs}
-            enabled={config.perfectPairs.enabled}
-            bet={perfectPairsBet}
-            onToggle={(checked) => {
-              updateConfig({
-                perfectPairs: {
-                  ...(config.perfectPairs || DEFAULT_CONFIG.perfectPairs),
-                  enabled: checked,
-                },
-              });
-              if (!checked) setPerfectPairsBet(0);
-            }}
-            onBetChange={setPerfectPairsBet}
-            maxBet={config.perfectPairs.maxBet}
-            availableBankroll={availableBankroll - twentyOnePlus3Bet}
-            payouts={{
-              Mixed: config.perfectPairs.payouts.mixed,
-              Colored: config.perfectPairs.payouts.colored,
-              Perfect: config.perfectPairs.payouts.perfect,
-            }}
-          />
-        )}
+        {/* Collapsible content */}
+        {sideBetsOpen && (
+          <div className="mt-2 sm:mt-3 space-y-2 sm:space-y-3 max-h-[150px] overflow-y-auto">
+            {/* Perfect Pairs */}
+            {config.perfectPairs && (
+              <SideBetToggle
+                name="perfectPairs"
+                label="Perfect Pairs"
+                description="Win if your first 2 cards form a pair"
+                config={config.perfectPairs}
+                enabled={config.perfectPairs.enabled}
+                bet={perfectPairsBet}
+                onToggle={(checked) => {
+                  updateConfig({
+                    perfectPairs: {
+                      ...(config.perfectPairs || DEFAULT_CONFIG.perfectPairs),
+                      enabled: checked,
+                    },
+                  });
+                  if (!checked) setPerfectPairsBet(0);
+                }}
+                onBetChange={setPerfectPairsBet}
+                maxBet={config.perfectPairs.maxBet}
+                availableBankroll={availableBankroll - twentyOnePlus3Bet}
+                payouts={{
+                  Mixed: config.perfectPairs.payouts.mixed,
+                  Colored: config.perfectPairs.payouts.colored,
+                  Perfect: config.perfectPairs.payouts.perfect,
+                }}
+              />
+            )}
 
-        {/* 21+3 */}
-        {config.twentyOnePlus3 && (
-          <SideBetToggle
-            name="twentyOnePlus3"
-            label="21+3"
-            description="Your 2 cards + dealer's card = poker hand"
-            config={config.twentyOnePlus3}
-            enabled={config.twentyOnePlus3.enabled}
-            bet={twentyOnePlus3Bet}
-            onToggle={(checked) => {
-              updateConfig({
-                twentyOnePlus3: {
-                  ...(config.twentyOnePlus3 || DEFAULT_CONFIG.twentyOnePlus3),
-                  enabled: checked,
-                },
-              });
-              if (!checked) setTwentyOnePlus3Bet(0);
-            }}
-            onBetChange={setTwentyOnePlus3Bet}
-            maxBet={config.twentyOnePlus3.maxBet}
-            availableBankroll={availableBankroll - perfectPairsBet}
-            payouts={{
-              Flush: config.twentyOnePlus3.payouts.flush,
-              Straight: config.twentyOnePlus3.payouts.straight,
-              '3 of a Kind': config.twentyOnePlus3.payouts.threeOfAKind,
-              'Straight Flush': config.twentyOnePlus3.payouts.straightFlush,
-            }}
-          />
-        )}
+            {/* 21+3 */}
+            {config.twentyOnePlus3 && (
+              <SideBetToggle
+                name="twentyOnePlus3"
+                label="21+3"
+                description="Your 2 cards + dealer's card = poker hand"
+                config={config.twentyOnePlus3}
+                enabled={config.twentyOnePlus3.enabled}
+                bet={twentyOnePlus3Bet}
+                onToggle={(checked) => {
+                  updateConfig({
+                    twentyOnePlus3: {
+                      ...(config.twentyOnePlus3 || DEFAULT_CONFIG.twentyOnePlus3),
+                      enabled: checked,
+                    },
+                  });
+                  if (!checked) setTwentyOnePlus3Bet(0);
+                }}
+                onBetChange={setTwentyOnePlus3Bet}
+                maxBet={config.twentyOnePlus3.maxBet}
+                availableBankroll={availableBankroll - perfectPairsBet}
+                payouts={{
+                  Flush: config.twentyOnePlus3.payouts.flush,
+                  Straight: config.twentyOnePlus3.payouts.straight,
+                  '3 of a Kind': config.twentyOnePlus3.payouts.threeOfAKind,
+                  'Straight Flush': config.twentyOnePlus3.payouts.straightFlush,
+                }}
+              />
+            )}
 
-        {/* Total side bets display */}
-        {(perfectPairsBet > 0 || twentyOnePlus3Bet > 0) && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center pt-2 mt-2 border-t-2 border-primary/20"
-          >
-            <div className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground mb-1">
-              Total Side Bets
-            </div>
-            <div
-              className={cn(
-                'text-xl sm:text-2xl font-bold',
-                canAffordSideBets
-                  ? 'text-primary drop-shadow-lg'
-                  : 'text-destructive drop-shadow-lg'
-              )}
-            >
-              ${perfectPairsBet + twentyOnePlus3Bet}
-            </div>
-            {!canAffordSideBets && (
+            {/* Total side bets display */}
+            {(perfectPairsBet > 0 || twentyOnePlus3Bet > 0) && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-xs sm:text-sm text-destructive mt-2 px-3 py-1 rounded-full bg-destructive/10 border border-destructive/30 inline-block"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center pt-2 mt-2 border-t-2 border-primary/20"
               >
-                ⚠️ Total exceeds bankroll
+                <div className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground mb-1">
+                  Total Side Bets
+                </div>
+                <div
+                  className={cn(
+                    'text-xl sm:text-2xl font-bold',
+                    canAffordSideBets ? 'text-primary drop-shadow-lg' : 'text-destructive drop-shadow-lg'
+                  )}
+                >
+                  ${perfectPairsBet + twentyOnePlus3Bet}
+                </div>
+                {!canAffordSideBets && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-xs sm:text-sm text-destructive mt-2 px-3 py-1 rounded-full bg-destructive/10 border border-destructive/30 inline-block"
+                  >
+                    ⚠️ Total exceeds bankroll
+                  </motion.div>
+                )}
               </motion.div>
             )}
-          </motion.div>
+          </div>
         )}
       </div>
 

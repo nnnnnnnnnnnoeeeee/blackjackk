@@ -103,19 +103,11 @@ export const ActionBar = memo(function ActionBar() {
     'action-bar'
   );
 
-  // Only show valid actions (memoized)
-  const visibleActions = useMemo(
-    () => ACTION_CONFIG.filter(({ action }) => validActions.includes(action)),
-    [validActions]
-  );
+  // Show all actions; disable the ones not currently valid so the player understands what exists
+  const visibleActions = ACTION_CONFIG;
 
-  // Responsive grid layout — HIT+STAND always in a 2-col first row
-  const gridClasses = useMemo(() => {
-    if (visibleActions.length <= 2) return 'grid grid-cols-2 gap-2 sm:gap-3';
-    if (visibleActions.length === 3) return 'grid grid-cols-2 gap-2 sm:gap-3';
-    if (visibleActions.length === 4) return 'grid grid-cols-2 gap-2 sm:gap-3';
-    return 'grid grid-cols-2 gap-2 sm:gap-3';
-  }, [visibleActions.length]);
+  // 5 actions: 2-col grid (hit+stand on row 1, then double+split+insurance below)
+  const gridClasses = 'grid grid-cols-2 gap-2 sm:gap-3';
 
   const variants = conditionalVariants(
     {
@@ -136,7 +128,7 @@ export const ActionBar = memo(function ActionBar() {
       aria-label="Player actions"
     >
       {visibleActions.map(({ action, label, variant, shortcut }) => {
-        const isDisabled = isAnimating;
+        const isDisabled = !validActions.includes(action) || isAnimating;
         const reason = getActionReason(action);
 
         return (

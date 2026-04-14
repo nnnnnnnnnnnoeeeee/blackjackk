@@ -45,14 +45,12 @@ export const HeaderBar = memo(function HeaderBar({
         </div>
       </div>
 
-      {/* Phase Banner - Only show when game is active (not during BETTING) */}
-      {phase !== 'BETTING' && (
-        <PhaseBanner
-          phase={phase}
-          activeHandIndex={activeHandIndex}
-          totalHands={totalHands}
-        />
-      )}
+      {/* Phase Banner - Always visible */}
+      <PhaseBanner
+        phase={phase}
+        activeHandIndex={activeHandIndex}
+        totalHands={totalHands}
+      />
     </div>
   );
 });

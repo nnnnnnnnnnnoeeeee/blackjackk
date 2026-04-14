@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev          # Start dev server (port 8080), auto-runs setup script first
+npm run dev          # Start dev server (port 3000), auto-runs setup script first
 npm run build        # Production build
 npm run lint         # ESLint
 npm run test         # Run all tests once (Vitest)
@@ -67,3 +67,12 @@ Keyboard defaults: `H`=Hit, `S`=Stand, `D`=Double, `P`=Split (configurable via `
 ## Environment
 
 Copy `env.template` to `.env` and fill in Supabase credentials. See `SETUP.md` for database migration instructions.
+
+### Variables
+
+| Variable | Required? | Default/Local Value | Description |
+| --- | --- | --- | --- |
+| `VITE_SUPABASE_URL` | Optional (Solo) | `https://placeholder.supabase.co` | Required for Multiplayer/Auth |
+| `VITE_SUPABASE_ANON_KEY` | Optional (Solo) | `placeholder-key` | Required for Multiplayer/Auth |
+
+For a quick local start, simply run `npm install && npm run dev` directly. The diagnostic script ensures that solo mode will still work out of the box without keys.

@@ -24,16 +24,11 @@ export const PhaseBanner = memo(function PhaseBanner({
 }: PhaseBannerProps) {
   const prefersReducedMotion = useReducedMotion();
 
-  // Don't render anything during BETTING phase
-  if (phase === 'BETTING') {
-    return null;
-  }
-
   const getPhaseText = (): string => {
     if (phase === 'PLAYER_TURN' && totalHands && totalHands > 1 && activeHandIndex !== undefined) {
-      return `Your Turn - Hand ${activeHandIndex + 1}/${totalHands}`;
+      return `Your Turn — Hand ${activeHandIndex + 1}/${totalHands}`;
     }
-    return phaseText[phase] || '';
+    return phaseText[phase] || 'Place Your Bet';
   };
 
   const getPhaseColor = () => {

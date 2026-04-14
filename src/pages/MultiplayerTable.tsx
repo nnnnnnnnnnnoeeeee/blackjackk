@@ -12,7 +12,7 @@ import { HandView } from '@/components/HandView';
 import { TimerBadge, TurnIndicator, BetComposerMultiplayer, ActionBarMultiplayer } from '@/ui/blackjack/components';
 import { OpponentsZone } from '@/ui/blackjack/table';
 import { ChipStack } from '@/components/ChipStack';
-import { ChatPanel } from '@/components/ChatPanel';
+import { TableChat } from '@/ui/blackjack/components/TableChat';
 import { QuickChatBar } from '@/components/QuickChatBar';
 import { EmoteOverlay, type ActiveEmote } from '@/components/EmoteOverlay';
 // Toast import removed - all notifications disabled
@@ -1031,9 +1031,15 @@ export default function MultiplayerTable() {
 
       {/* Chat Panel */}
       {currentUser && id && (
-        <ChatPanel
+        <TableChat
           tableId={id}
-          currentUserId={currentUser.id}
+          userId={currentUser.id}
+          username={
+            table?.table_players.find((p) => p.user_id === currentUser.id)?.profile?.username ??
+            currentUser.user_metadata?.username ??
+            'Joueur'
+          }
+          channel={realtimeChannelRef.current}
           isOpen={chatOpen}
           onClose={() => setChatOpen(false)}
         />
