@@ -464,16 +464,31 @@ export const BetComposer = memo(function BetComposer() {
       variants={variants}
       initial="initial"
       animate="animate"
-      className="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 md:p-5 rounded-lg sm:rounded-xl bg-card/50 backdrop-blur-sm border border-border w-full max-w-full relative"
+      className="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl bg-card/60 backdrop-blur-md border border-primary/20 w-full max-w-full relative shadow-[0_4px_32px_rgba(0,0,0,0.4)]"
     >
-      {/* Bet amount display - Always visible */}
-      <div className="text-center w-full flex-shrink-0">
-        <div className="text-[9px] sm:text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground mb-0.5 sm:mb-1">
-          Your Bet
+      {/* Bet amount display — HERO */}
+      <div className="text-center w-full flex-shrink-0 py-1">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+          Votre mise
         </div>
-        <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-primary break-all">
-          ${betAmount}
+        <div
+          className={cn(
+            'text-5xl sm:text-6xl font-black tabular-nums transition-all duration-300 leading-none',
+            betAmount > 0
+              ? 'text-primary'
+              : 'text-muted-foreground/30',
+          )}
+          style={betAmount > 0 ? {
+            textShadow: '0 0 32px rgba(212,175,55,0.65), 0 0 8px rgba(212,175,55,0.4)',
+          } : undefined}
+        >
+          ${betAmount.toLocaleString()}
         </div>
+        {betAmount > 0 && (
+          <div className="text-[10px] text-muted-foreground mt-1">
+            Bankroll restante : <span className="font-semibold text-foreground">${(bankroll - betAmount).toLocaleString()}</span>
+          </div>
+        )}
       </div>
 
       {/* Chip buttons - Always visible */}
@@ -485,39 +500,39 @@ export const BetComposer = memo(function BetComposer() {
         />
       </div>
 
-      {/* Quick actions - Always visible */}
-      <div className="flex gap-2 sm:gap-2.5 md:gap-3 w-full max-w-xs sm:max-w-sm md:max-w-md px-1 flex-shrink-0">
+      {/* Quick actions */}
+      <div className="flex gap-2 w-full max-w-xs sm:max-w-sm md:max-w-md flex-shrink-0">
         <button
           onClick={handleClear}
-          className="btn-casino-secondary text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 flex-1 min-h-[44px] sm:min-h-[48px]"
+          className="flex-1 min-h-[44px] rounded-lg border border-border/60 bg-card/40 hover:bg-card/70 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors px-2"
           aria-label={`${t.betting.clearButton} (${keyBindingsSafe.clear})`}
           title={`${t.betting.clearButton} (${keyBindingsSafe.clear})`}
         >
-          {t.betting.clearButton} ({keyBindingsSafe.clear})
+          ✕ Clear <span className="opacity-50 text-[10px]">({keyBindingsSafe.clear})</span>
         </button>
         <button
           onClick={handleRebet}
           disabled={
-            phase !== 'BETTING' || 
-            lastBetAmountRef.current === 0 || 
+            phase !== 'BETTING' ||
+            lastBetAmountRef.current === 0 ||
             lastBetAmountRef.current < minBet ||
             lastBetAmountRef.current > maxBet ||
             (lastBetAmountRef.current + lastPerfectPairsBetRef.current + lastTwentyOnePlus3BetRef.current) > bankroll
           }
-          className="btn-casino-secondary text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 flex-1 min-h-[44px] sm:min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 min-h-[44px] rounded-lg border border-border/60 bg-card/40 hover:bg-card/70 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors px-2 disabled:opacity-30 disabled:cursor-not-allowed"
           aria-label={`${t.actions.rebet} (${keyBindingsSafe.rebet})`}
           title={`${t.actions.rebet} (${keyBindingsSafe.rebet})`}
         >
-          {t.actions.rebet} ({keyBindingsSafe.rebet})
+          ↺ Rebet <span className="opacity-50 text-[10px]">({keyBindingsSafe.rebet})</span>
         </button>
         <button
           onClick={handleAllIn}
           disabled={bankroll === 0}
-          className="btn-casino-secondary text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 flex-1 min-h-[44px] sm:min-h-[48px]"
+          className="flex-1 min-h-[44px] rounded-lg border border-warning/40 bg-warning/10 hover:bg-warning/20 text-xs font-bold text-warning transition-colors px-2 disabled:opacity-30"
           aria-label={`${t.betting.allInButton} (${keyBindingsSafe.allIn})`}
           title={`${t.betting.allInButton} (${keyBindingsSafe.allIn})`}
         >
-          {t.betting.allInButton} ({keyBindingsSafe.allIn})
+          ALL IN <span className="opacity-50 text-[10px]">({keyBindingsSafe.allIn})</span>
         </button>
       </div>
 

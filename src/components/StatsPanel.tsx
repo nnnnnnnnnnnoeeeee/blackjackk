@@ -42,48 +42,32 @@ export const StatsPanel = memo(function StatsPanel() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="w-full p-1 sm:p-1.5 md:p-2 rounded-lg bg-card/30 backdrop-blur-sm border border-border"
+      className="w-full px-2 py-1 rounded-lg bg-card/20 backdrop-blur-sm border border-border/50"
     >
-      <XPBar className="mb-1.5 sm:mb-2" />
-      <div className="flex flex-wrap justify-center gap-1 sm:gap-1.5 md:gap-2">
-        <StatItem 
-          label="Bankroll" 
-          value={`$${bankroll.toLocaleString()}`}
-          className="min-w-[70px] sm:min-w-[80px] md:min-w-[90px]"
-        />
-        <StatItem 
-          label="Hands" 
+      <XPBar className="mb-1" />
+      {/* Compact stats — 3 items max */}
+      <div className="flex justify-center gap-4 sm:gap-6">
+        <StatItem
+          label="Mains"
           value={stats.handsPlayed}
-          className="min-w-[50px] sm:min-w-[60px]"
         />
-        <StatItem 
-          label="Win Rate" 
+        <StatItem
+          label="Win %"
           value={`${winRate}%`}
-          className="min-w-[60px] sm:min-w-[70px]"
         />
-        <StatItem 
-          label="BJ" 
-          value={stats.blackjacks}
-          className="min-w-[40px] sm:min-w-[50px]"
-        />
-        <StatItem 
-          label="Net" 
+        <StatItem
+          label="Net"
           value={`${netProfit >= 0 ? '+' : ''}$${netProfit.toLocaleString()}`}
           className={cn(
-            'min-w-[70px] sm:min-w-[80px] md:min-w-[90px]',
             netProfit > 0 && 'text-success',
             netProfit < 0 && 'text-destructive',
           )}
         />
       </div>
-      
-      {/* Reset button (small, subtle) */}
+
       {bankroll === 0 && (
-        <div className="mt-4 text-center">
-          <button
-            onClick={resetGame}
-            className="btn-casino text-sm"
-          >
+        <div className="mt-3 text-center">
+          <button onClick={resetGame} className="btn-casino text-sm">
             New Game ($1,000)
           </button>
         </div>

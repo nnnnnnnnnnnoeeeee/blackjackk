@@ -249,10 +249,10 @@
   .poker-chip {
     @apply relative flex items-center justify-center rounded-full font-bold;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
-    width: 52px;
-    height: 52px;
-    min-width: 52px;
-    min-height: 52px;
+    width: 62px;
+    height: 62px;
+    min-width: 62px;
+    min-height: 62px;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     font-family: 'Outfit', system-ui, sans-serif;
