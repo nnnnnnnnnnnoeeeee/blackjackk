@@ -34,13 +34,20 @@ export const CenterPotZone = memo(function CenterPotZone({
         {isPlaying && currentBet && currentBet > 0 && (
           <motion.div
             key="bet-display"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-            className="flex flex-col items-center"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="flex flex-col items-center gap-1"
           >
-            <div className="poker-chip gold text-sm" aria-label={`Current bet: $${currentBet}`}>
-              ${currentBet}
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
+              Mise
+            </span>
+            <div
+              className="text-2xl sm:text-3xl font-black text-primary tabular-nums"
+              style={{ textShadow: '0 0 20px rgba(212,175,55,0.5)' }}
+              aria-label={`Current bet: $${currentBet}`}
+            >
+              ${currentBet.toLocaleString()}
             </div>
           </motion.div>
         )}

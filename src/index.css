@@ -188,8 +188,8 @@
     @apply relative flex flex-col items-center justify-center;
     @apply bg-white text-[#111];
     aspect-ratio: 2.5 / 3.5;
-    min-width: 60px;
-    max-width: 90px;
+    min-width: 72px;
+    max-width: 112px;
     border-radius: 6px;
     border: 1px solid rgba(0,0,0,0.12);
     font-family: 'Outfit', system-ui, sans-serif;
@@ -507,9 +507,9 @@
 
   /* Score badge */
   .score-badge {
-    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold;
-    @apply bg-secondary/80 text-foreground border border-border;
-    @apply backdrop-blur-sm;
+    @apply inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-base font-extrabold;
+    @apply bg-secondary/90 text-foreground border-2 border-border;
+    @apply backdrop-blur-sm shadow-md;
   }
 
   .score-badge.blackjack {

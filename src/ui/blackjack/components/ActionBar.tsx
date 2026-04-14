@@ -114,8 +114,9 @@ export const ActionBar = memo(function ActionBar({ onBeforeAction }: ActionBarPr
   // Show all actions; disable the ones not currently valid so the player understands what exists
   const visibleActions = ACTION_CONFIG;
 
-  // 5 actions: 2-col grid (hit+stand on row 1, then double+split+insurance below)
-  const gridClasses = 'grid grid-cols-2 gap-2 sm:gap-3';
+  // Primary = hit + stand (full row each). Secondary = rest (3-col row below).
+  const primaryActions = visibleActions.filter((a) => a.action === 'hit' || a.action === 'stand');
+  const secondaryActions = visibleActions.filter((a) => a.action !== 'hit' && a.action !== 'stand');
 
   const variants = conditionalVariants(
     {
@@ -130,28 +131,42 @@ export const ActionBar = memo(function ActionBar({ onBeforeAction }: ActionBarPr
       variants={variants}
       initial="initial"
       animate="animate"
-      className={gridClasses}
+      className="flex flex-col gap-2 sm:gap-2.5 w-full"
       style={{ position: 'relative', zIndex: 10 }}
       role="toolbar"
       aria-label="Player actions"
     >
-      {visibleActions.map(({ action, label, variant, shortcut }) => {
-        const isDisabled = !validActions.includes(action) || isAnimating;
-        const reason = getActionReason(action);
-
-        return (
+      {/* Primary row: HIT + STAND */}
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        {primaryActions.map(({ action, label, variant, shortcut }) => (
           <ActionButton
             key={action}
             action={action}
             label={label}
             variant={variant}
-            disabled={isDisabled}
+            disabled={!validActions.includes(action) || isAnimating}
             shortcut={shortcut}
-            reason={reason}
+            reason={getActionReason(action)}
             onClick={() => handleAction(action)}
           />
-        );
-      })}
+        ))}
+      </div>
+
+      {/* Secondary row: DOUBLE + SPLIT + INSURANCE */}
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+        {secondaryActions.map(({ action, label, variant, shortcut }) => (
+          <ActionButton
+            key={action}
+            action={action}
+            label={label}
+            variant={variant}
+            disabled={!validActions.includes(action) || isAnimating}
+            shortcut={shortcut}
+            reason={getActionReason(action)}
+            onClick={() => handleAction(action)}
+          />
+        ))}
+      </div>
     </motion.div>
   );
 });
