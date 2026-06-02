@@ -36,7 +36,7 @@ export const CoachFeedback = memo(function CoachFeedback({ feedback }: CoachFeed
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8, scale: 0.96 }}
           transition={{ duration: 0.18, ease: 'easeOut' }}
-          className="fixed bottom-44 left-1/2 -translate-x-1/2 z-[160] w-[min(340px,calc(100vw-2rem))] pointer-events-none"
+          className="fixed top-1/2 -translate-y-1/2 left-4 sm:left-8 z-[160] w-[min(340px,calc(100vw-2rem))] pointer-events-none"
           role="alert"
           aria-live="polite"
         >

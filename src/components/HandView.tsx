@@ -66,11 +66,23 @@ export const HandView = memo(function HandView({
   const resultText = getResultText();
   
   return (
-    <div className={cn('relative flex flex-col items-center gap-2', className)}>
+    <div className={cn('relative flex flex-col items-center gap-1 sm:gap-2', className)}>
       {/* Label - Only show for player hands (dealer label is handled by DealerZone) */}
       {!isDealer && (
-        <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-          Player
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+            Player
+          </span>
+          {showValue && cards.length > 0 && (
+            <span className={cn(
+              "text-xs font-bold px-1.5 py-0.5 rounded border",
+              isBlackjack ? "bg-primary/20 border-primary text-primary" :
+              isBusted ? "bg-destructive/20 border-destructive text-destructive" :
+              "bg-secondary/80 border-border text-foreground"
+            )}>
+              {valueDisplay}
+            </span>
+          )}
         </div>
       )}
       
@@ -78,8 +90,7 @@ export const HandView = memo(function HandView({
       <motion.div
         className={cn(
           'relative flex items-center justify-center min-h-[130px] sm:min-h-[160px] md:min-h-[180px]',
-          'p-3 sm:p-4 md:p-5 rounded-xl transition-all duration-300',
-          'max-w-full overflow-hidden',
+          'p-2 sm:p-3 md:p-4 rounded-xl transition-all duration-300',
           isActive && !isDealer && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
           getResultStyles(),
         )}
@@ -107,7 +118,7 @@ export const HandView = memo(function HandView({
           `,
         } : {}}
       >
-        <div className="flex -space-x-3 sm:-space-x-4 md:-space-x-5 max-w-full overflow-x-auto px-2">
+        <div className="flex -space-x-4 sm:-space-x-5 px-2 justify-center">
           <AnimatePresence>
             {cards.map((card, index) => (
               <PlayingCard
@@ -185,20 +196,6 @@ export const HandView = memo(function HandView({
         </AnimatePresence>
       </motion.div>
       
-      {/* Score badge */}
-      {showValue && cards.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={cn(
-            'score-badge',
-            isBlackjack && 'blackjack',
-            isBusted && 'bust',
-          )}
-        >
-          {valueDisplay}
-        </motion.div>
-      )}
     </div>
   );
 });

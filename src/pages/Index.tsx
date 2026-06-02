@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase, isPlaceholder } from '@/lib/supabaseClient';
 import { Loader2 } from 'lucide-react';
 
 const Index = () => {
@@ -34,14 +34,21 @@ const Index = () => {
   }, [navigate]);
 
   const checkUserAndRedirect = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (user) {
-      // Utilisateur connecté → rediriger vers la sélection de mode
+    if (isPlaceholder) {
       navigate('/mode-selection', { replace: true });
-    } else {
-      // Utilisateur non connecté → rediriger vers login
-      navigate('/login', { replace: true });
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        navigate('/mode-selection', { replace: true });
+      } else {
+        navigate('/login', { replace: true });
+      }
+    } catch (e) {
+      navigate('/mode-selection', { replace: true });
     }
   };
 

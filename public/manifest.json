@@ -1,0 +1,18 @@
+{
+  "name": "Blackjack Brilliance",
+  "short_name": "Blackjack",
+  "description": "A premium Blackjack game with solo and multiplayer modes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b4d24",
+  "theme_color": "#d4af37",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["games", "entertainment"]
+}

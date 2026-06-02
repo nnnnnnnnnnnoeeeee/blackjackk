@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase, isPlaceholder } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +25,12 @@ export default function Login() {
     setLoading(true);
 
     try {
+      if (isPlaceholder) {
+        toast.success('Mode Invité activé (Supabase non configuré)');
+        navigate('/mode-selection');
+        return;
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -44,6 +50,12 @@ export default function Login() {
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
+      if (isPlaceholder) {
+        toast.success('Mode Invité activé (Supabase non configuré)');
+        navigate('/mode-selection');
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

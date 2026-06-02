@@ -48,6 +48,8 @@ import { BasicStrategyChart } from './BasicStrategyChart';
 import { ParticleSystem } from './ParticleSystem';
 import { LevelUpNotification } from './LevelUpNotification';
 import { XPBar } from './XPBar';
+import { AchievementNotification } from './AchievementNotification';
+import { AchievementsPanel } from './AchievementsPanel';
 import { useSound } from '@/hooks/useSound';
 import { useHaptic } from '@/hooks/useHaptic';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
@@ -82,6 +84,7 @@ export const NewTable = memo(function NewTable() {
   const [showSettings, setShowSettings] = useState(false);
   const [showStatsDashboard, setShowStatsDashboard] = useState(false);
   const [showStrategyChart, setShowStrategyChart] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
   const [showSettlement, setShowSettlement] = useState(false);
   const [particleTrigger, setParticleTrigger] = useState(false);
   const [particleType, setParticleType] = useState<'win' | 'lose' | 'blackjack' | 'chip'>('win');
@@ -293,6 +296,12 @@ export const NewTable = memo(function NewTable() {
       {/* Level Up Notification */}
       <LevelUpNotification />
 
+      {/* Achievement Notification */}
+      <AchievementNotification
+        achievement={useGameStore.getState().pendingAchievements[0] ?? null}
+        onDismiss={() => useGameStore.getState().dismissAchievement()}
+      />
+
       {/* Screen Flash Overlay */}
       <AnimatePresence>
         {flashType && (
@@ -450,6 +459,29 @@ export const NewTable = memo(function NewTable() {
         >
           🎓
         </button>
+        {/* Achievements button */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const newValue = !showAchievements;
+            setShowAchievements(newValue);
+            setShowSettings(false);
+            setShowStatsDashboard(false);
+            setShowStrategyChart(false);
+          }}
+          className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg backdrop-blur-md border-2 min-h-[44px] transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg ${
+            showAchievements
+              ? 'bg-primary/20 border-primary/60 text-primary'
+              : 'bg-card/95 border-primary/30'
+          }`}
+          style={{ pointerEvents: 'auto' }}
+          aria-label="Achievements"
+          title="Achievements"
+          type="button"
+        >
+          🏆
+        </button>
       </div>
 
       {/* Floating Panels - Use Sheet on mobile, motion.div on desktop */}
@@ -484,6 +516,17 @@ export const NewTable = memo(function NewTable() {
               </SheetHeader>
               <div className="mt-4">
                 <BasicStrategyChart />
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <Sheet open={showAchievements} onOpenChange={setShowAchievements}>
+            <SheetContent side="right" className="w-full sm:w-[400px] md:w-[500px] overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Achievements</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4">
+                <AchievementsPanel />
               </div>
             </SheetContent>
           </Sheet>
@@ -528,6 +571,19 @@ export const NewTable = memo(function NewTable() {
               <BasicStrategyChart />
             </motion.div>
           )}
+
+          {showAchievements && (
+            <motion.div
+              key="achievements-panel"
+              initial={{ opacity: 0, scale: 0.9, x: 20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, x: 20 }}
+              className="fixed top-28 right-2 sm:top-32 sm:right-4 z-[90] w-[calc(100vw-1rem)] sm:w-[400px] md:w-[500px] max-h-[calc(100vh-8rem)] overflow-y-auto bg-card/95 backdrop-blur-md rounded-lg border-2 border-primary/30 shadow-xl p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <AchievementsPanel />
+            </motion.div>
+          )}
         </>
       )}
 
@@ -541,11 +597,12 @@ export const NewTable = memo(function NewTable() {
               totalHands={playerHands.length}
             />
             
-            {/* Stats Panel and Card Counting - Only show during BETTING phase */}
+            {/* Card Counting - Only show during BETTING phase */}
             {!showSettings && !showStatsDashboard && !showStrategyChart && phase === 'BETTING' && (
-              <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-2">
-                <StatsPanel />
-                <CardCountingPanel />
+              <div className="flex justify-center mt-2">
+                <div className="w-full max-w-xs">
+                  <CardCountingPanel />
+                </div>
               </div>
             )}
           </div>

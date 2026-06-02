@@ -11,7 +11,7 @@ import type { Hand } from '@/lib/blackjack/types';
 interface PlayerZoneProps {
   hands: Hand[];
   activeHandIndex?: number;
-  getHandResult?: (index: number) => 'win' | 'lose' | 'push' | 'blackjack' | null;
+  getHandResult?: (index: number) => 'win' | 'lose' | 'push' | 'blackjack' | 'surrender' | null;
   className?: string;
 }
 
@@ -22,10 +22,10 @@ export const PlayerZone = memo(function PlayerZone({
   className,
 }: PlayerZoneProps) {
   return (
-    <div className={cn('w-full max-w-full overflow-hidden', className)}>
+    <div className={cn('w-full max-w-full', className)}>
       <AnimatePresence mode="wait">
         {hands.length > 0 ? (
-          <div className="flex gap-1.5 sm:gap-2 md:gap-3 flex-wrap justify-center overflow-x-auto pb-1 max-w-full">
+          <div className="flex gap-4 md:gap-6 flex-wrap justify-center pb-2 max-w-full">
             {hands.map((hand, index) => {
               const isActive = index === activeHandIndex;
               const result = getHandResult?.(index) || null;

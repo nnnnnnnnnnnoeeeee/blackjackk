@@ -464,22 +464,22 @@ export const BetComposer = memo(function BetComposer() {
       variants={variants}
       initial="initial"
       animate="animate"
-      className="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl bg-card/60 backdrop-blur-md border border-primary/20 w-full max-w-full relative shadow-[0_4px_32px_rgba(0,0,0,0.4)]"
+      className="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 w-full max-w-full relative shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
     >
       {/* Bet amount display — HERO */}
       <div className="text-center w-full flex-shrink-0 py-1">
-        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-semibold">
           Votre mise
         </div>
         <div
           className={cn(
-            'text-5xl sm:text-6xl font-black tabular-nums transition-all duration-300 leading-none',
+            'text-4xl sm:text-5xl font-black tabular-nums transition-all duration-300 leading-none',
             betAmount > 0
               ? 'text-primary'
-              : 'text-muted-foreground/30',
+              : 'text-white/20',
           )}
           style={betAmount > 0 ? {
-            textShadow: '0 0 32px rgba(212,175,55,0.65), 0 0 8px rgba(212,175,55,0.4)',
+            textShadow: '0 0 20px rgba(212,175,55,0.5)',
           } : undefined}
         >
           ${betAmount.toLocaleString()}
@@ -501,14 +501,14 @@ export const BetComposer = memo(function BetComposer() {
       </div>
 
       {/* Quick actions */}
-      <div className="flex gap-2 w-full max-w-xs sm:max-w-sm md:max-w-md flex-shrink-0">
+      <div className="flex justify-center gap-2 sm:gap-3 w-full max-w-xs sm:max-w-sm md:max-w-md flex-shrink-0 my-1">
         <button
           onClick={handleClear}
-          className="flex-1 min-h-[44px] rounded-lg border border-border/60 bg-card/40 hover:bg-card/70 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors px-2"
+          className="flex-1 min-h-[40px] rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] sm:text-xs font-semibold text-white/60 hover:text-white transition-all px-2 flex items-center justify-center gap-1"
           aria-label={`${t.betting.clearButton} (${keyBindingsSafe.clear})`}
           title={`${t.betting.clearButton} (${keyBindingsSafe.clear})`}
         >
-          ✕ Clear <span className="opacity-50 text-[10px]">({keyBindingsSafe.clear})</span>
+          <span>✕</span> Clear <span className="opacity-40 ml-0.5">({keyBindingsSafe.clear})</span>
         </button>
         <button
           onClick={handleRebet}
@@ -519,20 +519,20 @@ export const BetComposer = memo(function BetComposer() {
             lastBetAmountRef.current > maxBet ||
             (lastBetAmountRef.current + lastPerfectPairsBetRef.current + lastTwentyOnePlus3BetRef.current) > bankroll
           }
-          className="flex-1 min-h-[44px] rounded-lg border border-border/60 bg-card/40 hover:bg-card/70 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors px-2 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="flex-1 min-h-[40px] rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] sm:text-xs font-semibold text-white/60 hover:text-white transition-all px-2 flex items-center justify-center gap-1 disabled:opacity-30 disabled:cursor-not-allowed"
           aria-label={`${t.actions.rebet} (${keyBindingsSafe.rebet})`}
           title={`${t.actions.rebet} (${keyBindingsSafe.rebet})`}
         >
-          ↺ Rebet <span className="opacity-50 text-[10px]">({keyBindingsSafe.rebet})</span>
+          <span>↺</span> Rebet <span className="opacity-40 ml-0.5">({keyBindingsSafe.rebet})</span>
         </button>
         <button
           onClick={handleAllIn}
           disabled={bankroll === 0}
-          className="flex-1 min-h-[44px] rounded-lg border border-warning/40 bg-warning/10 hover:bg-warning/20 text-xs font-bold text-warning transition-colors px-2 disabled:opacity-30"
+          className="flex-1 min-h-[40px] rounded-full border border-warning/30 bg-warning/10 hover:bg-warning/20 text-[10px] sm:text-xs font-bold text-warning transition-all px-2 flex items-center justify-center gap-1 disabled:opacity-30"
           aria-label={`${t.betting.allInButton} (${keyBindingsSafe.allIn})`}
           title={`${t.betting.allInButton} (${keyBindingsSafe.allIn})`}
         >
-          ALL IN <span className="opacity-50 text-[10px]">({keyBindingsSafe.allIn})</span>
+          ALL IN <span className="opacity-40 ml-0.5">({keyBindingsSafe.allIn})</span>
         </button>
       </div>
 
@@ -559,22 +559,22 @@ export const BetComposer = memo(function BetComposer() {
       </div>
 
       {/* Side Bets Section - Collapsible */}
-      <div className="w-full border-t-2 border-primary/20 pt-2 sm:pt-3 mt-2 sm:mt-3 flex-shrink-0">
+      <div className="w-full border-t border-white/10 pt-2 sm:pt-3 mt-2 sm:mt-3 flex-shrink-0">
         {/* Toggle header */}
         <button
           type="button"
           onClick={() => setSideBetsOpen((v) => !v)}
-          className="w-full inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 border border-primary/30 hover:border-primary/60 transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
           aria-expanded={sideBetsOpen}
         >
-          <span className="text-sm sm:text-base">🎰</span>
-          <span className="text-[10px] sm:text-xs uppercase tracking-wider font-bold text-primary">
+          <span className="text-sm sm:text-base opacity-80">🎰</span>
+          <span className="text-[10px] sm:text-xs uppercase tracking-wider font-bold text-white/80">
             Side Bets
             {(perfectPairsBet > 0 || twentyOnePlus3Bet > 0) && (
-              <span className="ml-1 text-foreground/70">(${perfectPairsBet + twentyOnePlus3Bet})</span>
+              <span className="ml-1 text-primary">(${perfectPairsBet + twentyOnePlus3Bet})</span>
             )}
           </span>
-          <span className="text-primary text-xs ml-auto">{sideBetsOpen ? '▲' : '▼'}</span>
+          <span className="text-white/40 text-xs ml-auto">{sideBetsOpen ? '▲' : '▼'}</span>
         </button>
 
         {/* Collapsible content */}
@@ -644,7 +644,7 @@ export const BetComposer = memo(function BetComposer() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-center pt-2 mt-2 border-t-2 border-primary/20"
+                className="text-center pt-2 mt-2 border-t border-white/10"
               >
                 <div className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground mb-1">
                   Total Side Bets
@@ -673,7 +673,7 @@ export const BetComposer = memo(function BetComposer() {
       </div>
 
       {/* Deal button - ALWAYS VISIBLE, NO SCROLL NEEDED */}
-      <div className="w-full mt-2 sm:mt-3 pt-2 sm:pt-3 border-t-2 border-primary/30 flex-shrink-0">
+      <div className="w-full mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/10 flex-shrink-0">
         <motion.button
           whileHover={canDeal && !prefersReducedMotion ? { scale: 1.05, y: -2 } : {}}
           whileTap={canDeal && !prefersReducedMotion ? { scale: 0.95, y: 0 } : {}}

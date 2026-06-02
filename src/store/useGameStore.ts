@@ -32,6 +32,7 @@ import { createShuffledShoe } from '@/lib/blackjack/deck';
 import { getValidActions, shouldDealerHit } from '@/lib/blackjack/rules';
 import { calculateRunningCount, calculateTrueCount } from '@/lib/blackjack/cardcounting';
 import { isBusted } from '@/lib/blackjack/hand';
+import { checkNewAchievements, type UnlockedAchievement, type Achievement } from '@/lib/blackjack/achievements';
 
 interface GameStore {
   // State
@@ -45,9 +46,13 @@ interface GameStore {
   tutorialCompleted: boolean;
   tutorialStep: number;
   language: 'fr' | 'en';
+  // Achievements
+  unlockedAchievements: UnlockedAchievement[];
+  pendingAchievements: Achievement[];
 
   // Actions
   clearLevelUp: () => void;
+  dismissAchievement: () => void;
   placeBet: (amount: number) => void;
   placeSideBets: (perfectPairs?: number, twentyOnePlus3?: number) => void;
   action: (action: PlayerAction) => void;
@@ -82,6 +87,9 @@ interface PartialGameStore {
   stats?: Partial<GameStats>;
   isAnimating?: boolean;
   language?: 'fr' | 'en';
+  tutorialCompleted?: boolean;
+  tutorialStep?: number;
+  cardCountingEnabled?: boolean;
 }
 
 const validateState = (state: unknown): Partial<GameStore> => {
@@ -216,8 +224,11 @@ export const useGameStore = create<GameStore>()(
       tutorialCompleted: false,
       tutorialStep: 0,
       language: 'en' as 'fr' | 'en',
+      unlockedAchievements: [],
+      pendingAchievements: [],
 
       clearLevelUp: () => set({ pendingLevelUp: null }),
+      dismissAchievement: () => set((state) => ({ pendingAchievements: state.pendingAchievements.slice(1) })),
       
       // Place side bets
       placeSideBets: (perfectPairs?: number, twentyOnePlus3?: number) => {
@@ -587,6 +598,26 @@ export const useGameStore = create<GameStore>()(
             isAnimating: false,
           });
           
+          // Check for new achievements
+          const currentStoreState = get();
+          const newlyUnlocked = checkNewAchievements(
+            newStats,
+            newXPSystem,
+            settlementState.bankroll,
+            currentStoreState.unlockedAchievements
+          );
+          if (newlyUnlocked.length > 0) {
+            const now = Date.now();
+            const newUnlockedEntries: UnlockedAchievement[] = newlyUnlocked.map((a) => ({
+              id: a.id,
+              unlockedAt: now,
+            }));
+            set({
+              unlockedAchievements: [...currentStoreState.unlockedAchievements, ...newUnlockedEntries],
+              pendingAchievements: [...currentStoreState.pendingAchievements, ...newlyUnlocked],
+            });
+          }
+
           // Double-check that state was set correctly
           const verifyState = get();
           console.log('[finishRound] State after set:', { phase: verifyState.gameState.phase, isAnimating: verifyState.isAnimating });
@@ -760,7 +791,7 @@ export const useGameStore = create<GameStore>()(
         if (!cardCountingEnabled) return null;
         
         // Calculate running count from all face-up cards seen
-        const allCards: import('./types').Card[] = [
+        const allCards: import('@/lib/blackjack/types').Card[] = [
           ...gameState.dealerHand.cards.filter(c => c.faceUp),
           ...gameState.playerHands.flatMap(h => h.cards.filter(c => c.faceUp)),
         ];
@@ -811,6 +842,7 @@ export const useGameStore = create<GameStore>()(
         cardCountingEnabled: state.cardCountingEnabled,
         coachMode: state.coachMode,
         language: state.language,
+        unlockedAchievements: state.unlockedAchievements,
       }),
       onRehydrateStorage: () => (state, error) => {
         if (error || !state) {
