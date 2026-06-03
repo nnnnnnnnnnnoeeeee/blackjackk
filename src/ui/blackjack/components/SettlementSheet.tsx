@@ -2,7 +2,7 @@
 // Component - Settlement Sheet (Mobile Bottom Sheet / Desktop Dialog)
 // ============================================================================
 
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
   Dialog,
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useMobileLayout } from '../hooks';
+import confetti from 'canvas-confetti';
 import { useTranslation } from '../i18n';
 import { HandResultCard } from './HandResultCard';
 import { ResultSummary } from './ResultSummary';
@@ -48,6 +49,38 @@ export const SettlementSheet = memo(function SettlementSheet({
   const { isMobile } = useMobileLayout();
   const { t } = useTranslation();
   
+  // Trigger confetti on win
+  useEffect(() => {
+    if (open) {
+      const hasWon = results.some(r => r.result === 'win' || r.result === 'blackjack') || 
+                     (insuranceResult?.won) ||
+                     (sideBetResults?.perfectPairs && sideBetResults.perfectPairs.payout > 0) ||
+                     (sideBetResults?.twentyOnePlus3 && sideBetResults.twentyOnePlus3.payout > 0);
+      
+      const hasBlackjack = results.some(r => r.result === 'blackjack');
+                     
+      if (hasWon) {
+        // Delay slightly for sheet to open
+        setTimeout(() => {
+          const count = hasBlackjack ? 250 : 100;
+          const defaults = { origin: { y: 0.7 }, zIndex: 300 };
+
+          function fire(particleRatio: number, opts: confetti.Options) {
+            confetti(Object.assign({}, defaults, opts, {
+              particleCount: Math.floor(count * particleRatio)
+            }));
+          }
+
+          fire(0.25, { spread: 26, startVelocity: 55 });
+          fire(0.2, { spread: 60 });
+          fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+          fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+          fire(0.1, { spread: 120, startVelocity: 45 });
+        }, 300);
+      }
+    }
+  }, [open, results, insuranceResult, sideBetResults]);
+
   // Note: Radix UI Dialog/Sheet components already handle focus trap automatically
 
   const handleNewHand = () => {

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { HandView } from '@/components/HandView';
 import { TimerBadge, TurnIndicator, BetComposerMultiplayer, ActionBarMultiplayer } from '@/ui/blackjack/components';
+import { TableShell } from '@/ui/blackjack/layout';
 import { OpponentsZone } from '@/ui/blackjack/table';
 import { ChipStack } from '@/components/ChipStack';
 import { TableChat } from '@/ui/blackjack/components/TableChat';
@@ -907,129 +908,337 @@ export default function MultiplayerTable() {
     }))
     .sort((a, b) => b.net - a.net);
 
-  return (
-    <div className="h-screen bg-table-felt flex flex-col relative overflow-hidden">
-      {/* Casino-style table border */}
-      <div className="absolute inset-0 border-8 border-gold/30 rounded-lg pointer-events-none" />
-      <div className="absolute inset-2 border-4 border-gold/20 rounded-lg pointer-events-none" />
-
-      {/* Emote overlay - above everything */}
-      <EmoteOverlay emotes={activeEmotes} />
-
-      {/* Header - Compact */}
-      <header className="p-3 border-b border-gold/20 bg-black/20 backdrop-blur-sm relative z-10 flex-shrink-0">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" onClick={() => navigate('/lobby')} className="text-gold hover:text-gold/80 h-8 px-2">
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Lobby
-            </Button>
-            <h1 className="text-lg font-bold text-gold font-heading">{table.name}</h1>
-            <span className="px-2 py-0.5 text-xs rounded-full bg-gold/20 text-gold border border-gold/30">
-              {table.status}
-            </span>
-            {table.room_code && (
-              <div className="flex items-center gap-1 px-2 py-0.5 bg-black/40 rounded border border-gold/20">
-                <Hash className="h-3 w-3 text-gold/70" />
-                <code className="text-xs font-mono font-bold text-gold">{table.room_code}</code>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5 text-gold hover:text-gold/80"
-                  onClick={() => {
-                    navigator.clipboard.writeText(table.room_code!);
-                    // Notification removed
-                  }}
-                  title="Copier le code"
-                >
-                  <Copy className="h-2.5 w-2.5" />
-                </Button>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="text-xs text-gold/80 font-semibold">
-              Round {gameState.currentRound}
-            </div>
-            {/* Active Player Indicator */}
-            {gameState.phase === 'playing' && activePlayer && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-gold/20 rounded-full border border-gold/30">
-                <Users className="h-3 w-3 text-gold" />
-                <span className="text-xs font-bold text-gold">
-                  {activePlayer.user_id === currentUser?.id ? 'Votre tour !' : `Tour : ${activePlayer.profile?.username || `J${activePlayer.seat}`}`}
-                </span>
-              </div>
-            )}
-
-            {/* Session Leaderboard toggle */}
-            <div className="relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setLeaderboardOpen((v) => !v)}
-                className="text-gold hover:text-gold/80 hover:bg-gold/10 h-8 w-8"
-                title="Classement de la session"
-              >
-                <Trophy className="h-4 w-4" />
-              </Button>
-              <AnimatePresence>
-                {leaderboardOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9, y: 4 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, y: 4 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute top-full right-0 mt-1 bg-black/95 border border-gold/30 rounded-xl p-3 shadow-2xl z-50 w-52"
-                  >
-                    <div className="text-xs font-bold text-gold mb-2 flex items-center gap-1.5">
-                      <Trophy className="h-3 w-3" />
-                      Classement session
-                    </div>
-                    <div className="space-y-1.5">
-                      {sessionLeaderboard.map((p, i) => (
-                        <div
-                          key={p.userId}
-                          className={`flex items-center justify-between text-xs px-2 py-1 rounded ${p.isMe ? 'bg-gold/20 text-gold font-semibold' : 'text-gold/70'}`}
-                        >
-                          <span className="flex items-center gap-1.5">
-                            <span className="text-gold/50">{i + 1}.</span>
-                            {p.username}
-                            {p.isMe && <span className="text-[9px] opacity-60">(vous)</span>}
-                          </span>
-                          <span className={p.net >= 0 ? 'text-green-400' : 'text-red-400'}>
-                            {p.net >= 0 ? '+' : ''}{p.net}$
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Quick Chat */}
-            {currentUser && id && (
-              <QuickChatBar
-                tableId={id}
-                userId={currentUser.id}
-                onEmote={(emote) => spawnEmote(emote)}
-              />
-            )}
-
+  const headerContent = (
+    <div className="flex justify-between items-center w-full">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" onClick={() => navigate('/lobby')} className="text-[#d4af37] hover:text-[#FFDF73] hover:bg-black/20 h-8 px-2 transition-colors">
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Lobby
+        </Button>
+        <h1 className="text-lg font-bold text-[#d4af37] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-playfair">{table.name}</h1>
+        <span className="px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded-full bg-[#d4af37]/20 text-[#d4af37] border border-[#d4af37]/30 shadow-[0_0_10px_rgba(212,175,55,0.2)]">
+          {table.status}
+        </span>
+        {table.room_code && (
+          <div className="flex items-center gap-1 px-2 py-0.5 bg-black/40 rounded border border-[#d4af37]/20 backdrop-blur-md">
+            <Hash className="h-3 w-3 text-[#d4af37]/70" />
+            <code className="text-xs font-mono font-bold text-[#d4af37]">{table.room_code}</code>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setChatOpen(!chatOpen)}
-              className="text-gold hover:text-gold/80 hover:bg-gold/10 h-8 w-8"
-              title="Ouvrir le chat"
+              className="h-5 w-5 text-[#d4af37]/70 hover:text-[#d4af37] transition-colors"
+              onClick={() => {
+                navigator.clipboard.writeText(table.room_code!);
+              }}
+              title="Copier le code"
             >
-              <MessageSquare className="h-4 w-4" />
+              <Copy className="h-2.5 w-2.5" />
             </Button>
           </div>
+        )}
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="text-[10px] text-[#d4af37]/80 font-bold uppercase tracking-widest bg-black/40 px-2 py-1 rounded border border-white/5">
+          Round {gameState.currentRound}
         </div>
-      </header>
+        {/* Active Player Indicator */}
+        {gameState.phase === 'playing' && activePlayer && (
+          <div className="flex items-center gap-2 px-3 py-1 bg-[#d4af37]/20 rounded-full border border-[#d4af37]/30 shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+            <Users className="h-3 w-3 text-[#d4af37]" />
+            <span className="text-xs font-bold text-[#d4af37]">
+              {activePlayer.user_id === currentUser?.id ? 'Votre tour !' : `Tour : ${activePlayer.profile?.username || `J${activePlayer.seat}`}`}
+            </span>
+          </div>
+        )}
 
-      {/* Chat Panel */}
+        {/* Session Leaderboard toggle */}
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setLeaderboardOpen((v) => !v)}
+            className="text-[#d4af37] hover:text-[#FFDF73] hover:bg-[#d4af37]/10 h-8 w-8 transition-colors"
+            title="Classement de la session"
+          >
+            <Trophy className="h-4 w-4" />
+          </Button>
+          <AnimatePresence>
+            {leaderboardOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 4 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 4 }}
+                transition={{ duration: 0.15 }}
+                className="absolute top-full right-0 mt-2 bg-black/80 backdrop-blur-xl border border-[#d4af37]/30 rounded-xl p-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-50 w-64"
+              >
+                <div className="text-xs font-bold text-[#d4af37] mb-3 flex items-center gap-2 uppercase tracking-wider border-b border-white/10 pb-2">
+                  <Trophy className="h-4 w-4" />
+                  Classement session
+                </div>
+                <div className="space-y-2">
+                  {sessionLeaderboard.map((p, i) => (
+                    <div
+                      key={p.userId}
+                      className={`flex items-center justify-between text-sm px-2 py-1.5 rounded-lg ${p.isMe ? 'bg-[#d4af37]/20 text-[#FFDF73] font-bold border border-[#d4af37]/30' : 'text-white/80'}`}
+                    >
+                      <span className="flex items-center gap-2 truncate">
+                        <span className="text-[#d4af37]/50 text-xs">{i + 1}.</span>
+                        <span className="truncate">{p.username}</span>
+                        {p.isMe && <span className="text-[9px] opacity-60 ml-1 uppercase tracking-wider">(vous)</span>}
+                      </span>
+                      <span className={`font-mono font-bold ml-2 ${p.net >= 0 ? 'text-[#4ade80]' : 'text-[#f87171]'}`}>
+                        {p.net >= 0 ? '+' : ''}{p.net}$
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Quick Chat */}
+        {currentUser && id && (
+          <QuickChatBar
+            tableId={id}
+            userId={currentUser.id}
+            onEmote={(emote) => spawnEmote(emote)}
+          />
+        )}
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setChatOpen(!chatOpen)}
+          className="text-[#d4af37] hover:text-[#FFDF73] hover:bg-[#d4af37]/10 h-8 w-8 transition-colors"
+          title="Ouvrir le chat"
+        >
+          <MessageSquare className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+
+  const dealerZoneContent = (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="text-center"
+    >
+      <div className="text-[10px] font-black text-[#d4af37] mb-2 tracking-[0.3em] uppercase drop-shadow-md">Croupier</div>
+      <div className="inline-block relative">
+        <div className="absolute -inset-4 bg-[#d4af37]/10 blur-xl rounded-full pointer-events-none" />
+        <div className="relative">
+          <HandView
+            hand={gameState.dealerHand}
+            isDealer
+            showValue={gameState.phase === 'settling' || gameState.phase === 'playing'}
+          />
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  const centerZoneContent = (
+    <div className="w-full flex flex-col items-center gap-6">
+      {/* Opponents Section */}
+      {table.table_players.filter(p => p.user_id !== currentUser?.id).length > 0 && (
+        <OpponentsZone
+          opponents={table.table_players
+            .filter(p => p.user_id !== currentUser?.id)
+            .map(player => ({
+              id: player.id,
+              seat: player.seat,
+              username: player.profile?.username || `J${player.seat}`,
+              bankroll: player.bankroll,
+              hands: gameState.playerHands[player.seat] || [],
+            }))}
+          activeSeat={gameState.activeSeat}
+          phase={gameState.phase}
+        />
+      )}
+
+      {/* Messages */}
+      {gameState.phase === 'playing' && !isMyTurn && (
+        <div className="bg-black/60 backdrop-blur-md rounded-2xl p-4 border border-[#d4af37]/20 text-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+          <p className="text-[#d4af37]/90 text-sm font-bold tracking-wide">
+            ⏳ En attente du joueur actif...
+          </p>
+          {activePlayer && (
+            <p className="text-xs text-[#d4af37]/60 mt-1 uppercase tracking-wider">
+              {activePlayer.profile?.username || `Joueur ${activePlayer.seat}`} joue
+            </p>
+          )}
+        </div>
+      )}
+
+      {gameState.phase === 'waiting' && (
+        <div className="bg-black/60 backdrop-blur-md rounded-2xl p-5 border border-[#d4af37]/20 shadow-[0_8px_32px_rgba(0,0,0,0.4)] min-w-[280px]">
+          <p className="text-[#d4af37] text-center text-sm font-bold tracking-wide uppercase mb-4">
+            {isTableCreator ? 'Démarrez la partie' : 'En attente du créateur'}
+          </p>
+          {isTableCreator && (
+            <Button
+              onClick={handleStartRound}
+              disabled={table.table_players.length < 1}
+              className="w-full py-6 rounded-xl bg-gradient-to-r from-[#d4af37] to-[#997A15] hover:from-[#FFDF73] hover:to-[#d4af37] text-black font-black text-lg uppercase tracking-wider border border-[#FFDF73]/50 shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all"
+            >
+              🎰 Démarrer ({table.table_players.length} joueur{table.table_players.length > 1 ? 's' : ''})
+            </Button>
+          )}
+        </div>
+      )}
+
+      {gameState.phase === 'settling' && (
+        <div className="bg-black/60 backdrop-blur-md rounded-2xl p-4 border border-[#d4af37]/20 text-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+          <p className="text-[#d4af37] text-sm font-black tracking-widest uppercase">Règlement en cours...</p>
+        </div>
+      )}
+    </div>
+  );
+
+  const playerZoneContent = mySeat && myPlayer && myHands.length > 0 ? (
+    <div className="flex flex-col items-center gap-4 w-full">
+      <div className="flex gap-4 flex-wrap justify-center overflow-visible px-4">
+        {myHands.map((hand, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1, type: 'spring', stiffness: 200, damping: 20 }}
+            className="relative"
+          >
+            {/* Hand Highlight Glow */}
+            {isMyTurn && idx === 0 && (
+              <div className="absolute -inset-4 bg-[#d4af37]/20 blur-xl rounded-full pointer-events-none" />
+            )}
+            
+            <div className={`
+              p-4 rounded-2xl border min-w-[220px] relative z-10
+              ${isMyTurn && idx === 0 ? 'bg-black/60 backdrop-blur-xl border-[#d4af37] shadow-[0_10px_40px_rgba(212,175,55,0.3)] ring-1 ring-[#d4af37]/50' : 'bg-black/40 backdrop-blur-md border-white/10 shadow-xl'}
+              transition-all duration-500
+            `}>
+              <div className="mb-3 text-[10px] font-black text-[#d4af37] uppercase tracking-[0.2em] flex items-center justify-between border-b border-white/10 pb-2">
+                <span>Main {idx + 1} {hand.isSplit && '✂️'}</span>
+                {hand.bet > 0 && (
+                  <span className="text-[#FFDF73] text-xs">${hand.bet}</span>
+                )}
+              </div>
+              <div className="flex justify-center">
+                <HandView
+                  hand={hand}
+                  isActive={isMyTurn && idx === 0}
+                  showValue={true}
+                />
+              </div>
+              {hand.bet > 0 && (
+                <div className="mt-4 flex justify-center scale-110">
+                  <ChipStack amount={hand.bet} size="sm" />
+                </div>
+              )}
+              {/* Status Badges */}
+              {hand.isBlackjack && (
+                <div className="absolute -top-3 -right-3 bg-gradient-to-br from-[#FFDF73] to-[#997A15] text-black text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg border border-[#FFDF73]/50">
+                  BLACKJACK
+                </div>
+              )}
+              {hand.isBusted && (
+                <div className="absolute -top-3 -right-3 bg-gradient-to-br from-red-500 to-red-800 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg border border-red-400/50">
+                  BUSTED
+                </div>
+              )}
+              {hand.isStood && !hand.isBusted && !hand.isBlackjack && (
+                <div className="absolute -top-3 -right-3 bg-gradient-to-br from-blue-500 to-blue-800 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg border border-blue-400/50">
+                  STOOD
+                </div>
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  ) : null;
+
+  const bottomDockContent = mySeat && myPlayer ? (
+    <div className="w-full flex justify-center">
+      <div className="w-full max-w-md">
+        {/* Betting Phase */}
+        {gameState.phase === 'betting' && (
+          <div className="bg-black/60 backdrop-blur-xl rounded-3xl p-5 border border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+            <div className="text-center mb-4 flex justify-between items-end">
+              <div className="text-left">
+                <div className="text-[10px] text-white/50 uppercase tracking-widest font-bold">Bankroll</div>
+                <div className="text-2xl font-black text-[#d4af37] tracking-tight">${myPlayer.bankroll.toLocaleString()}</div>
+              </div>
+            </div>
+            <BetComposerMultiplayer
+              bankroll={myPlayer.bankroll}
+              minBet={10}
+              maxBet={500}
+              onBet={(amount) => handleAction('bet', { amount })}
+              onDeal={isTableCreator && Object.keys(gameState.playerHands || {}).length > 0 ? handleStartRound : undefined}
+              isTableCreator={isTableCreator}
+              bettingTimeLeft={bettingTimeLeft}
+              canDeal={isTableCreator && Object.keys(gameState.playerHands || {}).length > 0}
+              soundEnabled={false}
+              soundVolume={0.5}
+            />
+          </div>
+        )}
+
+        {/* Playing Phase - My Turn */}
+        {gameState.phase === 'playing' && isMyTurn && (() => {
+          const activeHand = myHands[0];
+          const canSplitHand = activeHand && 
+            activeHand.cards.length === 2 && 
+            activeHand.cards[0].rank === activeHand.cards[1].rank &&
+            myPlayer.bankroll >= activeHand.bet &&
+            !activeHand.isStood &&
+            !activeHand.isBusted;
+          
+          const canDoubleHand = activeHand && 
+            activeHand.cards.length === 2 &&
+            myPlayer.bankroll >= activeHand.bet &&
+            !activeHand.isDoubled &&
+            !activeHand.isStood &&
+            !activeHand.isBusted;
+          
+          const dealerUpCard = gameState.dealerHand.cards.find((c: any) => c.faceUp);
+          const canInsurance = dealerUpCard?.rank === 'A' && 
+            activeHand?.cards.length === 2 &&
+            myPlayer.bankroll >= (activeHand?.bet || 0) / 2;
+          
+          const actions = [
+            { action: 'hit' as PlayerAction, label: 'Hit', enabled: true },
+            { action: 'stand' as PlayerAction, label: 'Stand', enabled: true },
+            { action: 'double' as PlayerAction, label: 'Double', enabled: !!canDoubleHand, reason: !canDoubleHand ? 'Can only double on first two cards' : undefined },
+            { action: 'split' as PlayerAction, label: 'Split', enabled: !!canSplitHand, reason: !canSplitHand ? 'Can only split with two cards of same rank' : undefined },
+          ];
+          
+          if (canInsurance) {
+            actions.push({ action: 'insurance' as PlayerAction, label: 'Insurance', enabled: true });
+          }
+          
+          return (
+            <div className="bg-black/60 backdrop-blur-xl rounded-3xl p-2 border border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+              <ActionBarMultiplayer
+                actions={actions}
+                onAction={(action) => handleAction(action)}
+                actionTimeLeft={actionTimeLeft}
+                isAnimating={false}
+                soundEnabled={false}
+                soundVolume={0.5}
+              />
+            </div>
+          );
+        })()}
+      </div>
+    </div>
+  ) : null;
+
+  return (
+    <>
+      <EmoteOverlay emotes={activeEmotes} />
       {currentUser && id && (
         <TableChat
           tableId={id}
@@ -1044,229 +1253,14 @@ export default function MultiplayerTable() {
           onClose={() => setChatOpen(false)}
         />
       )}
-
-      {/* Game Area - Optimized Layout */}
-      <main className="flex-1 relative overflow-hidden flex flex-col">
-        {/* Dealer Section - Top Center */}
-        <div className="flex-shrink-0 pt-4 pb-2 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <div className="text-sm font-bold text-gold mb-2 tracking-wider">CROUPIER</div>
-            <div className="bg-black/40 backdrop-blur-sm rounded-lg p-3 border-2 border-gold/30 shadow-xl inline-block">
-              <HandView
-                hand={gameState.dealerHand}
-                isDealer
-                showValue={gameState.phase === 'settling' || gameState.phase === 'playing'}
-              />
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Opponents Section - Using OpponentsZone */}
-        {table.table_players.filter(p => p.user_id !== currentUser?.id).length > 0 && (
-          <OpponentsZone
-            opponents={table.table_players
-              .filter(p => p.user_id !== currentUser?.id)
-              .map(player => ({
-                id: player.id,
-                seat: player.seat,
-                username: player.profile?.username || `J${player.seat}`,
-                bankroll: player.bankroll,
-                hands: gameState.playerHands[player.seat] || [],
-              }))}
-            activeSeat={gameState.activeSeat}
-            phase={gameState.phase}
-          />
-        )}
-
-        {/* MY CARDS SECTION - Fixed Bottom, Always Visible */}
-        {mySeat && myPlayer && (
-          <div className="flex-shrink-0 border-t-2 border-gold/50 bg-gradient-to-t from-black/90 via-black/80 to-black/70 backdrop-blur-lg p-3 shadow-2xl">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex items-start justify-between gap-4">
-                {/* My Cards Display - Enhanced */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <h3 className="text-lg font-bold text-gold">MES CARTES</h3>
-                    <div className="text-xs text-gold/80">
-                      Bankroll: <span className="font-bold text-gold">${myPlayer.bankroll.toLocaleString()}</span>
-                    </div>
-                    {myHands.length > 0 && myHands.reduce((sum, h) => sum + h.bet, 0) > 0 && (
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs text-gold/60">Mise:</span>
-                        <ChipStack amount={myHands.reduce((sum, h) => sum + h.bet, 0)} size="sm" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-2 flex-wrap overflow-x-auto pb-1">
-                    {myHands.length > 0 ? (
-                      myHands.map((hand, idx) => (
-                        <motion.div
-                          key={idx}
-                          initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                          animate={{ scale: 1, opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.1 }}
-                          className="relative"
-                        >
-                          <div className={`
-                            p-3 rounded-lg border-2 bg-black/50 backdrop-blur-sm min-w-[200px]
-                            ${isMyTurn && idx === 0 ? 'border-gold bg-gold/30 shadow-xl shadow-gold/50 ring-2 ring-gold/50' : 'border-gold/40 bg-black/50'}
-                            transition-all duration-300
-                          `}>
-                            <div className="mb-1.5 text-xs font-semibold text-gold uppercase tracking-wider flex items-center justify-between">
-                              <span>Main {idx + 1} {hand.isSplit && '✂️'}</span>
-                              {hand.bet > 0 && (
-                                <span className="text-xs text-gold/70">${hand.bet}</span>
-                              )}
-                            </div>
-                            <HandView
-                              hand={hand}
-                              isActive={isMyTurn && idx === 0}
-                              showValue={true}
-                            />
-                            {hand.bet > 0 && (
-                              <div className="mt-1.5 flex justify-center">
-                                <ChipStack amount={hand.bet} size="sm" />
-                              </div>
-                            )}
-                            {/* Hand status indicators */}
-                            {hand.isBlackjack && (
-                              <div className="absolute top-2 left-2 bg-gold text-black text-xs font-bold px-2 py-1 rounded">
-                                BJ
-                              </div>
-                            )}
-                            {hand.isBusted && (
-                              <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
-                                BUST
-                              </div>
-                            )}
-                            {hand.isStood && !hand.isBusted && !hand.isBlackjack && (
-                              <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded">
-                                STAND
-                              </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      ))
-                    ) : (
-                      <div className="text-gold/60 text-sm py-6 px-4 bg-black/30 rounded-lg border border-gold/20">
-                        Aucune carte - Placez une mise pour commencer
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Controls Section - Right Side */}
-                <div className="flex-shrink-0 w-80">
-                  {/* Betting Phase */}
-                  {gameState.phase === 'betting' && myPlayer && (
-                    <BetComposerMultiplayer
-                      bankroll={myPlayer.bankroll}
-                      minBet={10}
-                      maxBet={500}
-                      onBet={(amount) => handleAction('bet', { amount })}
-                      onDeal={isTableCreator && Object.keys(gameState.playerHands || {}).length > 0 ? handleStartRound : undefined}
-                      isTableCreator={isTableCreator}
-                      bettingTimeLeft={bettingTimeLeft}
-                      canDeal={isTableCreator && Object.keys(gameState.playerHands || {}).length > 0}
-                      soundEnabled={false}
-                      soundVolume={0.5}
-                    />
-                  )}
-
-                  {/* Playing Phase - My Turn */}
-                  {gameState.phase === 'playing' && isMyTurn && (() => {
-                    const activeHand = myHands[0];
-                    const canSplitHand = activeHand && 
-                      activeHand.cards.length === 2 && 
-                      activeHand.cards[0].rank === activeHand.cards[1].rank &&
-                      myPlayer.bankroll >= activeHand.bet &&
-                      !activeHand.isStood &&
-                      !activeHand.isBusted;
-                    
-                    const canDoubleHand = activeHand && 
-                      activeHand.cards.length === 2 &&
-                      myPlayer.bankroll >= activeHand.bet &&
-                      !activeHand.isDoubled &&
-                      !activeHand.isStood &&
-                      !activeHand.isBusted;
-                    
-                    const dealerUpCard = gameState.dealerHand.cards.find((c: any) => c.faceUp);
-                    const canInsurance = dealerUpCard?.rank === 'A' && 
-                      activeHand?.cards.length === 2 &&
-                      myPlayer.bankroll >= (activeHand?.bet || 0) / 2;
-                    
-                    const actions = [
-                      { action: 'hit' as PlayerAction, label: 'Hit', enabled: true },
-                      { action: 'stand' as PlayerAction, label: 'Stand', enabled: true },
-                      { action: 'double' as PlayerAction, label: 'Double', enabled: !!canDoubleHand, reason: !canDoubleHand ? 'Can only double on first two cards' : undefined },
-                      { action: 'split' as PlayerAction, label: 'Split', enabled: !!canSplitHand, reason: !canSplitHand ? 'Can only split with two cards of same rank' : undefined },
-                    ];
-                    
-                    if (canInsurance) {
-                      actions.push({ action: 'insurance' as PlayerAction, label: 'Insurance', enabled: true });
-                    }
-                    
-                    return (
-                      <ActionBarMultiplayer
-                        actions={actions}
-                        onAction={(action) => handleAction(action)}
-                        actionTimeLeft={actionTimeLeft}
-                        isAnimating={false}
-                        soundEnabled={false}
-                        soundVolume={0.5}
-                      />
-                    );
-                  })()}
-
-                  {/* Playing Phase - Not My Turn */}
-                  {gameState.phase === 'playing' && !isMyTurn && (
-                    <div className="bg-black/40 rounded-lg p-3 border border-gold/20 text-center">
-                      <p className="text-gold/80 text-sm">
-                        ⏳ En attente du joueur actif...
-                      </p>
-                      {activePlayer && (
-                        <p className="text-xs text-gold/60 mt-1">
-                          {activePlayer.profile?.username || `Joueur ${activePlayer.seat}`} joue
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Waiting Phase */}
-                  {gameState.phase === 'waiting' && (
-                    <div className="bg-black/40 rounded-lg p-3 border border-gold/20">
-                      <p className="text-gold text-sm font-semibold mb-2">
-                        {isTableCreator ? 'Démarrez la partie' : 'En attente du créateur'}
-                      </p>
-                      {isTableCreator && (
-                        <Button
-                          onClick={handleStartRound}
-                          size="sm"
-                          disabled={table.table_players.length < 1}
-                          className="w-full bg-gold hover:bg-gold/90 text-black font-bold"
-                        >
-                          🎰 Démarrer ({table.table_players.length} joueur{table.table_players.length > 1 ? 's' : ''})
-                        </Button>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Settlement Phase */}
-                  {gameState.phase === 'settling' && (
-                    <div className="bg-black/40 rounded-lg p-3 border border-gold/20 text-center">
-                      <p className="text-gold text-sm font-semibold">Règlement en cours...</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
-    </div>
+      <TableShell
+        className="font-outfit"
+        header={headerContent}
+        dealerZone={dealerZoneContent}
+        centerZone={centerZoneContent}
+        playerZone={playerZoneContent}
+        bottomDock={bottomDockContent}
+      />
+    </>
   );
 }

@@ -60,7 +60,7 @@ export const PlayingCard = memo(function PlayingCard({
   if (!showFront) {
     return (
       <motion.div
-        initial={{ y: -180, x: 0, opacity: 0, scale: 0.4, rotate: -8 }}
+        initial={{ y: -300, x: 200, opacity: 0, scale: 0.3, rotate: 60 }}
         animate={{
           y: 0,
           x: 0,
@@ -83,7 +83,7 @@ export const PlayingCard = memo(function PlayingCard({
 
   return (
     <motion.div
-      initial={{ y: -180, x: 0, opacity: 0, scale: 0.4, rotate: -8 }}
+      initial={{ y: -300, x: 200, opacity: 0, scale: 0.3, rotate: 60 }}
       animate={{
         y: 0,
         x: 0,

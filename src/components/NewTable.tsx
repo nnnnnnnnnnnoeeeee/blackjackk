@@ -61,6 +61,96 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Settings, BarChart, TrendingUp, ArrowLeft } from 'lucide-react';
 
+// ============================================================================
+// Side Dock Button — Premium floating action button
+// ============================================================================
+
+function SideDockButton({
+  icon,
+  label,
+  isActive,
+  activeColor = '#d4af37',
+  onClick,
+}: {
+  icon: string;
+  label: string;
+  isActive: boolean;
+  activeColor?: string;
+  onClick: (e: React.MouseEvent) => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div className="relative flex items-center justify-end">
+      {/* Tooltip */}
+      <AnimatePresence>
+        {hovered && (
+          <motion.div
+            initial={{ opacity: 0, x: 8, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 8, scale: 0.9 }}
+            transition={{ duration: 0.15 }}
+            className="absolute right-full mr-2.5 px-2.5 py-1 rounded-lg bg-black/90 backdrop-blur-md border border-white/10 shadow-xl whitespace-nowrap pointer-events-none"
+          >
+            <span className="text-[11px] font-bold text-white/90 tracking-wide">{label}</span>
+            {/* Arrow */}
+            <div className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-2 rotate-45 bg-black/90 border-r border-t border-white/10" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Button */}
+      <motion.button
+        onClick={onClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        whileHover={{ scale: 1.12 }}
+        whileTap={{ scale: 0.9 }}
+        type="button"
+        aria-label={label}
+        className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-lg transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+        style={{
+          pointerEvents: 'auto',
+          backgroundColor: isActive ? `${activeColor}18` : 'rgba(0,0,0,0.5)',
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderColor: isActive ? `${activeColor}50` : 'rgba(255,255,255,0.08)',
+          boxShadow: isActive
+            ? `0 0 20px ${activeColor}25, 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)`
+            : '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+        }}
+      >
+        {/* Active indicator dot */}
+        {isActive && (
+          <motion.div
+            layoutId={`dock-indicator-${label}`}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
+            style={{
+              backgroundColor: activeColor,
+              boxShadow: `0 0 8px ${activeColor}80`,
+            }}
+          />
+        )}
+
+        {/* Close icon when active, otherwise normal icon */}
+        <span
+          className="transition-transform duration-200"
+          style={{
+            transform: isActive ? 'rotate(90deg)' : 'rotate(0deg)',
+            filter: isActive ? `drop-shadow(0 0 6px ${activeColor}80)` : 'none',
+          }}
+        >
+          {isActive ? '✕' : icon}
+        </span>
+      </motion.button>
+    </div>
+  );
+}
+
 export const NewTable = memo(function NewTable() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -387,9 +477,13 @@ export const NewTable = memo(function NewTable() {
         {t.common.back}
       </Button>
 
-      {/* Floating Menu Button - Top Right (moved down a bit) */}
-      <div className="fixed top-16 right-2 sm:top-20 sm:right-4 z-[100] flex flex-col gap-2">
-        <button
+      {/* Floating Menu — Premium Side Dock */}
+      <div className="fixed top-16 right-2 sm:top-20 sm:right-3 z-[100] flex flex-col gap-2.5">
+        {/* Settings */}
+        <SideDockButton
+          icon="⚙️"
+          label={t.a11y.settings}
+          isActive={showSettings}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -398,14 +492,12 @@ export const NewTable = memo(function NewTable() {
             setShowStatsDashboard(false);
             setShowStrategyChart(false);
           }}
-          className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-card/95 backdrop-blur-md border-2 border-primary/30 min-h-[44px] transition-all hover:border-primary/50 hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
-          style={{ pointerEvents: 'auto' }}
-          aria-label={t.a11y.settings}
-          type="button"
-        >
-          {showSettings ? '✕' : '⚙️'}
-        </button>
-        <button
+        />
+        {/* Stats */}
+        <SideDockButton
+          icon="📊"
+          label={t.a11y.stats}
+          isActive={showStatsDashboard}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -414,15 +506,13 @@ export const NewTable = memo(function NewTable() {
             setShowSettings(false);
             setShowStrategyChart(false);
           }}
-          className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-card/95 backdrop-blur-md border-2 border-primary/30 min-h-[44px] transition-all hover:border-primary/50 hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
-          style={{ pointerEvents: 'auto' }}
-          aria-label={t.a11y.stats}
-          type="button"
-        >
-          {showStatsDashboard ? '✕' : '📊'}
-        </button>
+        />
+        {/* Strategy Chart (only during player turn) */}
         {phase === 'PLAYER_TURN' && (
-          <button
+          <SideDockButton
+            icon="🃏"
+            label={t.a11y.strategy}
+            isActive={showStrategyChart}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -431,36 +521,26 @@ export const NewTable = memo(function NewTable() {
               setShowSettings(false);
               setShowStatsDashboard(false);
             }}
-            className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-card/95 backdrop-blur-md border-2 border-primary/30 min-h-[44px] transition-all hover:border-primary/50 hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
-            style={{ pointerEvents: 'auto' }}
-            aria-label={t.a11y.strategy}
-            type="button"
-          >
-            {showStrategyChart ? '✕' : '📈'}
-          </button>
+          />
         )}
-        {/* Coach mode toggle */}
-        <button
+        {/* Coach Mode */}
+        <SideDockButton
+          icon="🎓"
+          label={coachMode ? 'Coach: ON' : 'Coach: OFF'}
+          isActive={coachMode}
+          activeColor="#f59e0b"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             toggleCoachMode();
           }}
-          className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg backdrop-blur-md border-2 min-h-[44px] transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg ${
-            coachMode
-              ? 'bg-warning/20 border-warning/60 text-warning'
-              : 'bg-card/95 border-primary/30'
-          }`}
-          style={{ pointerEvents: 'auto' }}
-          aria-label="Mode Entraîneur"
-          aria-pressed={coachMode}
-          title={coachMode ? 'Mode Entraîneur actif' : 'Activer le Mode Entraîneur'}
-          type="button"
-        >
-          🎓
-        </button>
-        {/* Achievements button */}
-        <button
+        />
+        {/* Achievements */}
+        <SideDockButton
+          icon="🏆"
+          label="Trophées"
+          isActive={showAchievements}
+          activeColor="#d4af37"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -470,18 +550,7 @@ export const NewTable = memo(function NewTable() {
             setShowStatsDashboard(false);
             setShowStrategyChart(false);
           }}
-          className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg backdrop-blur-md border-2 min-h-[44px] transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg ${
-            showAchievements
-              ? 'bg-primary/20 border-primary/60 text-primary'
-              : 'bg-card/95 border-primary/30'
-          }`}
-          style={{ pointerEvents: 'auto' }}
-          aria-label="Achievements"
-          title="Achievements"
-          type="button"
-        >
-          🏆
-        </button>
+        />
       </div>
 
       {/* Floating Panels - Use Sheet on mobile, motion.div on desktop */}
@@ -521,11 +590,11 @@ export const NewTable = memo(function NewTable() {
           </Sheet>
 
           <Sheet open={showAchievements} onOpenChange={setShowAchievements}>
-            <SheetContent side="right" className="w-full sm:w-[400px] md:w-[500px] overflow-y-auto">
+            <SheetContent side="right" className="w-full sm:w-[400px] md:w-[500px] overflow-y-auto bg-[#0a0a0a]/98 border-l-white/10">
               <SheetHeader>
-                <SheetTitle>Achievements</SheetTitle>
+                <SheetTitle className="sr-only">Achievements</SheetTitle>
               </SheetHeader>
-              <div className="mt-4">
+              <div className="mt-2">
                 <AchievementsPanel />
               </div>
             </SheetContent>
@@ -578,7 +647,7 @@ export const NewTable = memo(function NewTable() {
               initial={{ opacity: 0, scale: 0.9, x: 20 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               exit={{ opacity: 0, scale: 0.9, x: 20 }}
-              className="fixed top-28 right-2 sm:top-32 sm:right-4 z-[90] w-[calc(100vw-1rem)] sm:w-[400px] md:w-[500px] max-h-[calc(100vh-8rem)] overflow-y-auto bg-card/95 backdrop-blur-md rounded-lg border-2 border-primary/30 shadow-xl p-4"
+              className="fixed top-28 right-2 sm:top-32 sm:right-4 z-[90] w-[calc(100vw-1rem)] sm:w-[400px] md:w-[500px] max-h-[calc(100vh-8rem)] overflow-y-auto bg-[#0a0a0a]/95 backdrop-blur-xl rounded-2xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] p-5"
               onClick={(e) => e.stopPropagation()}
             >
               <AchievementsPanel />
