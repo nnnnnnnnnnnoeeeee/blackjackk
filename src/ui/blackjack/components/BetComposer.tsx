@@ -199,7 +199,7 @@ export const BetComposer = memo(function BetComposer() {
   const handleRebet = useCallback(() => {
     // Check if we're in BETTING phase
     if (phase !== 'BETTING') {
-      toast.error('Rebet unavailable', {
+      toast.error(t.betting.rebetUnavailableTitle, {
         description: 'Can only rebet during betting phase',
       });
       return;
@@ -224,7 +224,7 @@ export const BetComposer = memo(function BetComposer() {
 
     // Check if we have a valid last bet
     if (lastBetAmount === 0 || lastBetAmount < minBet) {
-      toast.error('Rebet unavailable', {
+      toast.error(t.betting.rebetUnavailableTitle, {
         description: 'No previous bet to rebet',
       });
       return;
@@ -232,7 +232,7 @@ export const BetComposer = memo(function BetComposer() {
 
     // Check if bet amount is valid
     if (lastBetAmount > maxBet) {
-      toast.error('Rebet unavailable', {
+      toast.error(t.betting.rebetUnavailableTitle, {
         description: `Previous bet ($${lastBetAmount}) exceeds maximum bet ($${maxBet})`,
       });
       return;
@@ -240,7 +240,7 @@ export const BetComposer = memo(function BetComposer() {
 
     // Check if player has enough money for the total bet (main + side bets)
     if (totalBetNeeded > bankroll) {
-      toast.error('Rebet unavailable', {
+      toast.error(t.betting.rebetUnavailableTitle, {
         description: `Insufficient funds. Need $${totalBetNeeded}, have $${bankroll}`,
       });
       return;
@@ -274,7 +274,7 @@ export const BetComposer = memo(function BetComposer() {
       console.log('[BetComposer] Rebet successful!');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error placing bet';
-      toast.error('Rebet unavailable', {
+      toast.error(t.betting.rebetUnavailableTitle, {
         description: message,
       });
       console.error('[BetComposer] Rebet error:', error);
@@ -283,7 +283,7 @@ export const BetComposer = memo(function BetComposer() {
       setPerfectPairsBet(0);
       setTwentyOnePlus3Bet(0);
     }
-  }, [phase, bankroll, maxBet, minBet, validateBet, validateSideBet, placeBet, placeSideBets, playSound, config]);
+  }, [phase, bankroll, maxBet, minBet, validateBet, validateSideBet, placeBet, placeSideBets, playSound, config, t]);
 
   const handleAllIn = useCallback(() => {
     // Miser tout ce qui reste, même si c'est moins que maxBet
@@ -419,13 +419,13 @@ export const BetComposer = memo(function BetComposer() {
       placeBet(betAmount);
       playSound('chipStack');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error placing bet';
-      toast.error('Error', {
+      const message = error instanceof Error ? error.message : t.betting.errorPlacingBet;
+      toast.error(t.betting.errorTitle, {
         description: message,
       });
       console.error('BetComposer error:', error);
     }
-  }, [betAmount, perfectPairsBet, twentyOnePlus3Bet, minBet, validateBet, validateSideBet, placeBet, placeSideBets, playSound, config]);
+  }, [betAmount, perfectPairsBet, twentyOnePlus3Bet, minBet, validateBet, validateSideBet, placeBet, placeSideBets, playSound, config, saveLastBets, t]);
 
   useEffect(() => {
     if (betAmount > maxBet) {
@@ -469,7 +469,7 @@ export const BetComposer = memo(function BetComposer() {
       {/* Bet amount display — HERO */}
       <div className="text-center w-full flex-shrink-0 py-1">
         <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-semibold">
-          Votre mise
+          {t.betting.yourBet}
         </div>
         <div
           className={cn(
@@ -486,7 +486,7 @@ export const BetComposer = memo(function BetComposer() {
         </div>
         {betAmount > 0 && (
           <div className="text-[10px] text-muted-foreground mt-1">
-            Bankroll restante : <span className="font-semibold text-foreground">${(bankroll - betAmount).toLocaleString()}</span>
+            {t.table.bankrollRemaining} : <span className="font-semibold text-foreground">${(bankroll - betAmount).toLocaleString()}</span>
           </div>
         )}
       </div>
@@ -508,7 +508,7 @@ export const BetComposer = memo(function BetComposer() {
           aria-label={`${t.betting.clearButton} (${keyBindingsSafe.clear})`}
           title={`${t.betting.clearButton} (${keyBindingsSafe.clear})`}
         >
-          <span>✕</span> Clear <span className="opacity-40 ml-0.5">({keyBindingsSafe.clear})</span>
+          <span>✕</span> {t.betting.clearButton} <span className="opacity-40 ml-0.5">({keyBindingsSafe.clear})</span>
         </button>
         <button
           onClick={handleRebet}
@@ -523,7 +523,7 @@ export const BetComposer = memo(function BetComposer() {
           aria-label={`${t.actions.rebet} (${keyBindingsSafe.rebet})`}
           title={`${t.actions.rebet} (${keyBindingsSafe.rebet})`}
         >
-          <span>↺</span> Rebet <span className="opacity-40 ml-0.5">({keyBindingsSafe.rebet})</span>
+          <span>↺</span> {t.actions.rebet} <span className="opacity-40 ml-0.5">({keyBindingsSafe.rebet})</span>
         </button>
         <button
           onClick={handleAllIn}
@@ -532,7 +532,7 @@ export const BetComposer = memo(function BetComposer() {
           aria-label={`${t.betting.allInButton} (${keyBindingsSafe.allIn})`}
           title={`${t.betting.allInButton} (${keyBindingsSafe.allIn})`}
         >
-          ALL IN <span className="opacity-40 ml-0.5">({keyBindingsSafe.allIn})</span>
+          {t.betting.allInButton} <span className="opacity-40 ml-0.5">({keyBindingsSafe.allIn})</span>
         </button>
       </div>
 
@@ -550,7 +550,7 @@ export const BetComposer = memo(function BetComposer() {
             WebkitAppearance: 'none',
             touchAction: 'none',
           }}
-          aria-label="Bet amount slider"
+          aria-label={t.betting.betAmountSliderAria}
         />
         <div className="flex justify-between text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">
           <span>$0</span>
@@ -569,7 +569,7 @@ export const BetComposer = memo(function BetComposer() {
         >
           <span className="text-sm sm:text-base opacity-80">🎰</span>
           <span className="text-[10px] sm:text-xs uppercase tracking-wider font-bold text-white/80">
-            Side Bets
+            {t.betting.sideBetsTitle}
             {(perfectPairsBet > 0 || twentyOnePlus3Bet > 0) && (
               <span className="ml-1 text-primary">(${perfectPairsBet + twentyOnePlus3Bet})</span>
             )}
@@ -584,8 +584,8 @@ export const BetComposer = memo(function BetComposer() {
             {config.perfectPairs && (
               <SideBetToggle
                 name="perfectPairs"
-                label="Perfect Pairs"
-                description="Win if your first 2 cards form a pair"
+                label={t.betting.perfectPairsLabel}
+                description={t.betting.perfectPairsDescription}
                 config={config.perfectPairs}
                 enabled={config.perfectPairs.enabled}
                 bet={perfectPairsBet}
@@ -613,8 +613,8 @@ export const BetComposer = memo(function BetComposer() {
             {config.twentyOnePlus3 && (
               <SideBetToggle
                 name="twentyOnePlus3"
-                label="21+3"
-                description="Your 2 cards + dealer's card = poker hand"
+                label={t.betting.twentyOnePlusThreeLabel}
+                description={t.betting.twentyOnePlusThreeDescription}
                 config={config.twentyOnePlus3}
                 enabled={config.twentyOnePlus3.enabled}
                 bet={twentyOnePlus3Bet}
@@ -647,7 +647,7 @@ export const BetComposer = memo(function BetComposer() {
                 className="text-center pt-2 mt-2 border-t border-white/10"
               >
                 <div className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground mb-1">
-                  Total Side Bets
+                  {t.betting.totalSideBets}
                 </div>
                 <div
                   className={cn(
@@ -663,7 +663,7 @@ export const BetComposer = memo(function BetComposer() {
                     animate={{ opacity: 1 }}
                     className="text-xs sm:text-sm text-destructive mt-2 px-3 py-1 rounded-full bg-destructive/10 border border-destructive/30 inline-block"
                   >
-                    ⚠️ Total exceeds bankroll
+                    ⚠️ {t.betting.totalExceedsBankroll}
                   </motion.div>
                 )}
               </motion.div>
@@ -690,17 +690,18 @@ export const BetComposer = memo(function BetComposer() {
             'btn-casino text-sm sm:text-base md:text-lg lg:text-xl',
             'px-4 sm:px-6 md:px-8 lg:px-10',
             'py-2.5 sm:py-3 md:py-4 lg:py-5',
-            'glow-gold w-full',
+            'w-full',
             'min-h-[48px] sm:min-h-[52px] md:min-h-[56px]',
             'font-bold uppercase tracking-wider',
-            'shadow-[0_4px_20px_rgba(212,175,55,0.4)]',
-            !canDeal && 'opacity-50 cursor-not-allowed filter grayscale-[50%]',
+            // Gold glow only when actionable — keeps the disabled state clean instead of muddy
+            canDeal && 'glow-gold shadow-[0_4px_20px_rgba(212,175,55,0.4)]',
+            !canDeal && 'opacity-40 cursor-not-allowed saturate-50',
             canDeal && !prefersReducedMotion && 'animate-[pulse-glow_2s_ease-in-out_infinite]'
           )}
           style={{
             pointerEvents: canDeal ? 'auto' : 'none',
           }}
-          aria-label={canDeal ? 'Deal cards' : 'Cannot deal: minimum bet not met'}
+          aria-label={canDeal ? t.betting.dealCardsAria : t.betting.cannotDealMinBetAria}
           aria-disabled={!canDeal}
           aria-describedby={!canDeal && betAmount < minBet ? 'deal-error' : undefined}
           type="button"
@@ -718,7 +719,7 @@ export const BetComposer = memo(function BetComposer() {
             role="alert"
             aria-live="polite"
           >
-            Minimum bet: ${minBet}
+            {t.betting.minimumBetLabel} : ${minBet}
           </p>
         )}
       </div>

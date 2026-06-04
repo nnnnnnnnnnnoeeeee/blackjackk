@@ -10,6 +10,7 @@ import { useHotkeys } from '../a11y';
 import { useReducedMotion, conditionalVariants } from '../a11y';
 import { ActionButton } from './ActionButton';
 import { toast } from 'sonner';
+import { vibrate } from '@/lib/haptics';
 import type { PlayerAction } from '@/lib/blackjack/types';
 
 interface ActionBarProps {
@@ -43,7 +44,7 @@ export const ActionBar = memo(function ActionBar({ onBeforeAction }: ActionBarPr
     shortcut: string;
   }> = useMemo(() => [
     { action: 'hit',       label: 'Hit',       variant: 'primary',   shortcut: keyBindings.hit },
-    { action: 'stand',     label: 'Stand',     variant: 'danger',    shortcut: keyBindings.stand },
+    { action: 'stand',     label: 'Stand',     variant: 'secondary', shortcut: keyBindings.stand },
     { action: 'double',    label: 'Double',    variant: 'secondary', shortcut: keyBindings.double },
     { action: 'split',     label: 'Split',     variant: 'secondary', shortcut: keyBindings.split },
     { action: 'insurance', label: 'Insurance', variant: 'secondary', shortcut: keyBindings.insurance },
@@ -57,11 +58,14 @@ export const ActionBar = memo(function ActionBar({ onBeforeAction }: ActionBarPr
 
       if (!validActions.includes(action)) {
         const reason = getActionReason(action);
+        vibrate('warning');
         toast.error('Action unavailable', {
           description: reason || `You cannot ${action} now.`,
         });
         return;
       }
+
+      vibrate('tap');
 
       // Coach mode hook — fires before executing so the state is still pre-action
       onBeforeAction?.(action);

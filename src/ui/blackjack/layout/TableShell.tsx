@@ -30,7 +30,7 @@ export const TableShell = memo(function TableShell({
   return (
     <div
       className={cn(
-        'table-felt table-border h-screen flex flex-col overflow-hidden',
+        'table-felt h-screen flex flex-col overflow-hidden',
         className
       )}
       style={{

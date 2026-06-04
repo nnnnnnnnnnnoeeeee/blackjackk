@@ -173,9 +173,11 @@ describe('Game Flow - Critical Scenarios', () => {
       };
       
       const settled = settleHands(settlementState);
-      
-      // Insurance is lost, bankroll stays the same
-      expect(settled.bankroll).toBe(850);
+
+      // Dealer has no blackjack: insurance (50) is lost → pays 0.
+      // The main hand (20) still beats the dealer's 17 and pays 1:1 → +200 (100 stake + 100 win).
+      // 850 + 0 + 200 = 1050. (If insurance wrongly paid 2:1, this would be 1200.)
+      expect(settled.bankroll).toBe(1050);
     });
   });
 

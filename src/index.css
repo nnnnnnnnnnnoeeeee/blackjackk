@@ -353,17 +353,16 @@
       radial-gradient(ellipse 60% 30% at 50% 100%, hsl(43 74% 49% / 0.04) 0%, transparent 50%);
   }
 
-  /* Animated gold border */
+  /* Gold table rim — refined, subtle (not a full-screen frame) */
   .table-border {
     @apply relative;
-    border: 2px solid hsl(43 74% 52%);
+    border: 1px solid hsl(43 74% 52% / 0.55);
     border-radius: 1rem;
     box-shadow:
-      0 0 0 1px rgba(0,0,0,0.4),
-      inset 0 0 24px hsl(43 74% 49% / 0.12),
-      0 0 20px hsl(43 74% 49% / 0.25),
-      0 0 60px hsl(43 74% 49% / 0.08);
-    animation: border-breathe 3s ease-in-out infinite;
+      0 0 0 1px rgba(0,0,0,0.35),
+      inset 0 0 28px hsl(43 74% 49% / 0.08),
+      0 0 16px hsl(43 74% 49% / 0.12),
+      0 8px 40px rgba(0,0,0,0.35);
   }
 
   /* ====== Semantic Action Buttons ====== */
@@ -390,25 +389,25 @@
     transform: translateY(3px);
   }
 
-  /* STAND — Red, stop action */
+  /* STAND — Slate/steel, "hold" action (not destructive — Stand is a safe, common move) */
   .btn-action-stand {
     @apply relative font-extrabold uppercase tracking-wide rounded-lg;
     @apply transition-all duration-150;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
-    background: linear-gradient(160deg, #ef4444 0%, #dc2626 60%, #b91c1c 100%);
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    background: linear-gradient(160deg, #64748b 0%, #475569 60%, #334155 100%);
     color: #fff;
-    box-shadow: 0 4px 0 #7f1d1d, 0 6px 16px rgba(239,68,68,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+    box-shadow: 0 4px 0 #1e293b, 0 6px 16px rgba(71,85,105,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   }
 
   .btn-action-stand:hover:not(:disabled) {
-    background: linear-gradient(160deg, #f87171 0%, #ef4444 60%, #dc2626 100%);
-    box-shadow: 0 5px 0 #7f1d1d, 0 8px 20px rgba(239,68,68,0.45), inset 0 1px 0 rgba(255,255,255,0.3);
+    background: linear-gradient(160deg, #94a3b8 0%, #64748b 60%, #475569 100%);
+    box-shadow: 0 5px 0 #1e293b, 0 8px 20px rgba(71,85,105,0.45), inset 0 1px 0 rgba(255,255,255,0.3);
     transform: translateY(-1px);
   }
 
   .btn-action-stand:active:not(:disabled) {
-    box-shadow: 0 1px 0 #7f1d1d, 0 2px 8px rgba(239,68,68,0.3);
+    box-shadow: 0 1px 0 #1e293b, 0 2px 8px rgba(71,85,105,0.3);
     transform: translateY(3px);
   }
 

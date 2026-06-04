@@ -182,6 +182,38 @@ export interface Translations {
     startOver: string;
     outOfChips: string;
   };
+
+  // Landing / Mode Selection
+  landing: {
+    subtitle: string;
+    levelLabel: string;
+    bankroll: string;
+    played: string;
+    winRate: string;
+    bestRun: string;
+    trophies: string;
+    multiplayer: string;
+    multiplayerDesc: string;
+    soloTitle: string;
+    soloDesc: string;
+    signOut: string;
+    multiplayerNeedsDb: string;
+    signedOut: string;
+    signOutError: string;
+    language: string;
+  };
+
+  // Table (gameplay surface)
+  table: {
+    bankrollLabel: string;
+    dealerShows: (label: string) => string;
+    bankrollRemaining: string;
+    waitingForBet: string;
+    cardCounting: string;
+    cardCountingHint: string;
+    running: string;
+    trueCount: string;
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -363,6 +395,38 @@ export const translations: Record<Language, Translations> = {
       startOver: 'Start Over ($1,000)',
       outOfChips: 'Out of chips!',
     },
+
+    // Landing / Mode Selection
+    landing: {
+      subtitle: 'Brilliance Edition',
+      levelLabel: 'Level',
+      bankroll: 'Bankroll',
+      played: 'Played',
+      winRate: 'Win Rate',
+      bestRun: 'Best Run',
+      trophies: 'Trophies',
+      multiplayer: 'Multiplayer',
+      multiplayerDesc: 'Real opponents, real stakes',
+      soloTitle: 'Solo Training',
+      soloDesc: 'Practice offline with AI coach',
+      signOut: 'Sign out',
+      multiplayerNeedsDb: 'Multiplayer mode requires a configured Supabase database.',
+      signedOut: 'Signed out successfully',
+      signOutError: 'Error signing out',
+      language: 'Language',
+    },
+
+    // Table (gameplay surface)
+    table: {
+      bankrollLabel: 'Bankroll',
+      dealerShows: (label: string) => `shows ${label}`,
+      bankrollRemaining: 'Remaining balance',
+      waitingForBet: 'Waiting for your bet',
+      cardCounting: 'Card Counting',
+      cardCountingHint: 'Hi-Lo system: 2-6 = +1, 7-9 = 0, 10-A = -1. True count = running count / decks remaining.',
+      running: 'Running',
+      trueCount: 'True',
+    },
   },
 
   fr: {
@@ -542,6 +606,38 @@ export const translations: Record<Language, Translations> = {
       newRound: 'Nouvelle Main',
       startOver: 'Recommencer ($1,000)',
       outOfChips: 'Plus de jetons !',
+    },
+
+    // Landing / Mode Selection
+    landing: {
+      subtitle: 'Édition Brilliance',
+      levelLabel: 'Niveau',
+      bankroll: 'Solde',
+      played: 'Jouées',
+      winRate: 'Victoires',
+      bestRun: 'Meilleure série',
+      trophies: 'Trophées',
+      multiplayer: 'Multijoueur',
+      multiplayerDesc: 'Adversaires réels, vrais enjeux',
+      soloTitle: 'Entraînement Solo',
+      soloDesc: 'Jouez hors ligne avec le coach IA',
+      signOut: 'Déconnexion',
+      multiplayerNeedsDb: 'Le mode multijoueur nécessite une base de données Supabase configurée.',
+      signedOut: 'Déconnexion réussie',
+      signOutError: 'Erreur lors de la déconnexion',
+      language: 'Langue',
+    },
+
+    // Table (gameplay surface)
+    table: {
+      bankrollLabel: 'Solde',
+      dealerShows: (label: string) => `montre ${label}`,
+      bankrollRemaining: 'Solde restant',
+      waitingForBet: 'En attente de votre mise',
+      cardCounting: 'Comptage de cartes',
+      cardCountingHint: 'Système Hi-Lo : 2-6 = +1, 7-9 = 0, 10-A = -1. Compte réel = compte courant / paquets restants.',
+      running: 'Courant',
+      trueCount: 'Réel',
     },
   },
 };

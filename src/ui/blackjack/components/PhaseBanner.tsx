@@ -5,8 +5,8 @@
 import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { phaseText } from '@/lib/casinoTheme';
 import { useReducedMotion, conditionalVariants } from '../a11y';
+import { useTranslation } from '../i18n';
 import type { GamePhase } from '@/lib/blackjack/types';
 
 interface PhaseBannerProps {
@@ -23,12 +23,20 @@ export const PhaseBanner = memo(function PhaseBanner({
   className,
 }: PhaseBannerProps) {
   const prefersReducedMotion = useReducedMotion();
+  const { t } = useTranslation();
 
   const getPhaseText = (): string => {
     if (phase === 'PLAYER_TURN' && totalHands && totalHands > 1 && activeHandIndex !== undefined) {
-      return `Your Turn — Hand ${activeHandIndex + 1}/${totalHands}`;
+      return `${t.status.yourTurn} — ${activeHandIndex + 1}/${totalHands}`;
     }
-    return phaseText[phase] || 'Place Your Bet';
+    switch (phase) {
+      case 'BETTING': return t.phases.betting;
+      case 'DEALING': return t.phases.dealing;
+      case 'PLAYER_TURN': return t.phases.playerTurn;
+      case 'DEALER_TURN': return t.phases.dealerTurn;
+      case 'SETTLEMENT': return t.phases.settlement;
+      default: return t.phases.betting;
+    }
   };
 
   const getPhaseColor = () => {

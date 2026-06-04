@@ -5,6 +5,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useGameStore } from '@/store/useGameStore';
 import { useSound } from '@/hooks/useSound';
+import { vibrate } from '@/lib/haptics';
 import type { GamePhase } from '@/lib/blackjack/types';
 
 export type ParticleType = 'win' | 'lose' | 'blackjack' | 'chip';
@@ -58,12 +59,15 @@ export function useSettlementEffects(): SettlementEffects {
       if (hasBlackjack) {
         playSound('blackjack');
         triggerParticles('blackjack');
+        vibrate('blackjack');
       } else if (hasWin) {
         playSound('win');
         triggerParticles('win');
+        vibrate('win');
       } else if (hasLoss) {
         playSound('lose');
         triggerParticles('lose');
+        vibrate('lose');
       }
     } else {
       // No results, ensure particles are cleared

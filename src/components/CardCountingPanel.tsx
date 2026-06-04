@@ -10,8 +10,10 @@ import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { useTranslation } from '@/ui/blackjack/i18n';
 
 export const CardCountingPanel = memo(function CardCountingPanel() {
+  const { t } = useTranslation();
   const cardCountingEnabled = useGameStore(s => s.cardCountingEnabled);
   const toggleCardCounting = useGameStore(s => s.toggleCardCounting);
   
@@ -51,18 +53,19 @@ export const CardCountingPanel = memo(function CardCountingPanel() {
   }, [cardCount]);
   
   return (
-    <div className="flex flex-col gap-0.5 sm:gap-1 p-1 sm:p-1.5 md:p-2 rounded-lg bg-card/30 border border-border">
+    <div className="flex flex-col gap-0.5 sm:gap-1 px-3 py-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
       <div className="flex items-center justify-between gap-2">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Label htmlFor="card-counting-toggle" className="text-[10px] sm:text-xs md:text-sm font-medium cursor-pointer flex-shrink-0">
-                Card Counting
+              <Label htmlFor="card-counting-toggle" className="text-[10px] sm:text-xs md:text-sm font-semibold cursor-pointer flex-shrink-0 flex items-center gap-1.5 text-white/80">
+                <span className="opacity-70">🃏</span>
+                {t.table.cardCounting}
               </Label>
             </TooltipTrigger>
             <TooltipContent>
               <p className="text-xs max-w-xs">
-                Hi-Lo system: 2-6 = +1, 7-9 = 0, 10-A = -1. True count = running count / decks remaining.
+                {t.table.cardCountingHint}
               </p>
             </TooltipContent>
           </Tooltip>
@@ -80,10 +83,10 @@ export const CardCountingPanel = memo(function CardCountingPanel() {
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="space-y-0.5 sm:space-y-1 pt-1 sm:pt-1.5 border-t border-border"
+          className="space-y-0.5 sm:space-y-1 pt-1 sm:pt-1.5 border-t border-white/10"
         >
           <div className="flex justify-between items-center text-[9px] sm:text-[10px] md:text-xs">
-            <span className="text-muted-foreground">Running:</span>
+            <span className="text-muted-foreground">{t.table.running} :</span>
             <span className={cn(
               'font-bold',
               cardCount.runningCount > 0 ? 'text-success' : 
@@ -94,7 +97,7 @@ export const CardCountingPanel = memo(function CardCountingPanel() {
             </span>
           </div>
           <div className="flex justify-between items-center text-[9px] sm:text-[10px] md:text-xs">
-            <span className="text-muted-foreground">True:</span>
+            <span className="text-muted-foreground">{t.table.trueCount} :</span>
             <span className={cn(
               'font-bold',
               interpretation?.color || 'text-muted-foreground'

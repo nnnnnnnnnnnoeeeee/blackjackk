@@ -6,12 +6,16 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase, isPlaceholder } from '@/lib/supabaseClient';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
-import { Users, User, Loader2, LogOut, Trophy, TrendingUp, Zap, Crown } from 'lucide-react';
+import { Users, User, Loader2, LogOut, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useGameStore, selectStats, selectXPSystem } from '@/store/useGameStore';
 import { LEVEL_NAMES, getXPProgress } from '@/lib/blackjack/types';
 import { getAchievementProgress } from '@/lib/blackjack/achievements';
+import { useTranslation } from '@/ui/blackjack/i18n';
+import { useReducedMotion } from '@/ui/blackjack/a11y';
+import { useMobileLayout } from '@/ui/blackjack/hooks';
 
 // ---- Floating Card Particle with Depth of Field ----
 function FloatingCard({ delay, x, depth }: { delay: number; x: number, depth: number }) {
@@ -84,9 +88,12 @@ function GoldSparkle({ delay }: { delay: number }) {
 }
 
 export default function ModeSelection() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { t, language, setLanguage } = useTranslation();
+  const prefersReducedMotion = useReducedMotion();
+  const { isMobile } = useMobileLayout();
 
   const stats = useGameStore(selectStats);
   const xpSystem = useGameStore(selectXPSystem);
@@ -106,9 +113,8 @@ export default function ModeSelection() {
   useEffect(() => {
     checkUser();
     
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const newUser = session?.user ?? null;
-      setUser(newUser);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
     });
     
     return () => subscription.unsubscribe();
@@ -141,7 +147,7 @@ export default function ModeSelection() {
       navigate('/game', { replace: true });
     } else {
       if (isPlaceholder) {
-        toast.error('Le mode multijoueur nécessite une base de données Supabase configurée.');
+        toast.error(t.landing.multiplayerNeedsDb);
         return;
       }
       navigate('/lobby', { replace: true });
@@ -151,10 +157,10 @@ export default function ModeSelection() {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      toast.success('Signed out successfully');
+      toast.success(t.landing.signedOut);
       navigate('/login', { replace: true });
-    } catch (error: any) {
-      toast.error('Error signing out');
+    } catch {
+      toast.error(t.landing.signOutError);
     }
   };
 
@@ -166,8 +172,10 @@ export default function ModeSelection() {
     );
   }
 
-  // Generate floating cards
-  const floatingCards = Array.from({ length: 15 }, (_, i) => ({
+  // Generate floating cards — fewer on mobile, none if the user prefers reduced motion
+  const cardCount = prefersReducedMotion ? 0 : isMobile ? 5 : 15;
+  const sparkleCount = prefersReducedMotion ? 0 : isMobile ? 8 : 25;
+  const floatingCards = Array.from({ length: cardCount }, (_, i) => ({
     delay: i * 0.8,
     x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 800),
     depth: Math.random()
@@ -188,7 +196,7 @@ export default function ModeSelection() {
 
       {/* Gold sparkles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {Array.from({ length: 25 }, (_, i) => (
+        {Array.from({ length: sparkleCount }, (_, i) => (
           <GoldSparkle key={i} delay={i * 0.4} />
         ))}
       </div>
@@ -239,9 +247,9 @@ export default function ModeSelection() {
             initial={{ opacity: 0, letterSpacing: "0em" }}
             animate={{ opacity: 1, letterSpacing: "0.4em" }}
             transition={{ delay: 0.5, duration: 1 }}
-            className="text-sm text-[#d4af37]/80 uppercase font-bold"
+            className="text-sm text-[#d4af37]/90 uppercase font-bold"
           >
-            Brilliance Edition
+            {t.landing.subtitle}
           </motion.p>
         </motion.div>
 
@@ -264,12 +272,12 @@ export default function ModeSelection() {
                     <Crown className="w-6 h-6 text-black" />
                   </div>
                   <div>
-                    <div className="text-[10px] text-white/50 uppercase tracking-widest font-bold">Level {xpSystem.level}</div>
+                    <div className="text-[10px] text-white/65 uppercase tracking-widest font-bold">{t.landing.levelLabel} {xpSystem.level}</div>
                     <div className="text-lg font-black text-white tracking-wide">{levelName}</div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[10px] text-white/50 uppercase tracking-widest font-bold">Bankroll</div>
+                  <div className="text-[10px] text-white/65 uppercase tracking-widest font-bold">{t.landing.bankroll}</div>
                   <div className="text-2xl font-black text-[#d4af37] drop-shadow-md">
                     ${bankroll.toLocaleString()}
                   </div>
@@ -278,7 +286,7 @@ export default function ModeSelection() {
 
               {/* XP Progress Bar */}
               <div className="mb-5">
-                <div className="flex justify-between text-[10px] text-white/50 font-bold mb-1.5">
+                <div className="flex justify-between text-[10px] text-white/65 font-bold mb-1.5">
                   <span>XP: {xpProgress.current} / {xpProgress.needed || '∞'}</span>
                   <span>{Math.round(xpProgress.pct * 100)}%</span>
                 </div>
@@ -306,21 +314,21 @@ export default function ModeSelection() {
               {/* Quick Stats Grid */}
               <div className="grid grid-cols-4 gap-3 text-center">
                 <div className="p-2 sm:p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                  <div className="text-[10px] text-white/50 uppercase font-bold mb-1">Played</div>
+                  <div className="text-[10px] text-white/65 uppercase font-bold mb-1">{t.landing.played}</div>
                   <div className="text-base sm:text-lg font-black text-white">{stats.handsPlayed}</div>
                 </div>
                 <div className="p-2 sm:p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                  <div className="text-[10px] text-white/50 uppercase font-bold mb-1">Win Rate</div>
+                  <div className="text-[10px] text-white/65 uppercase font-bold mb-1">{t.landing.winRate}</div>
                   <div className={`text-base sm:text-lg font-black ${winRate >= 50 ? 'text-[#4ade80]' : 'text-[#f87171]'}`}>
                     {winRate}%
                   </div>
                 </div>
                 <div className="p-2 sm:p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                  <div className="text-[10px] text-white/50 uppercase font-bold mb-1">Best Run</div>
+                  <div className="text-[10px] text-white/65 uppercase font-bold mb-1">{t.landing.bestRun}</div>
                   <div className="text-base sm:text-lg font-black text-[#d4af37]">{stats.bestStreak} <span className="text-xs">🔥</span></div>
                 </div>
                 <div className="p-2 sm:p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                  <div className="text-[10px] text-white/50 uppercase font-bold mb-1">Trophies</div>
+                  <div className="text-[10px] text-white/65 uppercase font-bold mb-1">{t.landing.trophies}</div>
                   <div className="text-base sm:text-lg font-black text-white">
                     {achievementProgress.unlocked}/{achievementProgress.total}
                   </div>
@@ -357,9 +365,9 @@ export default function ModeSelection() {
                 <Users className="h-7 w-7 text-black" />
               </div>
               <div className="text-left flex-1">
-                <div className="font-black text-xl sm:text-2xl text-white tracking-wide mb-0.5">Multiplayer</div>
-                <div className="text-sm text-white/50 font-medium">
-                  Real opponents, real stakes
+                <div className="font-black text-xl sm:text-2xl text-white tracking-wide mb-0.5">{t.landing.multiplayer}</div>
+                <div className="text-sm text-white/65 font-medium">
+                  {t.landing.multiplayerDesc}
                 </div>
               </div>
               <motion.div
@@ -385,9 +393,9 @@ export default function ModeSelection() {
                 <User className="h-7 w-7 text-white/70 group-hover:text-white transition-colors" />
               </div>
               <div className="text-left flex-1">
-                <div className="font-bold text-lg sm:text-xl text-white/90 tracking-wide mb-0.5">Solo Training</div>
-                <div className="text-sm text-white/40 font-medium">
-                  Practice offline with AI coach
+                <div className="font-bold text-lg sm:text-xl text-white/90 tracking-wide mb-0.5">{t.landing.soloTitle}</div>
+                <div className="text-sm text-white/60 font-medium">
+                  {t.landing.soloDesc}
                 </div>
               </div>
               <div className="text-white/20 text-2xl font-light group-hover:text-white/50 transition-colors">
@@ -397,27 +405,51 @@ export default function ModeSelection() {
           </motion.div>
         </motion.div>
 
-        {/* User Info & Logout */}
+        {/* Language Selector, User Info & Logout */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="flex items-center justify-between pt-5 border-t border-white/10"
+          className="flex items-center justify-between gap-3 pt-5 border-t border-white/10"
         >
-          {user && (
-            <p className="text-xs text-white/40 font-medium truncate max-w-[200px]">
-              {user.email}
-            </p>
-          )}
-          <Button
-            onClick={handleLogout}
-            variant="ghost"
-            size="sm"
-            className="text-white/40 hover:text-white hover:bg-white/5 ml-auto text-xs font-bold uppercase tracking-wider"
+          {/* Language toggle */}
+          <div
+            className="flex items-center gap-0.5 rounded-full bg-black/40 border border-white/10 p-0.5"
+            role="group"
+            aria-label={t.landing.language}
           >
-            <LogOut className="h-3.5 w-3.5 mr-2" />
-            Sign out
-          </Button>
+            {(['fr', 'en'] as const).map((lng) => (
+              <button
+                key={lng}
+                onClick={() => setLanguage(lng)}
+                aria-pressed={language === lng}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                  language === lng
+                    ? 'bg-[#d4af37] text-black'
+                    : 'text-white/60 hover:text-white'
+                }`}
+              >
+                {lng.toUpperCase()}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-3 ml-auto min-w-0">
+            {user && (
+              <p className="text-xs text-white/55 font-medium truncate max-w-[160px]">
+                {user.email}
+              </p>
+            )}
+            <Button
+              onClick={handleLogout}
+              variant="ghost"
+              size="sm"
+              className="text-white/55 hover:text-white hover:bg-white/5 text-xs font-bold uppercase tracking-wider flex-shrink-0"
+            >
+              <LogOut className="h-3.5 w-3.5 mr-2" />
+              {t.landing.signOut}
+            </Button>
+          </div>
         </motion.div>
       </motion.div>
     </div>
