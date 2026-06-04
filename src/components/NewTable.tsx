@@ -264,7 +264,7 @@ export const NewTable = memo(function NewTable() {
       timers.push(setTimeout(() => setResultBanner(null), 1600));
     } else if (hasLoss) {
       playSound('lose');
-      allBusted ? haptic.bust() : haptic.lose();
+      if (allBusted) haptic.bust(); else haptic.lose();
       setParticleType('lose');
       setParticleTrigger(true);
       setFlashType('lose');

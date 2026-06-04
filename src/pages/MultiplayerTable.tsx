@@ -6,6 +6,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { HandView } from '@/components/HandView';
@@ -23,6 +24,7 @@ import { createShuffledShoe, drawCard } from '@/lib/blackjack/deck';
 import { addCardToHand, createEmptyHand, isBusted, isBlackjack, getBestHandValue, isSoftHand, canSplit } from '@/lib/blackjack/hand';
 import { getNextActiveHandIndex, areAllHandsFinished, shouldDealerHit, calculatePayout, canInsure } from '@/lib/blackjack/rules';
 import type { GameConfig } from '@/lib/blackjack/types';
+import { useTranslation } from '@/ui/blackjack/i18n';
 
 interface TableData {
   id: string;
@@ -40,23 +42,24 @@ interface TableData {
 
 interface GameState {
   phase: string;
-  shoe: any[];
-  dealerHand: any;
-  playerHands: Record<number, any[]>;
+  shoe: BlackjackCard[];
+  dealerHand: Hand;
+  playerHands: Record<number, Hand[]>;
   activeSeat: number | null;
   currentRound: number;
-  sideBets?: Record<string, any>;
-  sideBetResults?: any;
+  sideBets?: Record<string, number>;
+  sideBetResults?: Record<string, unknown>;
 }
 
 // Function removed - opponents now displayed in horizontal layout
 
 export default function MultiplayerTable() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [table, setTable] = useState<TableData | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
   const [mySeat, setMySeat] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [isTableCreator, setIsTableCreator] = useState(false);
@@ -184,7 +187,7 @@ export default function MultiplayerTable() {
 
           // Flip dealer's hole card
           const dealerHand = { ...currentState.dealerHand };
-          dealerHand.cards = dealerHand.cards.map((card: any) => ({ ...card, faceUp: true }));
+          dealerHand.cards = dealerHand.cards.map((card) => ({ ...card, faceUp: true }));
 
           // Dealer plays: hit until 17 or more (stand on all 17s - S17)
           while (shouldDealerHit(dealerHand.cards, false)) {
@@ -208,7 +211,7 @@ export default function MultiplayerTable() {
           };
 
           await updateGameState(newState);
-        } catch (error: any) {
+        } catch (error) {
           console.error('[MultiplayerTable] Dealer turn error:', error);
         }
       };
@@ -300,7 +303,7 @@ export default function MultiplayerTable() {
 
             // Notification removed
           }, 3000);
-        } catch (error: any) {
+        } catch (error) {
           console.error('[MultiplayerTable] Settlement error:', error);
         }
       };
@@ -345,7 +348,7 @@ export default function MultiplayerTable() {
 
       // Load profiles separately
       if (tableData) {
-        const userIds = tableData.table_players.map((p: any) => p.user_id);
+        const userIds = tableData.table_players.map((p: TableData['table_players'][number]) => p.user_id);
         if (userIds.length > 0) {
           const { data: profiles } = await supabase
             .from('profiles')
@@ -353,9 +356,9 @@ export default function MultiplayerTable() {
             .in('id', userIds);
 
           // Attach profiles to players
-          tableData.table_players = tableData.table_players.map((p: any) => ({
+          tableData.table_players = tableData.table_players.map((p: TableData['table_players'][number]) => ({
             ...p,
-            profile: profiles?.find((pr: any) => pr.id === p.user_id),
+            profile: profiles?.find((pr: { id: string; username: string }) => pr.id === p.user_id),
           }));
         }
       }
@@ -373,7 +376,7 @@ export default function MultiplayerTable() {
         return updated;
       });
 
-      const myPlayer = tableData.table_players.find((p: any) => p.user_id === user.id);
+      const myPlayer = tableData.table_players.find((p: TableData['table_players'][number]) => p.user_id === user.id);
       setMySeat(myPlayer?.seat || null);
       setIsTableCreator(tableData.created_by === user.id);
 
@@ -386,7 +389,7 @@ export default function MultiplayerTable() {
       if (!stateError && stateData) {
         setGameState(stateData.state_json);
       }
-    } catch (error: any) {
+    } catch (error) {
       // Notification removed
       navigate('/lobby');
     } finally {
@@ -467,7 +470,7 @@ export default function MultiplayerTable() {
     }
   };
 
-  const handleAction = async (actionType: string, payload?: any) => {
+  const handleAction = async (actionType: string, payload?: { amount?: number }) => {
     if (!id || !mySeat || !gameState) return;
 
     try {
@@ -704,7 +707,7 @@ export default function MultiplayerTable() {
 
       // Update state
       await updateGameState(newState);
-    } catch (error: any) {
+    } catch (error) {
       console.error('[MultiplayerTable] Action error:', error);
       // Notification removed
     }
@@ -867,7 +870,7 @@ export default function MultiplayerTable() {
 
         // Notification removed
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('[MultiplayerTable] Start round error:', error);
       // Notification removed
     }
@@ -1167,7 +1170,7 @@ export default function MultiplayerTable() {
           <div className="bg-black/60 backdrop-blur-xl rounded-3xl p-5 border border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
             <div className="text-center mb-4 flex justify-between items-end">
               <div className="text-left">
-                <div className="text-[10px] text-white/50 uppercase tracking-widest font-bold">Bankroll</div>
+                <div className="text-[10px] text-white/50 uppercase tracking-widest font-bold">{t.table.bankrollLabel}</div>
                 <div className="text-2xl font-black text-[#d4af37] tracking-tight">${myPlayer.bankroll.toLocaleString()}</div>
               </div>
             </div>
@@ -1203,20 +1206,20 @@ export default function MultiplayerTable() {
             !activeHand.isStood &&
             !activeHand.isBusted;
           
-          const dealerUpCard = gameState.dealerHand.cards.find((c: any) => c.faceUp);
+          const dealerUpCard = gameState.dealerHand.cards.find((c) => c.faceUp);
           const canInsurance = dealerUpCard?.rank === 'A' && 
             activeHand?.cards.length === 2 &&
             myPlayer.bankroll >= (activeHand?.bet || 0) / 2;
           
           const actions = [
-            { action: 'hit' as PlayerAction, label: 'Hit', enabled: true },
-            { action: 'stand' as PlayerAction, label: 'Stand', enabled: true },
-            { action: 'double' as PlayerAction, label: 'Double', enabled: !!canDoubleHand, reason: !canDoubleHand ? 'Can only double on first two cards' : undefined },
-            { action: 'split' as PlayerAction, label: 'Split', enabled: !!canSplitHand, reason: !canSplitHand ? 'Can only split with two cards of same rank' : undefined },
+            { action: 'hit' as PlayerAction, label: t.actions.hit, enabled: true },
+            { action: 'stand' as PlayerAction, label: t.actions.stand, enabled: true },
+            { action: 'double' as PlayerAction, label: t.actions.double, enabled: !!canDoubleHand, reason: !canDoubleHand ? t.errors.cannotDouble : undefined },
+            { action: 'split' as PlayerAction, label: t.actions.split, enabled: !!canSplitHand, reason: !canSplitHand ? t.errors.cannotSplit : undefined },
           ];
-          
+
           if (canInsurance) {
-            actions.push({ action: 'insurance' as PlayerAction, label: 'Insurance', enabled: true });
+            actions.push({ action: 'insurance' as PlayerAction, label: t.actions.insurance, enabled: true });
           }
           
           return (

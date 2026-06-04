@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -32,7 +33,7 @@ export default function Lobby() {
   const [tableName, setTableName] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [creating, setCreating] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [roomCodeInput, setRoomCodeInput] = useState('');
   const [joiningByCode, setJoiningByCode] = useState(false);
   const navigate = useNavigate();
@@ -127,9 +128,9 @@ export default function Lobby() {
       } else {
         setTables([]);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('[Lobby] Error loading tables:', error);
-      toast.error(`Erreur lors du chargement des tables: ${error.message || 'Erreur inconnue'}`);
+      toast.error(`Erreur lors du chargement des tables: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
       setTables([]);
     } finally {
       setLoading(false);
@@ -334,10 +335,11 @@ export default function Lobby() {
       console.log('[Lobby] Table created successfully:', table.id);
       toast.success('Table créée !');
       navigate(`/table/${table.id}`);
-    } catch (error: any) {
+    } catch (error) {
       console.error('[Lobby] Unexpected error creating table:', error);
-      const errorMessage = error?.message || error?.error || 'Erreur lors de la création de la table';
-      const errorDetails = error?.details ? ` (${error.details})` : '';
+      const err = error as { message?: string; error?: string; details?: string } | null;
+      const errorMessage = err?.message || err?.error || 'Erreur lors de la création de la table';
+      const errorDetails = err?.details ? ` (${err.details})` : '';
       toast.error(`${errorMessage}${errorDetails}`, {
         description: 'Ouvrez la console (F12) pour voir les détails',
         duration: 5000,
@@ -387,9 +389,9 @@ export default function Lobby() {
       // Use the same join logic
       await handleJoinTable(table.id);
       setRoomCodeInput('');
-    } catch (error: any) {
+    } catch (error) {
       console.error('[Lobby] Join by code error:', error);
-      toast.error(error.message || 'Erreur lors de la connexion');
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la connexion');
     } finally {
       setJoiningByCode(false);
     }
@@ -449,7 +451,7 @@ export default function Lobby() {
       }
 
       // Find available seat
-      const takenSeats = table.table_players.map((p: any) => p.seat);
+      const takenSeats = table.table_players.map((p: { seat: number }) => p.seat);
       let availableSeat = 1;
       for (let i = 1; i <= table.max_players; i++) {
         if (!takenSeats.includes(i)) {
@@ -476,9 +478,9 @@ export default function Lobby() {
 
       toast.success('Table rejointe !');
       navigate(`/table/${tableId}`);
-    } catch (error: any) {
+    } catch (error) {
       console.error('[Lobby] Join table error:', error);
-      toast.error(error.message || 'Erreur lors de la connexion à la table');
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la connexion à la table');
     }
   };
 
@@ -528,9 +530,9 @@ export default function Lobby() {
       toast.success('Table supprimée');
       // Reload tables list
       loadTables();
-    } catch (error: any) {
+    } catch (error) {
       console.error('[Lobby] Delete table error:', error);
-      toast.error(error.message || 'Erreur lors de la suppression');
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la suppression');
     }
   };
 

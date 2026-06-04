@@ -68,7 +68,7 @@ describe('Game Flow - Critical Scenarios', () => {
 
     it('throws error when insufficient bankroll for double', () => {
       const state = createInitialState(100);
-      let newState = startRound(state, 50);
+      const newState = startRound(state, 50);
       
       // Bankroll is now 50, but we need 50 more for double
       expect(newState.bankroll).toBe(50);

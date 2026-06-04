@@ -86,7 +86,7 @@ export function ChatPanel({ tableId, currentUserId, isOpen, onClose }: ChatPanel
             .single();
 
           const newMessage: Message = {
-            ...payload.new as any,
+            ...(payload.new as Message),
             profile: profile || undefined,
           };
 
@@ -124,7 +124,7 @@ export function ChatPanel({ tableId, currentUserId, isOpen, onClose }: ChatPanel
 
       setNewMessage('');
       inputRef.current?.focus();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error sending message:', error);
     } finally {
       setLoading(false);

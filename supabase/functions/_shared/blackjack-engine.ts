@@ -26,8 +26,8 @@ export interface GameState {
   playerHands: Record<number, Hand[]>; // seat -> hands[]
   activeSeat: number | null;
   currentRound: number;
-  sideBets: Record<string, any>;
-  sideBetResults: any;
+  sideBets: Record<string, number>;
+  sideBetResults: Record<string, unknown>;
 }
 
 // Create a shuffled shoe

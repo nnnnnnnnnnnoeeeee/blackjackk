@@ -135,12 +135,13 @@ serve(async (req) => {
       JSON.stringify({ table }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Unexpected error:', error);
+    const err = error as { message?: string; stack?: string } | null;
     return new Response(
-      JSON.stringify({ 
-        error: error?.message || 'Internal server error',
-        details: error?.stack 
+      JSON.stringify({
+        error: err?.message || 'Internal server error',
+        details: err?.stack
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

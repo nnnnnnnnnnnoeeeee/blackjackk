@@ -57,8 +57,8 @@ export default function ResetPassword() {
 
       toast.success('Mot de passe réinitialisé avec succès !');
       navigate('/login');
-    } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de la réinitialisation');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la réinitialisation');
     } finally {
       setLoading(false);
     }

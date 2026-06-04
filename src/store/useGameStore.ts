@@ -848,7 +848,7 @@ export const useGameStore = create<GameStore>()(
         if (error || !state) {
           // Injection sécurisée de l'état si localStorage est vide ou corrompu
           const initialState = validateState({});
-          useGameStore.setState(initialState as any);
+          useGameStore.setState(initialState);
         } else if (state) {
           const validated = validateState(state);
           // Update state with validated values

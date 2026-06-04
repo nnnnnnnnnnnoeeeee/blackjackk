@@ -141,10 +141,10 @@ export const labels = {
 // Helper function to get labels with dot notation
 export function getLabel(key: string, params?: Record<string, string | number>): string {
   const keys = key.split('.');
-  let value: any = labels;
+  let value: unknown = labels;
 
   for (const k of keys) {
-    value = value?.[k];
+    value = (value as Record<string, unknown> | undefined)?.[k];
     if (value === undefined) {
       // Fallback to direct key lookup for backward compatibility
       const flatLabels: Record<string, string> = {
@@ -182,7 +182,7 @@ export function getLabel(key: string, params?: Record<string, string | number>):
   }
 
   if (typeof value === 'function' && params) {
-    return value(params as any);
+    return (value as (p: Record<string, string | number>) => string)(params);
   }
 
   return typeof value === 'string' ? value : key;

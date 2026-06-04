@@ -40,8 +40,8 @@ export default function Register() {
 
       toast.success('Compte créé ! Vérifiez votre email pour confirmer.');
       navigate('/login');
-    } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de l\'inscription');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'inscription');
     } finally {
       setLoading(false);
     }
@@ -58,8 +58,8 @@ export default function Register() {
       });
 
       if (error) throw error;
-    } catch (error: any) {
-      toast.error(error.message || 'Erreur d\'inscription Google');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erreur d\'inscription Google');
       setGoogleLoading(false);
     }
   };

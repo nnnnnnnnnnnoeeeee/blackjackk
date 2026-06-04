@@ -69,7 +69,7 @@ serve(async (req) => {
     }
 
     // Check if user is already in table
-    const alreadyJoined = table.table_players.some((p: any) => p.user_id === user.id);
+    const alreadyJoined = table.table_players.some((p: { user_id: string }) => p.user_id === user.id);
     if (alreadyJoined) {
       return new Response(
         JSON.stringify({ error: 'Already in this table' }),
@@ -86,7 +86,7 @@ serve(async (req) => {
     }
 
     // Find available seat
-    const takenSeats = table.table_players.map((p: any) => p.seat);
+    const takenSeats = table.table_players.map((p: { seat: number }) => p.seat);
     let availableSeat = 1;
     for (let i = 1; i <= table.max_players; i++) {
       if (!takenSeats.includes(i)) {

@@ -40,8 +40,8 @@ export default function Login() {
 
       toast.success('Connexion réussie !');
       navigate('/mode-selection');
-    } catch (error: any) {
-      toast.error(error.message || 'Erreur de connexion');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erreur de connexion');
     } finally {
       setLoading(false);
     }
@@ -64,8 +64,8 @@ export default function Login() {
       });
 
       if (error) throw error;
-    } catch (error: any) {
-      toast.error(error.message || 'Erreur de connexion Google');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erreur de connexion Google');
       setGoogleLoading(false);
     }
   };

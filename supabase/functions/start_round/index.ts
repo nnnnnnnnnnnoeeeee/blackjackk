@@ -72,7 +72,7 @@ serve(async (req) => {
 
     // Check if user is creator or player
     const isCreator = table.created_by === user.id;
-    const isPlayer = table.table_players.some((p: any) => p.user_id === user.id);
+    const isPlayer = table.table_players.some((p: { user_id: string }) => p.user_id === user.id);
     
     if (!isCreator && !isPlayer) {
       return new Response(

@@ -85,7 +85,7 @@ serve(async (req) => {
       );
     }
 
-    let gameState: GameState = stateData.state_json;
+    const gameState: GameState = stateData.state_json;
 
     if (gameState.phase !== 'settling') {
       return new Response(

@@ -10,7 +10,7 @@ import { TimerBadge } from './TimerBadge';
 import { TurnIndicator } from './TurnIndicator';
 import { toast } from 'sonner';
 import type { PlayerAction, Hand } from '@/lib/blackjack/types';
-import { getLabel } from '../i18n';
+import { useTranslation } from '../i18n';
 
 interface ActionBarMultiplayerProps {
   actions: Array<{
@@ -46,6 +46,7 @@ export const ActionBarMultiplayer = memo(function ActionBarMultiplayer({
   soundEnabled = false,
   soundVolume = 0.5,
 }: ActionBarMultiplayerProps) {
+  const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
 
   const handleAction = useCallback(
@@ -57,8 +58,8 @@ export const ActionBarMultiplayer = memo(function ActionBarMultiplayer({
       const actionConfig = actions.find((a) => a.action === action);
       if (!actionConfig || !actionConfig.enabled) {
         const reason = actionConfig?.reason;
-        toast.error(getLabel('action_unavailable'), {
-          description: reason || `You cannot ${action} now.`,
+        toast.error(t.errors.actionUnavailable, {
+          description: reason || t.errors.actionUnavailable,
         });
         return;
       }
@@ -66,14 +67,14 @@ export const ActionBarMultiplayer = memo(function ActionBarMultiplayer({
       try {
         onAction(action);
       } catch (error) {
-        const message = error instanceof Error ? error.message : `Error executing ${action}`;
-        toast.error(getLabel('error_title'), {
+        const message = error instanceof Error ? error.message : t.betting.errorPlacingBet;
+        toast.error(t.betting.errorTitle, {
           description: message,
         });
         console.error('[ActionBarMultiplayer] Error:', error);
       }
     },
-    [actions, isAnimating, onAction]
+    [actions, isAnimating, onAction, t]
   );
 
   const enabledActions = useMemo(
@@ -105,7 +106,7 @@ export const ActionBarMultiplayer = memo(function ActionBarMultiplayer({
         <div className="flex items-center gap-2">
           <TurnIndicator isActive={true} label="⭐" />
           <span className="text-base font-bold text-primary animate-pulse">
-            {getLabel('your_turn')}
+            {t.status.yourTurn}
           </span>
         </div>
         {actionTimeLeft !== undefined && actionTimeLeft > 0 && (

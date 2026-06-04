@@ -11,7 +11,7 @@ import { useBetValidation } from '../hooks';
 import { useReducedMotion, conditionalVariants } from '../a11y';
 import { ChipSelector } from './ChipSelector';
 import { TimerBadge } from './TimerBadge';
-import { getLabel } from '../i18n';
+import { useTranslation } from '../i18n';
 
 interface BetComposerMultiplayerProps {
   bankroll: number;
@@ -38,6 +38,7 @@ export const BetComposerMultiplayer = memo(function BetComposerMultiplayer({
   soundEnabled = false,
   soundVolume = 0.5,
 }: BetComposerMultiplayerProps) {
+  const { t } = useTranslation();
   const { playSound } = useSound({
     enabled: soundEnabled,
     volume: soundVolume,
@@ -64,11 +65,11 @@ export const BetComposerMultiplayer = memo(function BetComposerMultiplayer({
     if (lastBetAmount > 0 && lastBetAmount <= bankroll && lastBetAmount <= maxBet) {
       setBetAmount(lastBetAmount);
     } else {
-      toast.error(getLabel('rebet_unavailable_title'), {
-        description: getLabel('rebet_unavailable_description'),
+      toast.error(t.betting.rebetUnavailableTitle, {
+        description: t.betting.rebetUnavailableDescription,
       });
     }
-  }, [lastBetAmount, bankroll, maxBet]);
+  }, [lastBetAmount, bankroll, maxBet, t]);
 
   const handleAllIn = useCallback(() => {
     setBetAmount(Math.min(bankroll, maxBet));
@@ -76,27 +77,27 @@ export const BetComposerMultiplayer = memo(function BetComposerMultiplayer({
 
   const handlePlaceBet = useCallback(() => {
     if (betAmount < minBet) {
-      toast.error(getLabel('error_title'), {
-        description: `${getLabel('minimum_bet')}: $${minBet}`,
+      toast.error(t.betting.errorTitle, {
+        description: `${t.betting.minimumBetLabel} : $${minBet}`,
       });
       return;
     }
     if (betAmount > bankroll) {
-      toast.error(getLabel('error_title'), {
-        description: getLabel('insufficient_bankroll'),
+      toast.error(t.betting.errorTitle, {
+        description: t.errors.insufficientBankroll,
       });
       return;
     }
     if (betAmount > maxBet) {
-      toast.error(getLabel('error_title'), {
-        description: `Maximum bet: $${maxBet}`,
+      toast.error(t.betting.errorTitle, {
+        description: `${t.betting.maximumBet} : $${maxBet}`,
       });
       return;
     }
     playSound('chipStack');
     onBet(betAmount);
     setBetAmount(0);
-  }, [betAmount, minBet, bankroll, maxBet, onBet, playSound]);
+  }, [betAmount, minBet, bankroll, maxBet, onBet, playSound, t]);
 
   useEffect(() => {
     if (betAmount > maxBet) {
@@ -126,7 +127,7 @@ export const BetComposerMultiplayer = memo(function BetComposerMultiplayer({
       <div className="flex items-center justify-between w-full mb-2">
         <div className="text-center flex-1">
           <div className="text-[9px] sm:text-[10px] md:text-xs uppercase tracking-wider text-muted-foreground mb-0.5 sm:mb-1">
-            {getLabel('your_bet')}
+            {t.betting.yourBet}
           </div>
           <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-primary break-all">
             ${betAmount}
@@ -157,25 +158,25 @@ export const BetComposerMultiplayer = memo(function BetComposerMultiplayer({
         <button
           onClick={handleClear}
           className="btn-casino-secondary text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 flex-1 min-h-[44px] sm:min-h-[48px]"
-          aria-label={getLabel('clear_bet_aria')}
+          aria-label={t.betting.clearBetAria}
         >
-          {getLabel('clear_button')}
+          {t.betting.clearButton}
         </button>
         <button
           onClick={handleRebet}
           disabled={lastBetAmount === 0 || lastBetAmount > bankroll || lastBetAmount > maxBet}
           className="btn-casino-secondary text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 flex-1 min-h-[44px] sm:min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed"
-          aria-label={getLabel('rebet_last_bet_aria')}
+          aria-label={t.betting.rebetLastBetAria}
         >
-          {getLabel('rebet_button')}
+          {t.betting.rebetButton}
         </button>
         <button
           onClick={handleAllIn}
           disabled={bankroll === 0}
           className="btn-casino-secondary text-[10px] sm:text-xs md:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 flex-1 min-h-[44px] sm:min-h-[48px]"
-          aria-label={getLabel('bet_all_aria')}
+          aria-label={t.betting.betAllAria}
         >
-          {getLabel('all_in_button')}
+          {t.betting.allInButton}
         </button>
       </div>
 
@@ -193,7 +194,7 @@ export const BetComposerMultiplayer = memo(function BetComposerMultiplayer({
             WebkitAppearance: 'none',
             touchAction: 'none',
           }}
-          aria-label={getLabel('bet_amount_slider_aria')}
+          aria-label={t.betting.betAmountSliderAria}
         />
         <div className="flex justify-between text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">
           <span>$0</span>
@@ -219,12 +220,12 @@ export const BetComposerMultiplayer = memo(function BetComposerMultiplayer({
             (betAmount < minBet || betAmount > bankroll || betAmount > maxBet) && 'opacity-50 cursor-not-allowed filter grayscale-[50%]',
             betAmount >= minBet && !prefersReducedMotion && 'animate-[pulse-glow_2s_ease-in-out_infinite]'
           )}
-          aria-label={betAmount >= minBet ? getLabel('place_bet_aria') : getLabel('cannot_deal_min_bet_aria')}
+          aria-label={betAmount >= minBet ? t.betting.placeBetAria : t.betting.cannotDealMinBetAria}
           type="button"
         >
           <span className="flex items-center justify-center gap-2">
             <span className="text-xl sm:text-2xl">💰</span>
-            <span>{getLabel('place_bet_button')}</span>
+            <span>{t.betting.placeBetButton}</span>
           </span>
         </motion.button>
         {canDeal && onDeal && (
@@ -243,12 +244,12 @@ export const BetComposerMultiplayer = memo(function BetComposerMultiplayer({
               'shadow-[0_4px_20px_rgba(34,197,94,0.4)]',
               !prefersReducedMotion && 'animate-[pulse-glow_2s_ease-in-out_infinite]'
             )}
-            aria-label={getLabel('deal_cards_aria')}
+            aria-label={t.betting.dealCardsAria}
             type="button"
           >
             <span className="flex items-center justify-center gap-2">
               <span className="text-xl sm:text-2xl">🎲</span>
-              <span>{getLabel('deal_button')}</span>
+              <span>{t.betting.dealButton}</span>
             </span>
           </motion.button>
         )}
@@ -259,7 +260,7 @@ export const BetComposerMultiplayer = memo(function BetComposerMultiplayer({
           role="alert"
           aria-live="polite"
         >
-          {getLabel('minimum_bet')}: ${minBet}
+          {t.betting.minimumBetLabel} : ${minBet}
         </p>
       )}
     </motion.div>

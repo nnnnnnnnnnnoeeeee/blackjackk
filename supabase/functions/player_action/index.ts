@@ -73,7 +73,7 @@ serve(async (req) => {
       );
     }
 
-    const player = table.table_players.find((p: any) => p.user_id === user.id);
+    const player = table.table_players.find((p: { user_id: string; seat: number; bankroll: number }) => p.user_id === user.id);
     if (!player) {
       return new Response(
         JSON.stringify({ error: 'Not a player in this table' }),
@@ -95,7 +95,7 @@ serve(async (req) => {
       );
     }
 
-    let gameState: GameState = stateData.state_json;
+    const gameState: GameState = stateData.state_json;
 
     // Process action based on type
     let newState: GameState;
@@ -197,7 +197,7 @@ function handleBet(state: GameState, seat: number, amount: number, bankroll: num
   };
 }
 
-function handleHit(state: GameState, seat: number, config: any): GameState {
+function handleHit(state: GameState, seat: number, config: unknown): GameState {
   if (state.phase !== 'playing' || state.activeSeat !== seat) {
     throw new Error('Not your turn');
   }
@@ -264,7 +264,7 @@ function handleStand(state: GameState, seat: number): GameState {
   };
 }
 
-function handleDouble(state: GameState, seat: number, bankroll: number, config: any): GameState {
+function handleDouble(state: GameState, seat: number, bankroll: number, config: unknown): GameState {
   if (state.phase !== 'playing' || state.activeSeat !== seat) {
     throw new Error('Not your turn');
   }
@@ -296,7 +296,7 @@ function handleDouble(state: GameState, seat: number, bankroll: number, config: 
   };
 }
 
-function handleSplit(state: GameState, seat: number, bankroll: number, config: any): GameState {
+function handleSplit(state: GameState, seat: number, bankroll: number, config: unknown): GameState {
   if (state.phase !== 'playing' || state.activeSeat !== seat) {
     throw new Error('Not your turn');
   }

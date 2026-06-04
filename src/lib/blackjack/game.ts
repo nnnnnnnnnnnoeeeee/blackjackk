@@ -135,8 +135,8 @@ export function dealInitialCards(state: GameState): GameState {
   }
   
   let shoe = [...state.shoe];
-  let playerCards: Card[] = [];
-  let dealerCards: Card[] = [];
+  const playerCards: Card[] = [];
+  const dealerCards: Card[] = [];
   
   // Deal in casino order: player, dealer, player, dealer (hole card face down)
   let card: Card;
