@@ -14,7 +14,7 @@ import { vibrate } from '@/lib/haptics';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   createInitialState, startHand, applyAction, advanceStreet, runShowdown,
-  inHandCount, decideBotAction, DEFAULT_POKER_CONFIG,
+  inHandCount, decideBotAction, DEFAULT_POKER_CONFIG, legalActions,
   type BotDifficulty, type Card as PokerCard, type PokerAction, type PokerPublicState,
 } from '@/lib/poker';
 import type { Card as BlackjackCard } from '@/lib/blackjack/types';
@@ -116,10 +116,38 @@ export default function PokerSolo() {
   const [botCount, setBotCount] = useState(3);
   const [game, setGame] = useState<Game | null>(null);
   const [lastActions, setLastActions] = useState<Record<number, { action: string; amount?: number }>>({});
+  const [timeLeft, setTimeLeft] = useState<number>(15);
   
   const gameRef = useRef<Game | null>(null);
   const settledFor = useRef<number>(-1);
   gameRef.current = game;
+
+  // 15-second countdown timer for Hero
+  useEffect(() => {
+    const g = game;
+    if (!g || g.state.currentTurnSeat !== HERO || g.state.phase === 'payout') {
+      setTimeLeft(15);
+      return;
+    }
+
+    setTimeLeft(15);
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          // Auto action on timeout: Check if check is legal, else fold
+          const actions = legalActions(g.state, HERO);
+          const autoAction = actions.includes('check') ? 'check' : 'fold';
+          doAction(HERO, autoAction);
+          return 15;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [game, doAction]);
 
   const start = useCallback(() => {
     setLastActions({});
@@ -363,7 +391,7 @@ export default function PokerSolo() {
                       key={idx}
                       card={toFaceUp(card)}
                       index={idx}
-                      className="w-[44px] sm:w-[58px] md:w-[66px] aspect-[2.5/3.5] shadow-lg"
+                      className="!min-w-0 !max-w-none w-[44px] sm:w-[58px] md:w-[66px] aspect-[2.5/3.5] shadow-lg"
                     />
                   );
                 }
@@ -429,7 +457,7 @@ export default function PokerSolo() {
                 <div
                   className={`absolute rounded-2xl p-2 border text-center transition-all w-24 sm:w-28 flex flex-col items-center justify-between z-30 bg-black/75 border-white/10 backdrop-blur-md ${
                     isTurn
-                      ? 'border-[#d4af37] ring-2 ring-[#d4af37]/35 shadow-[0_0_18px_rgba(212,175,55,0.5)] animate-pulse'
+                      ? 'border-[#d4af37] ring-2 ring-[#d4af37]/35 shadow-[0_0_18px_rgba(212,175,55,0.5)]'
                       : ''
                   } ${s.status === 'folded' ? 'opacity-35 grayscale scale-95 border-white/5 bg-black/50' : ''}`}
                   style={{
@@ -440,9 +468,25 @@ export default function PokerSolo() {
                 >
                   {/* Dealer badge */}
                   {s.seat === state.buttonSeat && (
-                    <span className="absolute -top-1.5 -right-1.5 text-[9px] font-black bg-[#d4af37] text-black rounded-full w-5 h-5 border border-black/40 flex items-center justify-center shadow-md">
+                    <span className="absolute -top-1.5 -right-1.5 text-[9px] font-black bg-[#d4af37] text-black rounded-full w-5 h-5 border border-black/40 flex items-center justify-center shadow-md z-40">
                       D
                     </span>
+                  )}
+
+                  {/* Active turn indicators (Player timer / Bot Thinking) */}
+                  {isTurn && (
+                    <>
+                      {isMe ? (
+                        <span className="absolute -top-3.5 -left-3 text-[10px] font-black bg-red-600 text-white rounded-full w-6 h-6 border border-white/20 flex items-center justify-center shadow-lg animate-bounce z-40">
+                          {timeLeft}s
+                        </span>
+                      ) : (
+                        <span className="absolute -top-3.5 -left-4 text-[8px] font-black uppercase tracking-wider bg-amber-500 text-black px-2 py-0.5 rounded-full border border-black/45 flex items-center gap-1 shadow-md animate-pulse z-40 whitespace-nowrap">
+                          <span className="w-1 h-1 bg-black rounded-full animate-ping" />
+                          Mise...
+                        </span>
+                      )}
+                    </>
                   )}
 
                   {/* Avatar Icon */}
@@ -455,8 +499,8 @@ export default function PokerSolo() {
                     {displayName}
                   </span>
 
-                  {/* Chips Stack */}
-                  <div className="text-[10px] sm:text-[11px] text-[#d4af37] font-black tabular-nums mt-0.5">
+                  {/* Chips Stack (Gold Pill) */}
+                  <div className="text-[11px] sm:text-xs font-black text-[#FFDF73] bg-[#d4af37]/15 border border-[#d4af37]/30 px-2.5 py-0.5 rounded-full mt-1 shadow-sm tabular-nums">
                     ${s.stack}
                   </div>
 
@@ -480,7 +524,7 @@ export default function PokerSolo() {
                             key={i}
                             card={toFaceUp(c)}
                             index={i}
-                            className="w-[28px] sm:w-[35px] aspect-[2.5/3.5] shadow-md"
+                            className="!min-w-0 !max-w-none w-[28px] sm:w-[35px] aspect-[2.5/3.5] shadow-md"
                           />
                         ))
                       : s.holeCards
@@ -489,7 +533,7 @@ export default function PokerSolo() {
                             key={i}
                             card={toFaceUp(c)}
                             index={i}
-                            className="w-[28px] sm:w-[35px] aspect-[2.5/3.5] shadow-md"
+                            className="!min-w-0 !max-w-none w-[28px] sm:w-[35px] aspect-[2.5/3.5] shadow-md"
                           />
                         ))
                       : s.status !== 'folded'
@@ -498,11 +542,23 @@ export default function PokerSolo() {
                             key={i}
                             card={cardBack}
                             index={i}
-                            className="w-[28px] sm:w-[35px] aspect-[2.5/3.5] shadow-md"
+                            className="!min-w-0 !max-w-none w-[28px] sm:w-[35px] aspect-[2.5/3.5] shadow-md"
                           />
                         ))
                       : null}
                   </div>
+
+                  {/* Visual timer countdown bar at seat bottom */}
+                  {isMe && isTurn && (
+                    <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden mt-1 max-w-[80px]">
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-amber-400"
+                        initial={{ width: '100%' }}
+                        animate={{ width: `${(timeLeft / 15) * 100}%` }}
+                        transition={{ duration: 1, ease: 'linear' }}
+                      />
+                    </div>
+                  )}
 
                   {/* Temporary Action Bubble overlay */}
                   <AnimatePresence>
