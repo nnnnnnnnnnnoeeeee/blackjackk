@@ -517,23 +517,14 @@ export default function PokerSolo() {
                   )}
 
                   {/* Hole Cards */}
-                  <div className="flex justify-center gap-0.5 mt-1.5 min-h-[42px] sm:min-h-[52px]">
-                    {s.seat === HERO
-                      ? (hole[HERO] ?? []).map((c, i) => (
+                  <div className="flex justify-center -space-x-3 sm:-space-x-3.5 mt-1.5 min-h-[50px] sm:min-h-[64px]">
+                    {s.seat === HERO || state.phase === 'payout' || s.holeCards
+                      ? (hole[s.seat] ?? []).map((c, i) => (
                           <PlayingCard
                             key={i}
                             card={toFaceUp(c)}
                             index={i}
-                            className="!min-w-0 !max-w-none w-[28px] sm:w-[35px] aspect-[2.5/3.5] shadow-md"
-                          />
-                        ))
-                      : s.holeCards
-                      ? s.holeCards.map((c, i) => (
-                          <PlayingCard
-                            key={i}
-                            card={toFaceUp(c)}
-                            index={i}
-                            className="!min-w-0 !max-w-none w-[28px] sm:w-[35px] aspect-[2.5/3.5] shadow-md"
+                            className="!min-w-0 !max-w-none w-[42px] sm:w-[50px] aspect-[2.5/3.5] shadow-md border border-black/10"
                           />
                         ))
                       : s.status !== 'folded'
@@ -542,7 +533,7 @@ export default function PokerSolo() {
                             key={i}
                             card={cardBack}
                             index={i}
-                            className="!min-w-0 !max-w-none w-[28px] sm:w-[35px] aspect-[2.5/3.5] shadow-md"
+                            className="!min-w-0 !max-w-none w-[42px] sm:w-[50px] aspect-[2.5/3.5] shadow-md border border-white/10"
                           />
                         ))
                       : null}

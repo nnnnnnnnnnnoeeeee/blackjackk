@@ -62,9 +62,9 @@ export function decideBotAction(
 
   // Difficulty profiles: [foldBelow, raiseAbove, aggression, bluffChance]
   const profile = {
-    easy: { foldBelow: 0.12, raiseAbove: 0.82, aggression: 0.35, bluff: 0.02 },
-    medium: { foldBelow: 0.32, raiseAbove: 0.70, aggression: 0.55, bluff: 0.06 },
-    hard: { foldBelow: 0.40, raiseAbove: 0.66, aggression: 0.70, bluff: 0.12 },
+    easy: { foldBelow: 0.15, raiseAbove: 0.85, aggression: 0.20, bluff: 0.02 },
+    medium: { foldBelow: 0.35, raiseAbove: 0.68, aggression: 0.50, bluff: 0.08 },
+    hard: { foldBelow: 0.45, raiseAbove: 0.58, aggression: 0.80, bluff: 0.16 },
   }[difficulty];
 
   const maxTo = me.committedThisStreet + me.stack;
