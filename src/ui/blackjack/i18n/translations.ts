@@ -242,6 +242,17 @@ export interface Translations {
     half: string;
     threeQuarter: string;
     potSize: string;
+    vsBots: string;
+    vsBotsDesc: string;
+    chooseDifficulty: string;
+    easy: string;
+    medium: string;
+    hard: string;
+    numberOfBots: string;
+    startGame: string;
+    gameOver: string;
+    playAgain: string;
+    botName: (n: number) => string;
   };
 }
 
@@ -483,6 +494,17 @@ export const translations: Record<Language, Translations> = {
       half: '½ Pot',
       threeQuarter: '¾ Pot',
       potSize: 'Pot',
+      vsBots: 'Play vs Bots',
+      vsBotsDesc: 'Practice offline against AI opponents',
+      chooseDifficulty: 'Difficulty',
+      easy: 'Easy',
+      medium: 'Medium',
+      hard: 'Hard',
+      numberOfBots: 'Number of bots',
+      startGame: 'Start game',
+      gameOver: 'Game over',
+      playAgain: 'Play again',
+      botName: (n: number) => `Bot ${n}`,
     },
   },
 
@@ -723,6 +745,17 @@ export const translations: Record<Language, Translations> = {
       half: '½ Pot',
       threeQuarter: '¾ Pot',
       potSize: 'Pot',
+      vsBots: 'Jouer contre des bots',
+      vsBotsDesc: 'Entraîne-toi hors ligne contre l\'IA',
+      chooseDifficulty: 'Difficulté',
+      easy: 'Facile',
+      medium: 'Moyen',
+      hard: 'Difficile',
+      numberOfBots: 'Nombre de bots',
+      startGame: 'Lancer la partie',
+      gameOver: 'Partie terminée',
+      playAgain: 'Rejouer',
+      botName: (n: number) => `Bot ${n}`,
     },
   },
 };

@@ -91,6 +91,19 @@ export default function PokerLobby() {
           </div>
         </div>
 
+        {/* Solo vs bots — offline, no account needed */}
+        <button onClick={() => navigate('/poker/solo')}
+          className="w-full mb-4 flex items-center justify-between rounded-2xl bg-gradient-to-r from-[#1a1a1a] to-[#0a0a0a] border border-[#d4af37]/30 p-4 hover:border-[#d4af37]/60 transition-colors">
+          <span className="flex items-center gap-3">
+            <span className="text-2xl">🤖</span>
+            <span className="text-left">
+              <span className="block font-black text-white">{t.poker.vsBots}</span>
+              <span className="block text-xs text-white/50">{t.poker.vsBotsDesc}</span>
+            </span>
+          </span>
+          <span className="text-[#d4af37] text-xl">→</span>
+        </button>
+
         {/* Create */}
         <div className="rounded-2xl bg-black/40 border border-white/10 p-4 mb-4 space-y-3">
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom de la table"

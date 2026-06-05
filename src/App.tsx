@@ -21,6 +21,7 @@ const Lobby = lazy(() => import("./pages/Lobby"));
 const MultiplayerTable = lazy(() => import("./pages/MultiplayerTable"));
 const PokerLobby = lazy(() => import("./pages/PokerLobby"));
 const PokerTable = lazy(() => import("./pages/PokerTable"));
+const PokerSolo = lazy(() => import("./pages/PokerSolo"));
 const UxPreview = lazy(() => import("./pages/UxPreview"));
 
 const queryClient = new QueryClient();
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/lobby" element={<Lobby />} />
               <Route path="/table/:id" element={<MultiplayerTable />} />
               <Route path="/poker/lobby" element={<PokerLobby />} />
+              <Route path="/poker/solo" element={<PokerSolo />} />
               <Route path="/poker/table/:id" element={<PokerTable />} />
               <Route path="/ux-preview" element={<UxPreview />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

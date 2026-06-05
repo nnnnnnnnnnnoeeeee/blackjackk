@@ -8,3 +8,4 @@ export * from './handEval';
 export * from './betting';
 export * from './pots';
 export * from './game';
+export * from './bot';
