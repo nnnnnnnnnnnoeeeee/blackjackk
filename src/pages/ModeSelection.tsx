@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase, isPlaceholder } from '@/lib/supabaseClient';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
-import { Users, User, Loader2, LogOut, Crown } from 'lucide-react';
+import { Users, User, Loader2, LogOut, Crown, Spade } from 'lucide-react';
 import { toast } from 'sonner';
 import { useGameStore, selectStats, selectXPSystem } from '@/store/useGameStore';
 import { LEVEL_NAMES, getXPProgress } from '@/lib/blackjack/types';
@@ -142,16 +142,16 @@ export default function ModeSelection() {
     }
   };
 
-  const handleModeSelection = (mode: 'solo' | 'multiplayer') => {
+  const handleModeSelection = (mode: 'solo' | 'multiplayer' | 'poker') => {
     if (mode === 'solo') {
       navigate('/game', { replace: true });
-    } else {
-      if (isPlaceholder) {
-        toast.error(t.landing.multiplayerNeedsDb);
-        return;
-      }
-      navigate('/lobby', { replace: true });
+      return;
     }
+    if (isPlaceholder) {
+      toast.error(t.landing.multiplayerNeedsDb);
+      return;
+    }
+    navigate(mode === 'poker' ? '/poker/lobby' : '/lobby', { replace: true });
   };
 
   const handleLogout = async () => {
@@ -396,6 +396,30 @@ export default function ModeSelection() {
                 <div className="font-bold text-lg sm:text-xl text-white/90 tracking-wide mb-0.5">{t.landing.soloTitle}</div>
                 <div className="text-sm text-white/60 font-medium">
                   {t.landing.soloDesc}
+                </div>
+              </div>
+              <div className="text-white/20 text-2xl font-light group-hover:text-white/50 transition-colors">
+                →
+              </div>
+            </button>
+          </motion.div>
+
+          {/* Poker - Secondary */}
+          <motion.div
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <button
+              onClick={() => handleModeSelection('poker')}
+              className="relative w-full py-5 sm:py-6 flex items-center gap-5 px-6 sm:px-8 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 hover:bg-black/60 transition-all duration-300 group"
+            >
+              <div className="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10 group-hover:border-white/20 transition-colors">
+                <Spade className="h-7 w-7 text-white/70 group-hover:text-white transition-colors" />
+              </div>
+              <div className="text-left flex-1">
+                <div className="font-bold text-lg sm:text-xl text-white/90 tracking-wide mb-0.5">{t.poker.title}</div>
+                <div className="text-sm text-white/60 font-medium">
+                  {t.poker.subtitle}
                 </div>
               </div>
               <div className="text-white/20 text-2xl font-light group-hover:text-white/50 transition-colors">

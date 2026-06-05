@@ -214,6 +214,35 @@ export interface Translations {
     running: string;
     trueCount: string;
   };
+
+  // Poker (No-Limit Texas Hold'em)
+  poker: {
+    title: string;
+    subtitle: string;
+    deal: string;
+    fold: string;
+    check: string;
+    call: string;
+    bet: string;
+    raise: string;
+    allIn: string;
+    raiseTo: string;
+    pot: string;
+    sidePot: string;
+    blinds: string;
+    yourTurn: string;
+    waitingForPlayers: string;
+    waitingForTurn: string;
+    showdown: string;
+    winnerNamed: (name: string) => string;
+    youWin: (amount: number) => string;
+    folded: string;
+    allInTag: string;
+    seatOpen: string;
+    half: string;
+    threeQuarter: string;
+    potSize: string;
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -427,6 +456,34 @@ export const translations: Record<Language, Translations> = {
       running: 'Running',
       trueCount: 'True',
     },
+
+    poker: {
+      title: 'Poker',
+      subtitle: "Texas Hold'em No-Limit",
+      deal: 'Deal',
+      fold: 'Fold',
+      check: 'Check',
+      call: 'Call',
+      bet: 'Bet',
+      raise: 'Raise',
+      allIn: 'All-in',
+      raiseTo: 'Raise to',
+      pot: 'Pot',
+      sidePot: 'Side pot',
+      blinds: 'Blinds',
+      yourTurn: 'Your turn',
+      waitingForPlayers: 'Waiting for players (need at least 2)',
+      waitingForTurn: 'Waiting for other players…',
+      showdown: 'Showdown',
+      winnerNamed: (name: string) => `${name} wins`,
+      youWin: (amount: number) => `You win $${amount}`,
+      folded: 'Folded',
+      allInTag: 'All-in',
+      seatOpen: 'Open seat',
+      half: '½ Pot',
+      threeQuarter: '¾ Pot',
+      potSize: 'Pot',
+    },
   },
 
   fr: {
@@ -638,6 +695,34 @@ export const translations: Record<Language, Translations> = {
       cardCountingHint: 'Système Hi-Lo : 2-6 = +1, 7-9 = 0, 10-A = -1. Compte réel = compte courant / paquets restants.',
       running: 'Courant',
       trueCount: 'Réel',
+    },
+
+    poker: {
+      title: 'Poker',
+      subtitle: "Texas Hold'em No-Limit",
+      deal: 'Distribuer',
+      fold: 'Se coucher',
+      check: 'Parole',
+      call: 'Suivre',
+      bet: 'Miser',
+      raise: 'Relancer',
+      allIn: 'Tapis',
+      raiseTo: 'Relancer à',
+      pot: 'Pot',
+      sidePot: 'Pot annexe',
+      blinds: 'Blinds',
+      yourTurn: 'À vous de jouer',
+      waitingForPlayers: 'En attente de joueurs (2 minimum)',
+      waitingForTurn: 'En attente des autres joueurs…',
+      showdown: 'Abattage',
+      winnerNamed: (name: string) => `${name} gagne`,
+      youWin: (amount: number) => `Vous gagnez $${amount}`,
+      folded: 'Couché',
+      allInTag: 'Tapis',
+      seatOpen: 'Place libre',
+      half: '½ Pot',
+      threeQuarter: '¾ Pot',
+      potSize: 'Pot',
     },
   },
 };
