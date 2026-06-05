@@ -1,0 +1,1016 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "graphify.md",
+      "file_type": "document",
+      "source_file": ".agents/rules/graphify.md",
+      "source_location": "L1",
+      "id": "rules_graphify",
+      "community": 8,
+      "norm_label": "graphify.md"
+    },
+    {
+      "label": "graphify",
+      "file_type": "document",
+      "source_file": ".agents/rules/graphify.md",
+      "source_location": "L6",
+      "id": "rules_graphify_graphify",
+      "community": 8,
+      "norm_label": "graphify"
+    },
+    {
+      "label": "graphify.md",
+      "file_type": "document",
+      "source_file": ".agents/workflows/graphify.md",
+      "source_location": "L1",
+      "id": "workflows_graphify",
+      "community": 9,
+      "norm_label": "graphify.md"
+    },
+    {
+      "label": "Workflow: graphify",
+      "file_type": "document",
+      "source_file": ".agents/workflows/graphify.md",
+      "source_location": "L6",
+      "id": "workflows_graphify_workflow_graphify",
+      "community": 9,
+      "norm_label": "workflow: graphify"
+    },
+    {
+      "label": "settings.json",
+      "file_type": "code",
+      "source_file": ".claude/settings.json",
+      "source_location": "L1",
+      "id": "claude_settings",
+      "community": 5,
+      "norm_label": "settings.json"
+    },
+    {
+      "label": "hooks",
+      "file_type": "code",
+      "source_file": ".claude/settings.json",
+      "source_location": "L2",
+      "id": "claude_settings_hooks",
+      "community": 5,
+      "norm_label": "hooks"
+    },
+    {
+      "label": "PreToolUse",
+      "file_type": "code",
+      "source_file": ".claude/settings.json",
+      "source_location": "L3",
+      "id": "claude_settings_hooks_pretooluse",
+      "community": 5,
+      "norm_label": "pretooluse"
+    },
+    {
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "id": "claude",
+      "community": 2,
+      "norm_label": "claude.md"
+    },
+    {
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "id": "claude_claude_md",
+      "community": 2,
+      "norm_label": "claude.md"
+    },
+    {
+      "label": "Commands",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L5",
+      "id": "claude_commands",
+      "community": 2,
+      "norm_label": "commands"
+    },
+    {
+      "label": "Architecture",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L21",
+      "id": "claude_architecture",
+      "community": 3,
+      "norm_label": "architecture"
+    },
+    {
+      "label": "Core Game Engine (`src/lib/blackjack/`)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L25",
+      "id": "claude_core_game_engine_src_lib_blackjack",
+      "community": 3,
+      "norm_label": "core game engine (`src/lib/blackjack/`)"
+    },
+    {
+      "label": "State Management (`src/store/useGameStore.ts`)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L34",
+      "id": "claude_state_management_src_store_usegamestore_ts",
+      "community": 3,
+      "norm_label": "state management (`src/store/usegamestore.ts`)"
+    },
+    {
+      "label": "Data Flow",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L37",
+      "id": "claude_data_flow",
+      "community": 3,
+      "norm_label": "data flow"
+    },
+    {
+      "label": "UI Structure",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L42",
+      "id": "claude_ui_structure",
+      "community": 3,
+      "norm_label": "ui structure"
+    },
+    {
+      "label": "Backend (Supabase)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L52",
+      "id": "claude_backend_supabase",
+      "community": 3,
+      "norm_label": "backend (supabase)"
+    },
+    {
+      "label": "Routing (`src/App.tsx`)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L58",
+      "id": "claude_routing_src_app_tsx",
+      "community": 3,
+      "norm_label": "routing (`src/app.tsx`)"
+    },
+    {
+      "label": "Key Configuration",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L61",
+      "id": "claude_key_configuration",
+      "community": 2,
+      "norm_label": "key configuration"
+    },
+    {
+      "label": "Environment",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L67",
+      "id": "claude_environment",
+      "community": 2,
+      "norm_label": "environment"
+    },
+    {
+      "label": "Variables",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L71",
+      "id": "claude_variables",
+      "community": 2,
+      "norm_label": "variables"
+    },
+    {
+      "label": "graphify",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L80",
+      "id": "claude_graphify",
+      "community": 2,
+      "norm_label": "graphify"
+    },
+    {
+      "label": "App.tsx",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L1",
+      "id": "src_app",
+      "community": 0,
+      "norm_label": "app.tsx"
+    },
+    {
+      "label": "Index",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L12",
+      "id": "src_app_index",
+      "community": 0,
+      "norm_label": "index"
+    },
+    {
+      "label": "NotFound",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L13",
+      "id": "src_app_notfound",
+      "community": 0,
+      "norm_label": "notfound"
+    },
+    {
+      "label": "Login",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L14",
+      "id": "src_app_login",
+      "community": 0,
+      "norm_label": "login"
+    },
+    {
+      "label": "Register",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L15",
+      "id": "src_app_register",
+      "community": 0,
+      "norm_label": "register"
+    },
+    {
+      "label": "ForgotPassword",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L16",
+      "id": "src_app_forgotpassword",
+      "community": 0,
+      "norm_label": "forgotpassword"
+    },
+    {
+      "label": "ResetPassword",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L17",
+      "id": "src_app_resetpassword",
+      "community": 0,
+      "norm_label": "resetpassword"
+    },
+    {
+      "label": "ModeSelection",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L18",
+      "id": "src_app_modeselection",
+      "community": 0,
+      "norm_label": "modeselection"
+    },
+    {
+      "label": "Game",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L19",
+      "id": "src_app_game",
+      "community": 0,
+      "norm_label": "game"
+    },
+    {
+      "label": "Lobby",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L20",
+      "id": "src_app_lobby",
+      "community": 0,
+      "norm_label": "lobby"
+    },
+    {
+      "label": "MultiplayerTable",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L21",
+      "id": "src_app_multiplayertable",
+      "community": 0,
+      "norm_label": "multiplayertable"
+    },
+    {
+      "label": "PokerLobby",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L22",
+      "id": "src_app_pokerlobby",
+      "community": 0,
+      "norm_label": "pokerlobby"
+    },
+    {
+      "label": "PokerTable",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L23",
+      "id": "src_app_pokertable",
+      "community": 0,
+      "norm_label": "pokertable"
+    },
+    {
+      "label": "UxPreview",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L24",
+      "id": "src_app_uxpreview",
+      "community": 0,
+      "norm_label": "uxpreview"
+    },
+    {
+      "label": "queryClient",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L26",
+      "id": "src_app_queryclient",
+      "community": 0,
+      "norm_label": "queryclient"
+    },
+    {
+      "label": "PageFallback()",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L29",
+      "id": "src_app_pagefallback",
+      "community": 0,
+      "norm_label": "pagefallback()"
+    },
+    {
+      "label": "App()",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": "L35",
+      "id": "src_app_app",
+      "community": 0,
+      "norm_label": "app()"
+    },
+    {
+      "label": "ModeSelection.tsx",
+      "file_type": "code",
+      "source_file": "src/pages/ModeSelection.tsx",
+      "source_location": "L1",
+      "id": "pages_modeselection",
+      "community": 4,
+      "norm_label": "modeselection.tsx"
+    },
+    {
+      "label": "FloatingCard()",
+      "file_type": "code",
+      "source_file": "src/pages/ModeSelection.tsx",
+      "source_location": "L21",
+      "id": "pages_modeselection_floatingcard",
+      "community": 4,
+      "norm_label": "floatingcard()"
+    },
+    {
+      "label": "GoldSparkle()",
+      "file_type": "code",
+      "source_file": "src/pages/ModeSelection.tsx",
+      "source_location": "L60",
+      "id": "pages_modeselection_goldsparkle",
+      "community": 4,
+      "norm_label": "goldsparkle()"
+    },
+    {
+      "label": "ModeSelection()",
+      "file_type": "code",
+      "source_file": "src/pages/ModeSelection.tsx",
+      "source_location": "L90",
+      "id": "pages_modeselection_modeselection",
+      "community": 4,
+      "norm_label": "modeselection()"
+    },
+    {
+      "label": "PokerLobby.tsx",
+      "file_type": "code",
+      "source_file": "src/pages/PokerLobby.tsx",
+      "source_location": "L1",
+      "id": "pages_pokerlobby",
+      "community": 7,
+      "norm_label": "pokerlobby.tsx"
+    },
+    {
+      "label": "PokerTableRow",
+      "file_type": "code",
+      "source_file": "src/pages/PokerLobby.tsx",
+      "source_location": "L14",
+      "id": "pages_pokerlobby_pokertablerow",
+      "community": 7,
+      "norm_label": "pokertablerow"
+    },
+    {
+      "label": "PokerLobby()",
+      "file_type": "code",
+      "source_file": "src/pages/PokerLobby.tsx",
+      "source_location": "L23",
+      "id": "pages_pokerlobby_pokerlobby",
+      "community": 7,
+      "norm_label": "pokerlobby()"
+    },
+    {
+      "label": "PokerTable.tsx",
+      "file_type": "code",
+      "source_file": "src/pages/PokerTable.tsx",
+      "source_location": "L1",
+      "id": "pages_pokertable",
+      "community": 1,
+      "norm_label": "pokertable.tsx"
+    },
+    {
+      "label": "PlayerRow",
+      "file_type": "code",
+      "source_file": "src/pages/PokerTable.tsx",
+      "source_location": "L17",
+      "id": "pages_pokertable_playerrow",
+      "community": 1,
+      "norm_label": "playerrow"
+    },
+    {
+      "label": "TableRow",
+      "file_type": "code",
+      "source_file": "src/pages/PokerTable.tsx",
+      "source_location": "L18",
+      "id": "pages_pokertable_tablerow",
+      "community": 1,
+      "norm_label": "tablerow"
+    },
+    {
+      "label": "toFaceUp()",
+      "file_type": "code",
+      "source_file": "src/pages/PokerTable.tsx",
+      "source_location": "L20",
+      "id": "pages_pokertable_tofaceup",
+      "community": 1,
+      "norm_label": "tofaceup()"
+    },
+    {
+      "label": "cardBack",
+      "file_type": "code",
+      "source_file": "src/pages/PokerTable.tsx",
+      "source_location": "L21",
+      "id": "pages_pokertable_cardback",
+      "community": 1,
+      "norm_label": "cardback"
+    },
+    {
+      "label": "PokerTable()",
+      "file_type": "code",
+      "source_file": "src/pages/PokerTable.tsx",
+      "source_location": "L23",
+      "id": "pages_pokertable_pokertable",
+      "community": 1,
+      "norm_label": "pokertable()"
+    },
+    {
+      "label": "translations.ts",
+      "file_type": "code",
+      "source_file": "src/ui/blackjack/i18n/translations.ts",
+      "source_location": "L1",
+      "id": "i18n_translations",
+      "community": 6,
+      "norm_label": "translations.ts"
+    },
+    {
+      "label": "Language",
+      "file_type": "code",
+      "source_file": "src/ui/blackjack/i18n/translations.ts",
+      "source_location": "L5",
+      "id": "i18n_translations_language",
+      "community": 6,
+      "norm_label": "language"
+    },
+    {
+      "label": "Translations",
+      "file_type": "code",
+      "source_file": "src/ui/blackjack/i18n/translations.ts",
+      "source_location": "L7",
+      "id": "i18n_translations_translations",
+      "community": 6,
+      "norm_label": "translations"
+    },
+    {
+      "label": "PokerActionBar.tsx",
+      "file_type": "code",
+      "source_file": "src/ui/poker/components/PokerActionBar.tsx",
+      "source_location": "L1",
+      "id": "components_pokeractionbar",
+      "community": 1,
+      "norm_label": "pokeractionbar.tsx"
+    },
+    {
+      "label": "PokerActionBarProps",
+      "file_type": "code",
+      "source_file": "src/ui/poker/components/PokerActionBar.tsx",
+      "source_location": "L13",
+      "id": "components_pokeractionbar_pokeractionbarprops",
+      "community": 1,
+      "norm_label": "pokeractionbarprops"
+    },
+    {
+      "label": "PokerActionBar",
+      "file_type": "code",
+      "source_file": "src/ui/poker/components/PokerActionBar.tsx",
+      "source_location": "L20",
+      "id": "components_pokeractionbar_pokeractionbar",
+      "community": 1,
+      "norm_label": "pokeractionbar"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/rules/graphify.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "rules_graphify",
+      "target": "rules_graphify_graphify",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/workflows/graphify.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "workflows_graphify",
+      "target": "workflows_graphify_workflow_graphify",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude/settings.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "claude_settings",
+      "target": "claude_settings_hooks",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude/settings.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "claude_settings_hooks",
+      "target": "claude_settings_hooks_pretooluse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "claude",
+      "target": "claude_claude_md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_architecture",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_commands",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_environment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L80",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_graphify",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "claude_claude_md",
+      "target": "claude_key_configuration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L52",
+      "weight": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_backend_supabase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_core_game_engine_src_lib_blackjack",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_data_flow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_routing_src_app_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_state_management_src_store_usegamestore_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "claude_architecture",
+      "target": "claude_ui_structure",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L71",
+      "weight": 1.0,
+      "source": "claude_environment",
+      "target": "claude_variables",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_app",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_forgotpassword",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_game",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_index",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_lobby",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_login",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_modeselection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_multiplayertable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_notfound",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_pagefallback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_pokerlobby",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_pokertable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_queryclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_register",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_resetpassword",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_uxpreview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/ModeSelection.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "pages_modeselection",
+      "target": "pages_modeselection_floatingcard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/ModeSelection.tsx",
+      "source_location": "L60",
+      "weight": 1.0,
+      "source": "pages_modeselection",
+      "target": "pages_modeselection_goldsparkle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/ModeSelection.tsx",
+      "source_location": "L90",
+      "weight": 1.0,
+      "source": "pages_modeselection",
+      "target": "pages_modeselection_modeselection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PokerLobby.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "pages_pokerlobby",
+      "target": "pages_pokerlobby_pokerlobby",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PokerLobby.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "pages_pokerlobby",
+      "target": "pages_pokerlobby_pokertablerow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PokerTable.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "pages_pokertable",
+      "target": "components_pokeractionbar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PokerTable.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "pages_pokertable",
+      "target": "components_pokeractionbar_pokeractionbar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PokerTable.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "pages_pokertable",
+      "target": "pages_pokertable_cardback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PokerTable.tsx",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "pages_pokertable",
+      "target": "pages_pokertable_playerrow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PokerTable.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "pages_pokertable",
+      "target": "pages_pokertable_pokertable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PokerTable.tsx",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "pages_pokertable",
+      "target": "pages_pokertable_tablerow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/pages/PokerTable.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "pages_pokertable",
+      "target": "pages_pokertable_tofaceup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/ui/blackjack/i18n/translations.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "i18n_translations",
+      "target": "i18n_translations_language",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/ui/blackjack/i18n/translations.ts",
+      "source_location": "L248",
+      "weight": 1.0,
+      "source": "i18n_translations",
+      "target": "i18n_translations_translations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/ui/poker/components/PokerActionBar.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "components_pokeractionbar",
+      "target": "components_pokeractionbar_pokeractionbar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/ui/poker/components/PokerActionBar.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "components_pokeractionbar",
+      "target": "components_pokeractionbar_pokeractionbarprops",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "5d84a3d7c2c3b72365b4a5e111b6a71ecbeebeea"
+}

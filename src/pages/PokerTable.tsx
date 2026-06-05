@@ -11,6 +11,8 @@ import { PokerActionBar } from '@/ui/poker/components/PokerActionBar';
 import { useTranslation } from '@/ui/blackjack/i18n';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import confetti from 'canvas-confetti';
+import { vibrate } from '@/lib/haptics';
 import type { Card as BlackjackCard } from '@/lib/blackjack/types';
 import type { Card as PokerCard, PokerAction, PokerPublicState } from '@/lib/poker';
 
@@ -32,7 +34,10 @@ export default function PokerTable() {
   const [names, setNames] = useState<Record<string, string>>({});
   const [myHole, setMyHole] = useState<PokerCard[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
   const fetchedHoleForHand = useRef<number>(-1);
+  const timeoutFiredFor = useRef<string>('');
+  const settledFor = useRef<number>(-1);
 
   const mySeat = table?.table_players.find((p) => p.user_id === userId)?.seat ?? null;
 
@@ -89,6 +94,35 @@ export default function PokerTable() {
     })();
   }, [id, state]);
 
+  // 1-second ticker driving the action countdown.
+  useEffect(() => {
+    const i = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(i);
+  }, []);
+
+  // When the current turn's timer expires, ask the server to auto-act (it
+  // re-validates the deadline, so concurrent calls are harmless).
+  useEffect(() => {
+    if (!id || !state || state.currentTurnSeat === null || !state.turnDeadline) return;
+    if (now < state.turnDeadline + 1500) return; // small grace period
+    const key = `${state.handNo}:${state.currentTurnSeat}:${state.turnDeadline}`;
+    if (timeoutFiredFor.current === key) return;
+    timeoutFiredFor.current = key;
+    supabase.functions.invoke('poker_timeout', { body: { table_id: id } });
+  }, [id, state, now]);
+
+  // Showdown celebration when I win the pot.
+  useEffect(() => {
+    if (!state || state.phase !== 'payout' || !state.results) return;
+    if (settledFor.current === state.handNo) return;
+    settledFor.current = state.handNo;
+    const mine = state.results.find((r) => r.seat === mySeat && r.amountWon > 0);
+    if (mine) {
+      vibrate('win');
+      confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+    }
+  }, [state, mySeat]);
+
   const startHand = useCallback(async () => {
     if (!id) return;
     setBusy(true);
@@ -119,6 +153,7 @@ export default function PokerTable() {
   };
   const pot = state ? state.seats.reduce((a, s) => a + s.committedTotal, 0) : 0;
   const isMyTurn = !!state && state.currentTurnSeat === mySeat;
+  const secondsLeft = state?.turnDeadline ? Math.max(0, Math.ceil((state.turnDeadline - now) / 1000)) : null;
   const canDeal = !!state && (state.phase === 'waiting' || state.phase === 'payout') &&
     (table?.table_players.length ?? 0) >= 2;
   const tag = (seat: number) => {
@@ -183,6 +218,9 @@ export default function PokerTable() {
                   {tag(s.seat) && <span className="text-[9px] font-black bg-white text-black rounded-full w-4 h-4 flex items-center justify-center">{tag(s.seat)}</span>}
                 </div>
                 <div className="text-[#d4af37] font-black tabular-nums">${s.stack}</div>
+                {isTurn && secondsLeft !== null && (
+                  <div className={`text-[11px] font-bold ${secondsLeft <= 5 ? 'text-destructive animate-pulse' : 'text-warning'}`}>⏱ {secondsLeft}s</div>
+                )}
                 {s.committedThisStreet > 0 && <div className="text-[11px] text-white/60">{t.poker.bet}: ${s.committedThisStreet}</div>}
                 {s.status === 'folded' && <div className="text-[10px] uppercase text-white/40">{t.poker.folded}</div>}
                 {s.status === 'allin' && <div className="text-[10px] uppercase text-warning font-bold">{t.poker.allInTag}</div>}

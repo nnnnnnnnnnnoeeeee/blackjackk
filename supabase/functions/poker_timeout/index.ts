@@ -1,13 +1,14 @@
 // ============================================================================
-// Edge Function: poker_player_action
-// Validates and applies a poker action, auto-advances streets and resolves
-// showdown / payout. All deck access is server-side (private store).
+// Edge Function: poker_timeout
+// Auto-acts for the current player when their action timer has expired.
+// Any seated player may call it; the server re-validates the deadline, so it is
+// safe and idempotent (a stale call simply finds nothing expired).
 // ============================================================================
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { applyAndResolve, withTurnDeadline } from '../_shared/poker-flow.ts';
-import type { Card, PokerAction, PokerConfig, PokerPublicState } from '../_shared/poker-engine.ts';
+import { legalActions, type Card, type PokerConfig, type PokerPublicState } from '../_shared/poker-engine.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -30,8 +31,7 @@ serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const { table_id, action, amount } = await req.json() as
-      { table_id: string; action: PokerAction; amount?: number };
+    const { table_id } = await req.json();
 
     const { data: table } = await supabaseClient
       .from('tables').select('*, table_players(*)').eq('id', table_id).single();
@@ -39,9 +39,8 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Table not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-
-    const player = table.table_players.find((p: { user_id: string; seat: number }) => p.user_id === user.id);
-    if (!player) {
+    const isMember = table.table_players.some((p: { user_id: string }) => p.user_id === user.id);
+    if (!isMember) {
       return new Response(JSON.stringify({ error: 'Not a player at this table' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
@@ -49,26 +48,23 @@ serve(async (req) => {
     const { data: stateRow } = await supabaseClient
       .from('table_state').select('state_json').eq('table_id', table_id).single();
     const state = stateRow?.state_json as PokerPublicState;
-    if (!state) {
-      return new Response(JSON.stringify({ error: 'No table state' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+
+    // Re-validate the deadline server-side. No-op if nothing is actually expired.
+    if (!state || state.currentTurnSeat === null || !state.turnDeadline || Date.now() < state.turnDeadline) {
+      return new Response(JSON.stringify({ ok: false, reason: 'not_expired' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const cfg = table.config as PokerConfig;
+    const seat = state.currentTurnSeat;
+    const legal = legalActions(state, seat);
+    const autoAction = legal.includes('check') ? 'check' : 'fold';
 
     const { data: priv } = await supabaseClient
       .from('poker_private').select('deck').eq('table_id', table_id).single();
     const deck: Card[] = (priv?.deck as Card[]) ?? [];
 
-    let result;
-    try {
-      result = await applyAndResolve(supabaseClient, table_id, state, deck, player.seat, action, amount, cfg);
-    } catch (err) {
-      const e = err as { message?: string } | null;
-      return new Response(JSON.stringify({ error: e?.message || 'Illegal action' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
+    const result = await applyAndResolve(supabaseClient, table_id, state, deck, seat, autoAction, undefined, cfg);
     const working = withTurnDeadline(result.state, cfg);
 
     await supabaseClient.from('table_state')
@@ -88,11 +84,12 @@ serve(async (req) => {
       await supabaseClient.from('tables').update({ status: 'waiting' }).eq('id', table_id);
     }
 
+    const seatPlayer = table.table_players.find((p: { seat: number; user_id: string }) => p.seat === seat);
     await supabaseClient.from('table_actions').insert({
-      table_id, user_id: user.id, action_type: action, payload: { amount: amount ?? null },
+      table_id, user_id: seatPlayer?.user_id ?? null, action_type: autoAction, payload: { auto: true },
     });
 
-    return new Response(JSON.stringify({ ok: true }),
+    return new Response(JSON.stringify({ ok: true, action: autoAction }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (error) {
     const err = error as { message?: string } | null;

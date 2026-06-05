@@ -7,6 +7,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { createInitialState, startHand, type PokerConfig, type PokerPublicState } from '../_shared/poker-engine.ts';
+import { withTurnDeadline } from '../_shared/poker-flow.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -68,7 +69,10 @@ serve(async (req) => {
     const base = createInitialState(seated, cfg);
     if (prev) { base.buttonSeat = prev.buttonSeat; base.handNo = prev.handNo; }
 
-    const { state, deck, hole } = startHand(base, cfg);
+    const started = startHand(base, cfg);
+    const deck = started.deck;
+    const hole = started.hole;
+    const state = withTurnDeadline(started.state, cfg);
 
     // Persist public state.
     await supabaseClient.from('table_state')

@@ -32,6 +32,7 @@ export interface PokerPublicState {
   handNo: number; buttonSeat: number; blinds: { sb: number; bb: number };
   communityCards: Card[]; seats: SeatState[]; betToCall: number; minRaise: number;
   currentTurnSeat: number | null; lastAggressorSeat: number | null;
+  turnDeadline?: number;
   results?: ShowdownResult[];
 }
 

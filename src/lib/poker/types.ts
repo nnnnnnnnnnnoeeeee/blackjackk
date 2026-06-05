@@ -78,6 +78,7 @@ export interface PokerPublicState {
   minRaise: number;              // minimum raise increment
   currentTurnSeat: number | null;
   lastAggressorSeat: number | null;
+  turnDeadline?: number;         // epoch ms; when the current turn auto-acts
   results?: ShowdownResult[];    // set at payout
 }
 
