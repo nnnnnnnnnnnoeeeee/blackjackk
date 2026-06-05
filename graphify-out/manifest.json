@@ -5,8 +5,8 @@
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
-    "mtime": 1780654530.0834687,
-    "ast_hash": "38e19cbf49e11b7407ea1f2cb94d134d",
+    "mtime": 1780656029.4673636,
+    "ast_hash": "919fa1f2e533a81508c58b160bd8032c",
     "semantic_hash": ""
   },
   "components.json": {
@@ -55,8 +55,8 @@
     "semantic_hash": ""
   },
   "src/App.tsx": {
-    "mtime": 1780654801.89645,
-    "ast_hash": "0ebf04bbfde6d258fbf33fcea529ac81",
+    "mtime": 1780656382.5470428,
+    "ast_hash": "0fbf3fd591e46cae976fee4da7abc3f2",
     "semantic_hash": ""
   },
   "src/components/AchievementNotification.tsx": {
@@ -530,8 +530,8 @@
     "semantic_hash": ""
   },
   "src/lib/poker/index.ts": {
-    "mtime": 1780591040.0558333,
-    "ast_hash": "06c94df7528c41fb2cec2396ef8e6ccc",
+    "mtime": 1780656248.886891,
+    "ast_hash": "7398985308c37464de9f2a8f855ec843",
     "semantic_hash": ""
   },
   "src/lib/poker/pots.ts": {
@@ -600,8 +600,8 @@
     "semantic_hash": ""
   },
   "src/pages/PokerLobby.tsx": {
-    "mtime": 1780654786.3940694,
-    "ast_hash": "fef11bb1c02eae08acb3591a41f2d37b",
+    "mtime": 1780656392.1146789,
+    "ast_hash": "bf2c1ed79b2c22649bd3f27395bebb63",
     "semantic_hash": ""
   },
   "src/pages/PokerTable.tsx": {
@@ -840,8 +840,8 @@
     "semantic_hash": ""
   },
   "src/ui/blackjack/i18n/translations.ts": {
-    "mtime": 1780654651.4131782,
-    "ast_hash": "8ff9607f057d0bc104775c78a42a01ef",
+    "mtime": 1780656298.812188,
+    "ast_hash": "7b89279c653bfd764a0aff41c6ae1453",
     "semantic_hash": ""
   },
   "src/ui/blackjack/i18n/useTranslation.tsx": {
@@ -1167,6 +1167,21 @@
   "supabase/functions/poker_timeout/index.ts": {
     "mtime": 1780655166.5866497,
     "ast_hash": "1d13facf6e6ef58da5928f7c6c533b3d",
+    "semantic_hash": ""
+  },
+  "src/lib/poker/bot.ts": {
+    "mtime": 1780656239.3750515,
+    "ast_hash": "4edac0fe33a535d2bae34c0b106d938d",
+    "semantic_hash": ""
+  },
+  "src/pages/PokerSolo.tsx": {
+    "mtime": 1780658376.0862248,
+    "ast_hash": "c0a27089c8f57989e1f28f465d6bdd1b",
+    "semantic_hash": ""
+  },
+  "src/test/poker-bot.test.ts": {
+    "mtime": 1780656266.032547,
+    "ast_hash": "fbb3bdb5101408e2e96767c71d532e2d",
     "semantic_hash": ""
   }
 }
