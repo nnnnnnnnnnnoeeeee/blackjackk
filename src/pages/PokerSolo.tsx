@@ -596,7 +596,7 @@ export default function PokerSolo() {
       {/* Bottom Action Controls */}
       <div className="p-4 sm:p-5 border-t border-white/10 bg-black/35 backdrop-blur-md z-40">
         {isHeroTurn ? (
-          <PokerActionBar state={state} mySeat={HERO} onAction={doAction} />
+          <PokerActionBar state={state} mySeat={HERO} onAction={(action, amount) => doAction(HERO, action, amount)} />
         ) : gameOver ? (
           <div className="flex flex-col items-center gap-3">
             <div className="text-lg sm:text-xl font-bold text-[#d4af37]">{t.poker.gameOver}</div>
