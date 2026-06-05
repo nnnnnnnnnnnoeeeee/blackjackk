@@ -122,33 +122,6 @@ export default function PokerSolo() {
   const settledFor = useRef<number>(-1);
   gameRef.current = game;
 
-  // 15-second countdown timer for Hero
-  useEffect(() => {
-    const g = game;
-    if (!g || g.state.currentTurnSeat !== HERO || g.state.phase === 'payout') {
-      setTimeLeft(15);
-      return;
-    }
-
-    setTimeLeft(15);
-
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          // Auto action on timeout: Check if check is legal, else fold
-          const actions = legalActions(g.state, HERO);
-          const autoAction = actions.includes('check') ? 'check' : 'fold';
-          doAction(HERO, autoAction);
-          return 15;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [game, doAction]);
-
   const start = useCallback(() => {
     setLastActions({});
     const players = [{ seat: HERO, userId: 'hero', stack: 1000 }];
@@ -191,6 +164,33 @@ export default function PokerSolo() {
       }
     });
   }, []);
+
+  // 15-second countdown timer for Hero
+  useEffect(() => {
+    const g = game;
+    if (!g || g.state.currentTurnSeat !== HERO || g.state.phase === 'payout') {
+      setTimeLeft(15);
+      return;
+    }
+
+    setTimeLeft(15);
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          // Auto action on timeout: Check if check is legal, else fold
+          const actions = legalActions(g.state, HERO);
+          const autoAction = actions.includes('check') ? 'check' : 'fold';
+          doAction(HERO, autoAction);
+          return 15;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [game, doAction]);
 
   // Drive bots: when it's a bot's turn, act after a delay.
   useEffect(() => {
