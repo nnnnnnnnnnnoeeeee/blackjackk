@@ -372,7 +372,7 @@ export default function PokerSolo() {
 
       {/* Felt Board Area */}
       <div className="flex-1 flex items-center justify-center p-3 sm:p-6 overflow-hidden min-h-0 relative">
-        <div className="w-full max-w-4xl max-h-full aspect-[0.95/1] sm:aspect-[2.1/1] bg-table-felt border-4 border-amber-900/90 rounded-[45px] sm:rounded-[100px] relative shadow-[inset_0_0_100px_rgba(0,0,0,0.85),0_15px_40px_rgba(0,0,0,0.6)] table-border">
+        <div className="w-full max-w-4xl max-h-full aspect-[0.95/1] landscape:aspect-[2.1/1] bg-table-felt border-4 border-amber-900/90 rounded-[45px] landscape:rounded-[100px] relative shadow-[inset_0_0_100px_rgba(0,0,0,0.85),0_15px_40px_rgba(0,0,0,0.6)] table-border">
           
           {/* Table Center (Board + Pot) */}
           <div className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2.5 z-20 pointer-events-none">
@@ -455,7 +455,7 @@ export default function PokerSolo() {
               <div key={s.seat}>
                 {/* Seat Box */}
                 <div
-                  className={`absolute rounded-xl sm:rounded-2xl p-1 sm:p-2 border text-center transition-all w-[4.25rem] sm:w-28 flex flex-col items-center justify-between z-30 bg-black/75 border-white/10 backdrop-blur-md ${
+                  className={`absolute rounded-xl sm:rounded-2xl p-1 sm:p-2 border text-center transition-all w-[4.25rem] sm:w-[5.5rem] lg:w-28 flex flex-col items-center justify-between z-30 bg-black/75 border-white/10 backdrop-blur-md ${
                     isTurn
                       ? 'border-[#d4af37] ring-2 ring-[#d4af37]/35 shadow-[0_0_18px_rgba(212,175,55,0.5)]'
                       : ''
