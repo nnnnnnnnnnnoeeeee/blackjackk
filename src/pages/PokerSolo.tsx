@@ -372,7 +372,7 @@ export default function PokerSolo() {
 
       {/* Felt Board Area */}
       <div className="flex-1 flex items-center justify-center p-3 sm:p-6 overflow-hidden min-h-0 relative">
-        <div className="w-full max-w-4xl aspect-[1.12/1] sm:aspect-[2.1/1] bg-table-felt border-4 border-amber-900/90 rounded-[45px] sm:rounded-[100px] relative shadow-[inset_0_0_100px_rgba(0,0,0,0.85),0_15px_40px_rgba(0,0,0,0.6)] table-border">
+        <div className="w-full max-w-4xl aspect-[0.95/1] sm:aspect-[2.1/1] bg-table-felt border-4 border-amber-900/90 rounded-[45px] sm:rounded-[100px] relative shadow-[inset_0_0_100px_rgba(0,0,0,0.85),0_15px_40px_rgba(0,0,0,0.6)] table-border">
           
           {/* Table Center (Board + Pot) */}
           <div className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2.5 z-20 pointer-events-none">
@@ -455,7 +455,7 @@ export default function PokerSolo() {
               <div key={s.seat}>
                 {/* Seat Box */}
                 <div
-                  className={`absolute rounded-2xl p-2 border text-center transition-all w-24 sm:w-28 flex flex-col items-center justify-between z-30 bg-black/75 border-white/10 backdrop-blur-md ${
+                  className={`absolute rounded-xl sm:rounded-2xl p-1 sm:p-2 border text-center transition-all w-[4.25rem] sm:w-28 flex flex-col items-center justify-between z-30 bg-black/75 border-white/10 backdrop-blur-md ${
                     isTurn
                       ? 'border-[#d4af37] ring-2 ring-[#d4af37]/35 shadow-[0_0_18px_rgba(212,175,55,0.5)]'
                       : ''
@@ -490,17 +490,17 @@ export default function PokerSolo() {
                   )}
 
                   {/* Avatar Icon */}
-                  <div className={`w-8 h-8 rounded-full bg-gradient-to-b ${avatarBg} border flex items-center justify-center text-sm shadow-inner mb-1`}>
+                  <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-b ${avatarBg} border flex items-center justify-center text-xs sm:text-sm shadow-inner mb-0.5 sm:mb-1`}>
                     {avatarEmoji}
                   </div>
 
                   {/* Display Name */}
-                  <span className="text-[11px] sm:text-xs font-bold truncate max-w-[80px] text-white/95 leading-tight">
+                  <span className="text-[9px] sm:text-xs font-bold truncate max-w-[62px] sm:max-w-[80px] text-white/95 leading-tight">
                     {displayName}
                   </span>
 
                   {/* Chips Stack (Gold Pill) */}
-                  <div className="text-[11px] sm:text-xs font-black text-[#FFDF73] bg-[#d4af37]/15 border border-[#d4af37]/30 px-2.5 py-0.5 rounded-full mt-1 shadow-sm tabular-nums">
+                  <div className="text-[9px] sm:text-xs font-black text-[#FFDF73] bg-[#d4af37]/15 border border-[#d4af37]/30 px-1.5 sm:px-2.5 py-0.5 rounded-full mt-0.5 sm:mt-1 shadow-sm tabular-nums">
                     ${s.stack}
                   </div>
 
@@ -517,14 +517,14 @@ export default function PokerSolo() {
                   )}
 
                   {/* Hole Cards */}
-                  <div className="flex justify-center -space-x-3 sm:-space-x-3.5 mt-1.5 min-h-[50px] sm:min-h-[64px]">
+                  <div className="flex justify-center -space-x-2 sm:-space-x-3.5 mt-1 sm:mt-1.5 min-h-[34px] sm:min-h-[64px]">
                     {s.seat === HERO || state.phase === 'payout' || s.holeCards
                       ? (hole[s.seat] ?? []).map((c, i) => (
                           <PlayingCard
                             key={i}
                             card={toFaceUp(c)}
                             index={i}
-                            className="!min-w-0 !max-w-none w-[42px] sm:w-[50px] aspect-[2.5/3.5] shadow-md border border-black/10"
+                            className="!min-w-0 !max-w-none w-[28px] sm:w-[50px] aspect-[2.5/3.5] shadow-md border border-black/10"
                           />
                         ))
                       : s.status !== 'folded'
@@ -533,7 +533,7 @@ export default function PokerSolo() {
                             key={i}
                             card={cardBack}
                             index={i}
-                            className="!min-w-0 !max-w-none w-[42px] sm:w-[50px] aspect-[2.5/3.5] shadow-md border border-white/10"
+                            className="!min-w-0 !max-w-none w-[28px] sm:w-[50px] aspect-[2.5/3.5] shadow-md border border-white/10"
                           />
                         ))
                       : null}

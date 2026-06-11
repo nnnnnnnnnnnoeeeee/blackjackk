@@ -5,8 +5,8 @@
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
-    "mtime": 1780656029.4673636,
-    "ast_hash": "919fa1f2e533a81508c58b160bd8032c",
+    "mtime": 1781190079.5969615,
+    "ast_hash": "f24b5e812916e53d3cba318fdcad9321",
     "semantic_hash": ""
   },
   "components.json": {
@@ -1182,6 +1182,11 @@
   "src/test/poker-bot.test.ts": {
     "mtime": 1780656266.032547,
     "ast_hash": "fbb3bdb5101408e2e96767c71d532e2d",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-06-11-mobile-tablet-optimization-design.md": {
+    "mtime": 1781190072.3433955,
+    "ast_hash": "6943d67346bb5959b4604b0c6d69b464",
     "semantic_hash": ""
   }
 }

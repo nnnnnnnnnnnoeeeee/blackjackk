@@ -1,16 +1,16 @@
-# Graph Report - blackjackk  (2026-06-05)
+# Graph Report - blackjackk  (2026-06-11)
 
 ## Corpus Check
-- 232 files · ~113,078 words
+- 233 files · ~113,513 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1388 nodes · 2709 edges · 109 communities (99 shown, 10 thin omitted)
+- 1401 nodes · 2721 edges · 112 communities (99 shown, 13 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `fb682df5`
+- Built from commit: `39e74cf3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -112,7 +112,10 @@
 - [[_COMMUNITY_Community 95|Community 95]]
 - [[_COMMUNITY_Community 106|Community 106]]
 - [[_COMMUNITY_Community 107|Community 107]]
+- [[_COMMUNITY_Community 108|Community 108]]
+- [[_COMMUNITY_Community 109|Community 109]]
 - [[_COMMUNITY_Community 110|Community 110]]
+- [[_COMMUNITY_Community 111|Community 111]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 117 edges
@@ -127,29 +130,29 @@
 10. `Hand` - 15 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `AchievementNotificationProps` --references--> `Achievement`  [EXTRACTED]
-  src/components/AchievementNotification.tsx → src/lib/blackjack/achievements.ts
 - `CategoryPill()` --calls--> `cn()`  [EXTRACTED]
   src/components/AchievementsPanel.tsx → src/lib/utils.ts
-- `GameStatusBarProps` --references--> `GamePhase`  [EXTRACTED]
-  src/components/GameStatusBar.tsx → src/lib/blackjack/types.ts
-- `CoachMistake` --references--> `PlayerAction`  [EXTRACTED]
-  src/components/NewTable.tsx → src/lib/blackjack/types.ts
 - `AlertDialogHeader()` --calls--> `cn()`  [EXTRACTED]
   src/components/ui/alert-dialog.tsx → src/lib/utils.ts
+- `AlertDialogFooter()` --calls--> `cn()`  [EXTRACTED]
+  src/components/ui/alert-dialog.tsx → src/lib/utils.ts
+- `BreadcrumbSeparator()` --calls--> `cn()`  [EXTRACTED]
+  src/components/ui/breadcrumb.tsx → src/lib/utils.ts
+- `BreadcrumbEllipsis()` --calls--> `cn()`  [EXTRACTED]
+  src/components/ui/breadcrumb.tsx → src/lib/utils.ts
 
 ## Import Cycles
 - 3-file cycle: `src/components/NewTable.tsx -> src/ui/blackjack/components/index.ts -> src/ui/blackjack/components/SettlementSheet.tsx -> src/components/NewTable.tsx`
 
-## Communities (109 total, 10 thin omitted)
+## Communities (112 total, 13 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.10
-Nodes (17): ForgotPassword, Game, Index, Lobby, Login, ModeSelection, MultiplayerTable, NotFound (+9 more)
+Cohesion: 0.05
+Nodes (41): Action, ActionType, actionTypes, addToRemoveQueue(), dispatch(), genId(), listeners, memoryState (+33 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.12
-Nodes (17): PokerActionBar, useTranslation(), HapticPattern, PATTERNS, vibrate(), MultiplayerTable(), PokerLobby(), BOT_PROFILES (+9 more)
+Cohesion: 0.13
+Nodes (19): PlayingCard, PokerActionBar, PokerActionBarProps, HapticPattern, PATTERNS, vibrate(), BOT_PROFILES, BotProfile (+11 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.14
@@ -161,35 +164,35 @@ Nodes (51): corsHeaders, corsHeaders, corsHeaders, corsHeaders, advanceStreet(),
 
 ### Community 4 - "Community 4"
 Cohesion: 0.25
-Nodes (7): ActionBar, ActionBarProps, BetValidationResult, useBetValidation(), MobileLayoutInfo, useValidActions(), selectConfig()
+Nodes (7): BetPanel, CHIP_VALUES, ChipButton, ChipButtonProps, selectConfig(), selectPhase(), Switch
 
 ### Community 6 - "Community 6"
-Cohesion: 0.32
+Cohesion: 0.36
 Nodes (7): getLabel(), labels, Language, Translations, TranslationContext, TranslationContextValue, TranslationProvider()
 
 ### Community 7 - "Community 7"
-Cohesion: 0.14
-Nodes (12): dealInitialCards(), evaluate21Plus3(), evaluatePerfectPairs(), PerfectPairResult, PerfectPairTier, TwentyOnePlus3Hand, TwentyOnePlus3Result, Card (+4 more)
+Cohesion: 0.15
+Nodes (11): dealInitialCards(), evaluate21Plus3(), evaluatePerfectPairs(), PerfectPairResult, PerfectPairTier, TwentyOnePlus3Hand, TwentyOnePlus3Result, Card (+3 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.21
-Nodes (7): Rank, Suit, Game, decideBotAction(), handStrength(), Card, SUIT
+Cohesion: 0.27
+Nodes (4): BotDifficulty, decideBotAction(), handStrength(), SUIT
 
 ### Community 11 - "Community 11"
-Cohesion: 0.15
-Nodes (24): drawCard(), needsReshuffle(), completeRound(), createInitialState(), dealerDrawCard(), executeAction(), executeDouble(), executeHit() (+16 more)
+Cohesion: 0.14
+Nodes (26): drawCard(), needsReshuffle(), completeRound(), createInitialState(), dealerDrawCard(), executeAction(), executeDouble(), executeHit() (+18 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.04
 Nodes (55): dependencies, canvas-confetti, class-variance-authority, clsx, cmdk, date-fns, embla-carousel-react, framer-motion (+47 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.06
-Nodes (34): calculateRunningCount(), calculateTrueCount(), getCardValue(), getCountInterpretation(), CardCountingPanel, useIsMobile(), Separator, Sidebar (+26 more)
+Cohesion: 0.07
+Nodes (28): useIsMobile(), Separator, Sidebar, SidebarContent, SidebarContext, SidebarFooter, SidebarGroup, SidebarGroupAction (+20 more)
 
 ### Community 14 - "Community 14"
-Cohesion: 0.10
-Nodes (18): ACTION_EXPLANATIONS, BASIC_STRATEGY, getBasicStrategyRecommendation(), StrategyAction, StrategyRecommendation, CoachMistake, Particle, ParticleSystem (+10 more)
+Cohesion: 0.33
+Nodes (5): ACTION_EXPLANATIONS, BASIC_STRATEGY, getBasicStrategyRecommendation(), StrategyAction, StrategyRecommendation
 
 ### Community 15 - "Community 15"
 Cohesion: 0.06
@@ -200,8 +203,8 @@ Cohesion: 0.07
 Nodes (29): Accessibilité, 🏗️ Architecture, ♠ Blackjack Brilliance, 📦 Build de Production, Compatibilité, ⚙️ Configuration des Variables d'Environnement, Configuration du Jeu, 🐛 Dépannage (+21 more)
 
 ### Community 17 - "Community 17"
-Cohesion: 0.23
-Nodes (12): TUTORIAL_STEPS, TutorialStep, Table, Button, Card, CardContent, CardDescription, CardFooter (+4 more)
+Cohesion: 0.18
+Nodes (14): TUTORIAL_STEPS, TutorialStep, supabase, Table, PokerTableRow, Button, Card, CardContent (+6 more)
 
 ### Community 18 - "Community 18"
 Cohesion: 0.07
@@ -209,19 +212,19 @@ Nodes (27): 1.1 Accéder à Google Cloud Console, 1.2 Activer l'API Google+, 2.1
 
 ### Community 19 - "Community 19"
 Cohesion: 0.16
-Nodes (15): Achievement, UnlockedAchievement, CardCountingStats, GameConfig, GameStats, getLevelFromXP(), HandHistory, INITIAL_STATS (+7 more)
+Nodes (14): UnlockedAchievement, CardCountingStats, GameConfig, GameStats, getLevelFromXP(), getXPProgress(), HandHistory, INITIAL_STATS (+6 more)
 
 ### Community 20 - "Community 20"
 Cohesion: 0.22
 Nodes (20): corsHeaders, shouldDealerHit(), corsHeaders, getNextActiveSeat(), handleBet(), handleDouble(), handleHit(), handleSplit() (+12 more)
 
 ### Community 21 - "Community 21"
-Cohesion: 0.16
-Nodes (12): ButtonProps, buttonVariants, Calendar(), CalendarProps, Pagination(), PaginationContent, PaginationEllipsis(), PaginationItem (+4 more)
+Cohesion: 0.11
+Nodes (20): CircularTimer(), CircularTimerProps, MessageBubble(), cn(), ButtonProps, buttonVariants, Calendar(), CalendarProps (+12 more)
 
 ### Community 22 - "Community 22"
-Cohesion: 0.05
-Nodes (39): devDependencies, autoprefixer, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals, jsdom (+31 more)
+Cohesion: 0.09
+Nodes (23): devDependencies, autoprefixer, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals, jsdom (+15 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.09
@@ -236,28 +239,28 @@ Cohesion: 0.16
 Nodes (10): ACTION_COLORS, ACTION_LABELS, BasicStrategyChart, DEALER_CARDS, PLAYER_HANDS, NewTable, UxPreview(), Badge() (+2 more)
 
 ### Community 26 - "Community 26"
-Cohesion: 0.21
-Nodes (11): PerfectPairsConfig, TwentyOnePlus3Config, BetComposer, CHIP_VALUES, ChipButton, ChipButtonProps, ChipSelector, ChipSelectorProps (+3 more)
+Cohesion: 0.15
+Nodes (18): useReducedMotion(), PerfectPairsConfig, TwentyOnePlus3Config, BetComposer, BetComposerMultiplayer, BetComposerMultiplayerProps, CHIP_VALUES, ChipButton (+10 more)
 
 ### Community 27 - "Community 27"
-Cohesion: 0.20
-Nodes (10): ParticleType, SettlementEffects, useSettlementEffects(), PlayingSound, SOUND_FILES, SOUND_PRIORITIES, SoundPriority, SoundType (+2 more)
+Cohesion: 0.11
+Nodes (19): Card, CardProps, BetValidationResult, useBetValidation(), MobileLayoutInfo, ParticleType, SettlementEffects, useSettlementEffects() (+11 more)
 
 ### Community 28 - "Community 28"
 Cohesion: 0.19
 Nodes (13): inHandCount(), advanceStreet(), applyAction(), clone(), commit(), createInitialState(), NEXT_STREET, nextSeatMatching() (+5 more)
 
 ### Community 29 - "Community 29"
-Cohesion: 0.19
-Nodes (11): useReducedMotion(), ACTION_CONFIG, ActionBarMultiplayer, ActionBarMultiplayerProps, ACTION_STYLE, ActionButton, ActionButtonProps, TurnIndicator (+3 more)
+Cohesion: 0.12
+Nodes (18): PlayerAction, ActionBar, ActionBarProps, ACTION_CONFIG, ActionBarMultiplayer, ActionBarMultiplayerProps, ACTION_STYLE, ActionButton (+10 more)
 
 ### Community 30 - "Community 30"
-Cohesion: 0.13
-Nodes (14): ACHIEVEMENTS, checkNewAchievements(), getAchievementProgress(), TIER_COLORS, TIER_GRADIENTS, AchievementNotification, AchievementNotificationProps, AchievementCard (+6 more)
+Cohesion: 0.12
+Nodes (17): Achievement, ACHIEVEMENTS, checkNewAchievements(), getAchievementProgress(), TIER_COLORS, TIER_GRADIENTS, XPSystem, AchievementNotification (+9 more)
 
 ### Community 31 - "Community 31"
-Cohesion: 0.12
-Nodes (18): getXPProgress(), LEVEL_NAMES, LevelUpNotification, COLORS, StatsDashboard, StatItem, StatItemProps, StatsPanel (+10 more)
+Cohesion: 0.20
+Nodes (8): LEVEL_NAMES, LevelUpNotification, StatItem, StatItemProps, StatsPanel, XPBar, selectBankroll(), selectPendingLevelUp()
 
 ### Community 32 - "Community 32"
 Cohesion: 0.12
@@ -268,52 +271,52 @@ Cohesion: 0.12
 Nodes (16): 1. Migration de la Page Principale (PRIORITÉ HAUTE), 2. Migration MultiplayerTable (PRIORITÉ MOYENNE), 3. Améliorations d'Accessibilité (PRIORITÉ BASSE), 4. Uniformisation Labels EN (PRIORITÉ BASSE), 5. Nettoyage et Suppression Anciens Composants (APRÈS MIGRATION), 6. Tests Finaux (PRIORITÉ MOYENNE), ✅ Ce Qui Est Déjà Fait, 📋 Ce Qui Reste À Faire (+8 more)
 
 ### Community 34 - "Community 34"
-Cohesion: 0.19
-Nodes (15): canDouble(), canHit(), canInsure(), canSplitHand(), canStand(), canSurrender(), getValidActions(), isActionValid() (+7 more)
+Cohesion: 0.40
+Nodes (9): canDouble(), canHit(), canInsure(), canSplitHand(), canStand(), canSurrender(), getValidActions(), isActionValid() (+1 more)
 
 ### Community 35 - "Community 35"
-Cohesion: 0.10
-Nodes (22): KeyBindings, BetPanel, CHIP_VALUES, ChipButton, ChipButtonProps, KeyBindingConfig, KeyBindingConfigProps, SettingsPanel (+14 more)
+Cohesion: 0.15
+Nodes (15): KeyBindings, KeyBindingConfig, KeyBindingConfigProps, SettingsPanel, AccordionContent, AccordionItem, AccordionTrigger, SelectContent (+7 more)
 
 ### Community 36 - "Community 36"
 Cohesion: 0.12
 Nodes (15): compilerOptions, allowImportingTsExtensions, isolatedModules, lib, module, moduleDetection, moduleResolution, noEmit (+7 more)
 
 ### Community 37 - "Community 37"
-Cohesion: 0.25
-Nodes (5): GameStatusBar, GameStatusBarProps, casinoTheme, phaseText, resultText
+Cohesion: 0.14
+Nodes (14): GamePhase, GameStatusBar, GameStatusBarProps, PhaseBanner, PhaseBannerProps, useTranslation(), HeaderBarProps, casinoTheme (+6 more)
 
 ### Community 38 - "Community 38"
-Cohesion: 0.24
-Nodes (11): PokerActionBarProps, callAmount(), isBettingRoundClosed(), legalActions(), minRaiseTo(), seatOf(), BotDecision, BotDifficulty (+3 more)
+Cohesion: 0.39
+Nodes (5): callAmount(), isBettingRoundClosed(), legalActions(), seatOf(), SeatState
 
 ### Community 39 - "Community 39"
-Cohesion: 0.18
-Nodes (13): Action, ActionType, actionTypes, addToRemoveQueue(), dispatch(), genId(), listeners, memoryState (+5 more)
+Cohesion: 0.29
+Nodes (12): calculateHandValues(), canSplit(), compareHands(), createHand(), formatHandValue(), getBestHandValue(), getCardValue(), isBlackjack() (+4 more)
 
 ### Community 40 - "Community 40"
 Cohesion: 0.19
 Nodes (14): configureSupabaseKeys(), __dirname, ENV_FILE, ENV_TEMPLATE, __filename, hasValidKeys(), main(), NODE_MODULES (+6 more)
 
 ### Community 41 - "Community 41"
-Cohesion: 0.10
-Nodes (15): CircularTimer(), CircularTimerProps, NavLink, NavLinkCompatProps, MessageBubble(), cn(), Checkbox, HoverCardContent (+7 more)
+Cohesion: 0.13
+Nodes (12): NavLink, NavLinkCompatProps, COLORS, Checkbox, InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot (+4 more)
 
 ### Community 42 - "Community 42"
-Cohesion: 0.60
-Nodes (4): ChipStack(), ChipStackProps, getChipColor(), getChipLabel()
+Cohesion: 0.15
+Nodes (12): 1. Fondation mobile partagée, 2. Poker (gros du travail), 3. Blackjack (polissage), 4. Pages de navigation, Approches écartées, Contexte / État actuel, Hors périmètre (YAGNI), Objectif (+4 more)
 
 ### Community 43 - "Community 43"
-Cohesion: 0.24
-Nodes (5): EMOJI_REACTIONS, PRESET_PHRASES, QuickChatBar(), QuickChatBarProps, supabase
+Cohesion: 0.40
+Nodes (4): EMOJI_REACTIONS, PRESET_PHRASES, QuickChatBar(), QuickChatBarProps
 
 ### Community 44 - "Community 44"
 Cohesion: 0.14
 Nodes (12): Carousel, CarouselApi, CarouselContent, CarouselContext, CarouselContextProps, CarouselItem, CarouselNext, CarouselOptions (+4 more)
 
 ### Community 45 - "Community 45"
-Cohesion: 0.23
-Nodes (11): useToast(), Toast, ToastAction, ToastActionElement, ToastClose, ToastDescription, ToastProps, ToastTitle (+3 more)
+Cohesion: 0.17
+Nodes (12): scripts, build, build:dev, delete:last-table, dev, lint, predev, preview (+4 more)
 
 ### Community 46 - "Community 46"
 Cohesion: 0.15
@@ -332,8 +335,8 @@ Cohesion: 0.18
 Nodes (9): Command, CommandDialogProps, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator (+1 more)
 
 ### Community 50 - "Community 50"
-Cohesion: 0.17
-Nodes (9): FormControl, FormDescription, FormFieldContext, FormFieldContextValue, FormItem, FormItemContext, FormItemContextValue, FormLabel (+1 more)
+Cohesion: 0.14
+Nodes (10): FormControl, FormDescription, FormFieldContext, FormFieldContextValue, FormItem, FormItemContext, FormItemContextValue, FormLabel (+2 more)
 
 ### Community 51 - "Community 51"
 Cohesion: 0.17
@@ -344,8 +347,8 @@ Cohesion: 0.33
 Nodes (6): conditionalTransition(), useFocusTrap(), BLACKJACK_HOTKEYS, HotkeyConfig, HotkeyHandler, useHotkeys()
 
 ### Community 53 - "Community 53"
-Cohesion: 0.28
-Nodes (6): BottomActionDock, BottomActionDockProps, HeaderBar, SidePanelDock, TableShell, TableShellProps
+Cohesion: 0.24
+Nodes (8): useMobileLayout(), BottomActionDock, BottomActionDockProps, HeaderBar, SidePanelDock, SidePanelDockProps, TableShell, TableShellProps
 
 ### Community 54 - "Community 54"
 Cohesion: 0.18
@@ -360,12 +363,12 @@ Cohesion: 0.18
 Nodes (7): ChartConfig, ChartContainer, ChartContext, ChartContextProps, ChartLegendContent, ChartTooltipContent, THEMES
 
 ### Community 57 - "Community 57"
-Cohesion: 0.14
-Nodes (18): HandResult, CoachSession, SettlementSheet, SettlementSheetProps, DialogContent, DialogDescription, DialogFooter(), DialogHeader() (+10 more)
+Cohesion: 0.11
+Nodes (23): HandResult, CoachSession, SettlementSheet, SettlementSheetProps, StatsDashboard, Tutorial, useHaptic(), SwipeHandlers (+15 more)
 
 ### Community 58 - "Community 58"
-Cohesion: 0.18
-Nodes (11): buildPots(), distribute(), sameSeats(), HAND_CATEGORY_LABEL, HandRank, PokerConfig, Pot, SeatState (+3 more)
+Cohesion: 0.29
+Nodes (5): buildPots(), distribute(), sameSeats(), HandRank, Pot
 
 ### Community 59 - "Community 59"
 Cohesion: 0.20
@@ -376,16 +379,16 @@ Cohesion: 0.20
 Nodes (9): DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut(), DropdownMenuSubContent (+1 more)
 
 ### Community 61 - "Community 61"
-Cohesion: 0.16
-Nodes (23): addCardToHand(), calculateHandValues(), canSplit(), compareHands(), createEmptyHand(), createHand(), formatHandValue(), getBestHandValue() (+15 more)
+Cohesion: 0.12
+Nodes (22): conditionalVariants(), Hand, ChipStack(), ChipStackProps, getChipColor(), getChipLabel(), ActiveEmote, EmoteOverlay() (+14 more)
 
 ### Community 62 - "Community 62"
-Cohesion: 0.14
-Nodes (15): SettlementResult, Card, CardProps, ACTION_LABELS, CoachFeedback, CoachFeedbackData, CoachFeedbackProps, Hand (+7 more)
+Cohesion: 0.28
+Nodes (7): SettlementResult, HandResultCard, HandResultCardProps, RESULT_COLORS, RESULT_LABELS, ResultSummary, ResultSummaryProps
 
 ### Community 63 - "Community 63"
-Cohesion: 0.17
-Nodes (11): ChatPanelProps, Message, TableChat(), TableChatProps, ChatMessage, useTableChat(), UseTableChatOptions, PokerTableRow (+3 more)
+Cohesion: 0.20
+Nodes (9): ChatPanelProps, Message, TableChat(), TableChatProps, ChatMessage, useTableChat(), UseTableChatOptions, ScrollArea (+1 more)
 
 ### Community 64 - "Community 64"
 Cohesion: 0.22
@@ -412,7 +415,7 @@ Cohesion: 0.25
 Nodes (7): buildCommand, devCommand, framework, headers, installCommand, outputDirectory, rewrites
 
 ### Community 70 - "Community 70"
-Cohesion: 0.32
+Cohesion: 0.38
 Nodes (6): draw(), freshDeck(), mulberry32(), RANKS, shuffledDeck(), SUITS
 
 ### Community 71 - "Community 71"
@@ -432,8 +435,8 @@ Cohesion: 0.33
 Nodes (6): 14.1 Utilitaires Généraux, 14.2 Thème Casino, 14.3 Tokens Blackjack, 14.4 Client Supabase, 14.5 Index Principal Blackjack UI, 14. Utilitaires
 
 ### Community 75 - "Community 75"
-Cohesion: 0.21
-Nodes (7): createDeck(), createShoe(), createShuffledShoe(), RANKS, shuffleCards(), SUITS, validateState()
+Cohesion: 0.24
+Nodes (6): createDeck(), createShoe(), createShuffledShoe(), RANKS, shuffleCards(), SUITS
 
 ### Community 76 - "Community 76"
 Cohesion: 0.40
@@ -448,8 +451,8 @@ Cohesion: 0.40
 Nodes (4): Alert, AlertDescription, AlertTitle, alertVariants
 
 ### Community 79 - "Community 79"
-Cohesion: 0.40
-Nodes (4): InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot
+Cohesion: 0.33
+Nodes (6): calculateRunningCount(), calculateTrueCount(), getCardValue(), getCountInterpretation(), CardCountingPanel, TooltipContent
 
 ### Community 80 - "Community 80"
 Cohesion: 0.50
@@ -484,36 +487,36 @@ Cohesion: 0.67
 Nodes (3): 9.1 Hooks Blackjack, 9.2 Hooks Généraux, 9. Hooks Personnalisés
 
 ### Community 106 - "Community 106"
-Cohesion: 0.33
-Nodes (6): combinations(), compareHands(), evaluate5(), evaluate7(), HAND_CATEGORY, SUIT
+Cohesion: 0.18
+Nodes (15): Rank, Suit, combinations(), compareHands(), evaluate5(), evaluate7(), Card, HAND_CATEGORY (+7 more)
 
 ### Community 107 - "Community 107"
-Cohesion: 0.28
-Nodes (6): conditionalVariants(), BetComposerMultiplayer, BetComposerMultiplayerProps, TimerBadge, TimerBadgeProps, SidePanelDockProps
+Cohesion: 0.40
+Nodes (4): name, private, type, version
 
-### Community 110 - "Community 110"
-Cohesion: 0.60
-Nodes (4): GamePhase, PhaseBanner, PhaseBannerProps, HeaderBarProps
+### Community 108 - "Community 108"
+Cohesion: 0.50
+Nodes (3): Particle, ParticleSystem, ParticleSystemProps
 
 ## Knowledge Gaps
-- **646 isolated node(s):** `PreToolUse`, `allow`, `$schema`, `style`, `rsc` (+641 more)
+- **656 isolated node(s):** `Objectif`, `Contexte / État actuel`, `Principes transversaux (fondation partagée)`, `1. Fondation mobile partagée`, `2. Poker (gros du travail)` (+651 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 41` to `Community 7`, `Community 13`, `Community 14`, `Community 17`, `Community 21`, `Community 25`, `Community 26`, `Community 29`, `Community 30`, `Community 31`, `Community 34`, `Community 35`, `Community 37`, `Community 38`, `Community 42`, `Community 43`, `Community 44`, `Community 45`, `Community 49`, `Community 50`, `Community 51`, `Community 53`, `Community 56`, `Community 57`, `Community 59`, `Community 60`, `Community 61`, `Community 62`, `Community 63`, `Community 64`, `Community 65`, `Community 66`, `Community 67`, `Community 68`, `Community 71`, `Community 78`, `Community 79`, `Community 82`, `Community 107`, `Community 110`?**
-  _High betweenness centrality (0.113) - this node is a cross-community bridge._
-- **Why does `PokerPublicState` connect `Community 38` to `Community 1`, `Community 10`, `Community 28`, `Community 58`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `Button` connect `Community 17` to `Community 1`, `Community 35`, `Community 44`, `Community 13`, `Community 14`, `Community 63`, `Community 25`, `Community 61`, `Community 31`?**
-  _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **What connects `PreToolUse`, `allow`, `$schema` to the rest of the system?**
-  _646 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `cn()` connect `Community 21` to `Community 0`, `Community 1`, `Community 4`, `Community 7`, `Community 13`, `Community 17`, `Community 25`, `Community 26`, `Community 27`, `Community 29`, `Community 30`, `Community 31`, `Community 35`, `Community 37`, `Community 41`, `Community 43`, `Community 44`, `Community 49`, `Community 50`, `Community 51`, `Community 53`, `Community 56`, `Community 57`, `Community 59`, `Community 60`, `Community 61`, `Community 62`, `Community 63`, `Community 64`, `Community 65`, `Community 66`, `Community 67`, `Community 68`, `Community 71`, `Community 78`, `Community 79`, `Community 82`, `Community 108`, `Community 109`, `Community 110`, `Community 111`?**
+  _High betweenness centrality (0.114) - this node is a cross-community bridge._
+- **Why does `Button` connect `Community 17` to `Community 1`, `Community 35`, `Community 44`, `Community 13`, `Community 25`, `Community 57`, `Community 61`, `Community 30`, `Community 63`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `legalActions()` connect `Community 38` to `Community 1`, `Community 10`, `Community 28`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **What connects `Objectif`, `Contexte / État actuel`, `Principes transversaux (fondation partagée)` to the rest of the system?**
+  _656 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.054693877551020405 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.12121212121212122 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12615384615384614 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.14285714285714285 - nodes in this community are weakly interconnected._

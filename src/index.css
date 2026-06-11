@@ -539,6 +539,43 @@
 }
 
 @layer utilities {
+  /* ====== Mobile viewport height ======
+     On mobile browsers, 100vh includes the address bar, so full-height
+     screens get their bottom edge clipped behind it. The dynamic viewport
+     unit (dvh) tracks the *visible* viewport. We transparently upgrade every
+     existing `h-screen` / `min-h-screen` to dvh where supported, with an
+     automatic fallback to vh on older browsers. */
+  @supports (height: 100dvh) {
+    .h-screen {
+      height: 100dvh;
+    }
+    .min-h-screen {
+      min-height: 100dvh;
+    }
+  }
+
+  /* Explicit dvh helpers for new code. */
+  .h-dvh {
+    height: 100vh;
+    height: 100dvh;
+  }
+  .min-h-dvh {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* Safe-area padding helpers (iOS notch / Android nav bar). */
+  .pb-safe {
+    padding-bottom: var(--safe-area-inset-bottom);
+  }
+  .pt-safe {
+    padding-top: var(--safe-area-inset-top);
+  }
+  .px-safe {
+    padding-left: var(--safe-area-inset-left);
+    padding-right: var(--safe-area-inset-right);
+  }
+
   .text-shadow-sm {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   }
