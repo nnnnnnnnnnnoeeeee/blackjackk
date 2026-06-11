@@ -163,7 +163,7 @@ export default function PokerTable() {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col bg-gradient-to-br from-[#0a3622] via-[#062114] to-[#030e09] text-white font-outfit">
+    <div className="h-dvh overflow-hidden relative flex flex-col bg-gradient-to-br from-[#0a3622] via-[#062114] to-[#030e09] text-white font-outfit">
       {/* Header */}
       <div className="flex items-center justify-between p-3">
         <Button onClick={() => navigate('/poker/lobby')} variant="outline" size="sm"
@@ -181,7 +181,7 @@ export default function PokerTable() {
       </div>
 
       {/* Community cards */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-6 px-3">
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center gap-6 px-3 py-2">
         <div className="flex gap-2 min-h-[96px] items-center">
           {(state?.communityCards ?? []).map((c, i) => (
             <PlayingCard key={i} card={toFaceUp(c)} index={i} className="w-[64px]" />

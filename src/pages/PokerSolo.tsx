@@ -354,7 +354,7 @@ export default function PokerSolo() {
   const activePlayersCount = state.seats.filter((s) => s.userId).length;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#061e12] to-[#010805] text-white font-outfit select-none">
+    <div className="h-dvh overflow-hidden flex flex-col bg-gradient-to-b from-[#061e12] to-[#010805] text-white font-outfit select-none">
       {/* Header bar */}
       <div className="flex items-center justify-between p-3 sm:px-6 bg-black/40 backdrop-blur-md border-b border-white/15">
         <Button onClick={() => setGame(null)} variant="outline" size="sm" className="bg-white/5 border-white/10 hover:bg-white/10 text-white/80">
@@ -372,7 +372,7 @@ export default function PokerSolo() {
 
       {/* Felt Board Area */}
       <div className="flex-1 flex items-center justify-center p-3 sm:p-6 overflow-hidden min-h-0 relative">
-        <div className="w-full max-w-4xl aspect-[0.95/1] sm:aspect-[2.1/1] bg-table-felt border-4 border-amber-900/90 rounded-[45px] sm:rounded-[100px] relative shadow-[inset_0_0_100px_rgba(0,0,0,0.85),0_15px_40px_rgba(0,0,0,0.6)] table-border">
+        <div className="w-full max-w-4xl max-h-full aspect-[0.95/1] sm:aspect-[2.1/1] bg-table-felt border-4 border-amber-900/90 rounded-[45px] sm:rounded-[100px] relative shadow-[inset_0_0_100px_rgba(0,0,0,0.85),0_15px_40px_rgba(0,0,0,0.6)] table-border">
           
           {/* Table Center (Board + Pot) */}
           <div className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2.5 z-20 pointer-events-none">
