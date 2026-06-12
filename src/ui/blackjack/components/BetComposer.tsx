@@ -464,16 +464,16 @@ export const BetComposer = memo(function BetComposer() {
       variants={variants}
       initial="initial"
       animate="animate"
-      className="flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 w-full max-w-full relative shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+      className="flex flex-col items-center gap-1.5 sm:gap-3 p-2 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 w-full max-w-full relative shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
     >
       {/* Bet amount display — HERO */}
-      <div className="text-center w-full flex-shrink-0 py-1">
-        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-semibold">
+      <div className="text-center w-full flex-shrink-0 sm:py-1">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5 sm:mb-1 font-semibold">
           {t.betting.yourBet}
         </div>
         <div
           className={cn(
-            'text-4xl sm:text-5xl font-black tabular-nums transition-all duration-300 leading-none',
+            'text-2xl sm:text-5xl font-black tabular-nums transition-all duration-300 leading-none',
             betAmount > 0
               ? 'text-primary'
               : 'text-white/20',
@@ -508,7 +508,7 @@ export const BetComposer = memo(function BetComposer() {
           aria-label={`${t.betting.clearButton} (${keyBindingsSafe.clear})`}
           title={`${t.betting.clearButton} (${keyBindingsSafe.clear})`}
         >
-          <span>✕</span> {t.betting.clearButton} <span className="opacity-40 ml-0.5">({keyBindingsSafe.clear})</span>
+          <span>✕</span> {t.betting.clearButton} <span className="opacity-40 ml-0.5 hidden sm:inline">({keyBindingsSafe.clear})</span>
         </button>
         <button
           onClick={handleRebet}
@@ -523,7 +523,7 @@ export const BetComposer = memo(function BetComposer() {
           aria-label={`${t.actions.rebet} (${keyBindingsSafe.rebet})`}
           title={`${t.actions.rebet} (${keyBindingsSafe.rebet})`}
         >
-          <span>↺</span> {t.actions.rebet} <span className="opacity-40 ml-0.5">({keyBindingsSafe.rebet})</span>
+          <span>↺</span> {t.actions.rebet} <span className="opacity-40 ml-0.5 hidden sm:inline">({keyBindingsSafe.rebet})</span>
         </button>
         <button
           onClick={handleAllIn}
@@ -532,7 +532,7 @@ export const BetComposer = memo(function BetComposer() {
           aria-label={`${t.betting.allInButton} (${keyBindingsSafe.allIn})`}
           title={`${t.betting.allInButton} (${keyBindingsSafe.allIn})`}
         >
-          {t.betting.allInButton} <span className="opacity-40 ml-0.5">({keyBindingsSafe.allIn})</span>
+          {t.betting.allInButton} <span className="opacity-40 ml-0.5 hidden sm:inline">({keyBindingsSafe.allIn})</span>
         </button>
       </div>
 
@@ -559,7 +559,7 @@ export const BetComposer = memo(function BetComposer() {
       </div>
 
       {/* Side Bets Section - Collapsible */}
-      <div className="w-full border-t border-white/10 pt-2 sm:pt-3 mt-2 sm:mt-3 flex-shrink-0">
+      <div className="w-full border-t border-white/10 pt-1.5 sm:pt-3 mt-1 sm:mt-3 flex-shrink-0">
         {/* Toggle header */}
         <button
           type="button"
@@ -673,7 +673,7 @@ export const BetComposer = memo(function BetComposer() {
       </div>
 
       {/* Deal button - ALWAYS VISIBLE, NO SCROLL NEEDED */}
-      <div className="w-full mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/10 flex-shrink-0">
+      <div className="w-full mt-1 sm:mt-3 pt-1.5 sm:pt-3 border-t border-white/10 flex-shrink-0">
         <motion.button
           whileHover={canDeal && !prefersReducedMotion ? { scale: 1.05, y: -2 } : {}}
           whileTap={canDeal && !prefersReducedMotion ? { scale: 0.95, y: 0 } : {}}
@@ -708,7 +708,7 @@ export const BetComposer = memo(function BetComposer() {
         >
           <span className="flex items-center justify-center gap-2">
             <span className="text-xl sm:text-2xl">🎲</span>
-            <span>{t.betting.dealButton} ({keyBindingsSafe.deal})</span>
+            <span>{t.betting.dealButton}<span className="hidden sm:inline"> ({keyBindingsSafe.deal})</span></span>
             {canDeal && <span className="text-sm sm:text-base">✓</span>}
           </span>
         </motion.button>

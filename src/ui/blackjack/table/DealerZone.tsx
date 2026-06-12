@@ -59,7 +59,7 @@ export const DealerZone = memo(function DealerZone({
         />
       ) : (
         /* Elegant empty state: two card-slot silhouettes so the felt never looks unfinished */
-        <div className="min-h-[130px] sm:min-h-[160px] flex flex-col items-center justify-center gap-2">
+        <div className="min-h-[96px] sm:min-h-[160px] flex flex-col items-center justify-center gap-2">
           <div className="flex items-center gap-2">
             {[0, 1].map((i) => (
               <div

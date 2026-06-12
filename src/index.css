@@ -600,6 +600,15 @@
     max-width: 60px;
     font-size: 0.7rem;
   }
+
+  /* Very narrow phones (iPhone SE 1st gen, small Androids) */
+  @media (max-width: 374px) {
+    .playing-card {
+      min-width: 38px;
+      max-width: 50px;
+      font-size: 0.6rem;
+    }
+  }
   
   .poker-chip {
     width: 48px;

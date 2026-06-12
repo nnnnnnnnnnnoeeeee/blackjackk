@@ -91,7 +91,7 @@ export const SettlementSheet = memo(function SettlementSheet({
   const content = (
     <div className="space-y-4">
       {/* Insurance Result */}
-      {insuranceBet && insuranceBet > 0 && insuranceResult && (
+      {(insuranceBet ?? 0) > 0 && insuranceResult && (
         <div className="rounded-lg p-3 border-2 bg-muted/20 border-muted/50">
           <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
             Insurance

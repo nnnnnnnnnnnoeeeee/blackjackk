@@ -37,13 +37,13 @@ export const CenterPotZone = memo(function CenterPotZone({
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            className="flex flex-col items-center gap-1"
+            className="flex flex-row sm:flex-col items-center gap-1.5 sm:gap-1"
           >
             <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
               Mise
             </span>
             <div
-              className="text-2xl sm:text-3xl font-black text-primary tabular-nums"
+              className="text-lg sm:text-3xl font-black text-primary tabular-nums"
               style={{ textShadow: '0 0 20px rgba(212,175,55,0.5)' }}
               aria-label={`Current bet: $${currentBet}`}
             >

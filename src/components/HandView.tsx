@@ -89,8 +89,8 @@ export const HandView = memo(function HandView({
       {/* Cards container with spotlight effect for active hand - Responsive */}
       <motion.div
         className={cn(
-          'relative flex items-center justify-center min-h-[130px] sm:min-h-[160px] md:min-h-[180px]',
-          'p-2 sm:p-3 md:p-4 rounded-xl transition-all duration-300',
+          'relative flex items-center justify-center min-h-[96px] sm:min-h-[160px] md:min-h-[180px]',
+          'p-1 sm:p-3 md:p-4 rounded-xl transition-all duration-300',
           isActive && !isDealer && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
           getResultStyles(),
         )}

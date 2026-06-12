@@ -470,7 +470,7 @@ export const NewTable = memo(function NewTable() {
         onClick={() => navigate('/mode-selection')}
         variant="outline"
         size="sm"
-        className="fixed top-4 left-4 z-[100] bg-card/95 backdrop-blur-md border-2 border-primary/30 shadow-lg"
+        className="fixed top-4 left-4 z-[45] bg-card/95 backdrop-blur-md border-2 border-primary/30 shadow-lg"
         aria-label={t.common.back}
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -478,7 +478,7 @@ export const NewTable = memo(function NewTable() {
       </Button>
 
       {/* Floating Menu — Premium Side Dock */}
-      <div className="fixed top-16 right-2 sm:top-20 sm:right-3 z-[100] flex flex-col gap-2.5">
+      <div className="fixed top-16 right-2 sm:top-20 sm:right-3 z-[45] flex flex-col gap-2.5">
         {/* Settings */}
         <SideDockButton
           icon="⚙️"

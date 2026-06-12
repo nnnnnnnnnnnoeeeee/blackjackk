@@ -33,7 +33,8 @@ export const HeaderBar = memo(function HeaderBar({
   return (
     <div className={cn('w-full', className)}>
       <div className="flex justify-between items-center mb-1 sm:mb-1.5 md:mb-2 gap-2">
-        <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-primary text-shadow-md flex-shrink-0">
+        {/* On phones the fixed Back button occupies the top-left corner */}
+        <h1 className="pl-24 sm:pl-0 text-sm sm:text-base md:text-lg lg:text-xl font-bold text-primary text-shadow-md flex-shrink-0">
           ♠ Blackjack
         </h1>
         <div className="text-right flex-shrink-0 min-w-0">

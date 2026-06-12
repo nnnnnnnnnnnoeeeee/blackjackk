@@ -25,7 +25,7 @@ export const TableShell = memo(function TableShell({
   sidePanel,
   className,
 }: TableShellProps) {
-  const { isMobile, dockHeight, safeAreaBottom } = useMobileLayout();
+  const { isMobile } = useMobileLayout();
 
   return (
     <div
@@ -33,9 +33,6 @@ export const TableShell = memo(function TableShell({
         'table-felt h-screen flex flex-col overflow-hidden',
         className
       )}
-      style={{
-        paddingBottom: isMobile ? `${safeAreaBottom}px` : undefined,
-      }}
     >
       {/* Header - Compact during gameplay */}
       {header && (
@@ -56,19 +53,14 @@ export const TableShell = memo(function TableShell({
 
           {/* Center Zone */}
           {centerZone && (
-            <div className="flex-shrink-0 flex justify-center items-center py-1 sm:py-2 md:py-3">
+            <div className="flex-shrink-0 flex justify-center items-center py-0.5 sm:py-2 md:py-3">
               {centerZone}
             </div>
           )}
 
-          {/* Player Zone */}
+          {/* Player Zone — the dock is in normal flow below, no offset needed */}
           {playerZone && (
-            <div
-              className="flex-shrink-0 flex justify-center gap-1.5 sm:gap-2 md:gap-3 flex-wrap px-1"
-              style={{
-                paddingBottom: isMobile ? `${dockHeight + 8}px` : undefined,
-              }}
-            >
+            <div className="flex-shrink-0 flex justify-center gap-1.5 sm:gap-2 md:gap-3 flex-wrap px-1">
               {playerZone}
             </div>
           )}
@@ -87,9 +79,6 @@ export const TableShell = memo(function TableShell({
         <footer
           className="flex-shrink-0 p-1 sm:p-2 md:p-3 lg:p-4 border-t-2 border-primary/30 bg-gradient-to-t from-black/40 via-black/20 to-transparent backdrop-blur-sm relative z-[40]"
           data-dock="bottom"
-          style={{
-            paddingBottom: isMobile ? `calc(1rem + ${safeAreaBottom}px)` : undefined,
-          }}
         >
           <div className="max-w-2xl mx-auto w-full">{bottomDock}</div>
         </footer>
