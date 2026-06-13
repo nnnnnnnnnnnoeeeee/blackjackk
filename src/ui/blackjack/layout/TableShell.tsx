@@ -43,7 +43,7 @@ export const TableShell = memo(function TableShell({
 
       {/* Main Content Area - More space for cards */}
       <main className="flex-1 flex flex-col justify-between p-1 sm:p-1.5 md:p-2 min-h-0 overflow-hidden relative">
-        <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col justify-between gap-2 sm:gap-3 md:gap-4 table-felt table-border rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 min-h-0">
+        <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col justify-center gap-4 sm:gap-6 md:gap-8 table-felt table-border rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 min-h-0 overflow-y-auto">
           {/* Dealer Zone */}
           {dealerZone && (
             <div className="flex-shrink-0 flex justify-center py-1 sm:py-2">
