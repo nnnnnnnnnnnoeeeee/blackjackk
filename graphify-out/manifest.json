@@ -5,8 +5,8 @@
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
-    "mtime": 1781269876.814405,
-    "ast_hash": "d7b241517ae7271b8612bf3ba66aa052",
+    "mtime": 1781345767.5192537,
+    "ast_hash": "b897277f88c410a43b87625c568cf4c3",
     "semantic_hash": ""
   },
   "components.json": {
@@ -870,8 +870,8 @@
     "semantic_hash": ""
   },
   "src/ui/blackjack/layout/TableShell.tsx": {
-    "mtime": 1781193397.4701228,
-    "ast_hash": "f6cdd94769ffe0e124d48136fc3752fe",
+    "mtime": 1781345732.086954,
+    "ast_hash": "baa3f7546e8fbd89cbb42f48560e7692",
     "semantic_hash": ""
   },
   "src/ui/blackjack/layout/index.ts": {

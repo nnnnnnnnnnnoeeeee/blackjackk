@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TranslationProvider } from "@/ui/blackjack/i18n";
 import { Loader2 } from "lucide-react";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Route-level code splitting: each page ships in its own chunk and is fetched
 // on demand, so visiting /login no longer downloads the heavy Game/Table pages.
@@ -60,6 +62,8 @@ const App = () => (
             </Routes>
           </Suspense>
         </BrowserRouter>
+        <Analytics />
+        <SpeedInsights />
       </TranslationProvider>
     </TooltipProvider>
   </QueryClientProvider>

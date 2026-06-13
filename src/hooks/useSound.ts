@@ -8,16 +8,16 @@ type SoundType = 'deal' | 'chip' | 'win' | 'lose' | 'blackjack' | 'bust' | 'push
 type SoundPriority = 'low' | 'medium' | 'high';
 
 const SOUND_FILES: Record<SoundType, string> = {
-  deal: '/sounds/deal.mp3',
-  chip: '/sounds/chip.mp3',
-  win: '/sounds/win.mp3',
-  lose: '/sounds/lose.mp3',
-  blackjack: '/sounds/blackjack.mp3',
-  bust: '/sounds/bust.mp3',
-  push: '/sounds/push.mp3',
-  flip: '/sounds/card-flip.mp3',
-  'button-hover': '/sounds/button-hover.mp3',
-  'button-click': '/sounds/button-click.mp3',
+  deal: '/sounds/deal.wav',
+  chip: '/sounds/chip.wav',
+  win: '/sounds/win.wav',
+  lose: '/sounds/lose.wav',
+  blackjack: '/sounds/blackjack.wav',
+  bust: '/sounds/bust.wav',
+  push: '/sounds/push.wav',
+  flip: '/sounds/card-flip.wav',
+  'button-hover': '/sounds/button-hover.wav',
+  'button-click': '/sounds/button-click.wav',
 };
 
 const SOUND_PRIORITIES: Record<SoundType, SoundPriority> = {
@@ -104,12 +104,12 @@ export function useSound(options: UseSoundOptions = {}) {
     }
 
     if (!musicRef.current) {
-      const music = new Audio('/sounds/ambient-casino.mp3');
+      const music = new Audio('/sounds/ambient-casino.wav');
       music.loop = true;
       music.volume = musicVolume;
       music.preload = 'auto';
       music.onerror = () => {
-        console.warn('Music file not found: /sounds/ambient-casino.mp3');
+        console.warn('Music file not found: /sounds/ambient-casino.wav');
       };
       musicRef.current = music;
       
